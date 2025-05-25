@@ -1,4 +1,4 @@
-modelo,consumo_l_h,manutencao_h,tipo
-Pilatus PC-12,265,1500,turboprop
-Cessna Citation XLS,550,2500,jet
-Embraer Phenom 300E,600,3000,jet
+modelo,consumo_l_por_h,manut_tipo,tipo
+Pilatus PC-12,260,turboprop,turboprop
+Cessna Citation XLS,600,jato,jato
+Embraer Phenom 300E,650,jato,jato

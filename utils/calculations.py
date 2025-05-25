@@ -1,17 +1,20 @@
 """calculations.py - funções de cálculo de custos e economia"""
 
-def calcula_custo_trecho(modelo, duracao_h, params):
-    consumo = params['consumo_modelos'].get(modelo, 0) * duracao_h
-    preco_comb = consumo * params['preco_combustivel']
-    manut = params['custo_manutencao'].get(modelo, 0) * duracao_h
-    piloto = params['custo_piloto_hora'].get(modelo, 0) * duracao_h
-    depr = params['depreciacao_hora'].get(modelo, 0) * duracao_h
-    total = preco_comb + manut + piloto + depr
-    return {
-        'consumo': consumo,
-        'preco_comb': preco_comb,
-        'manut': manut,
-        'piloto': piloto,
-        'depr': depr,
-        'total': total
-    }
+def calcular_combustivel(duracao, consumo_lh, preco_litro):
+    return duracao * consumo_lh * preco_litro
+
+def calcular_piloto(duracao, custo_piloto_hora):
+    return duracao * custo_piloto_hora
+
+def calcular_manutencao(duracao, custo_manutencao_hora):
+    return duracao * custo_manutencao_hora
+
+def calcular_depreciacao(duracao, depreciacao_anual_pct, valor_base=50000000, horas_ano=400):
+    custo_por_hora = (valor_base * depreciacao_anual_pct / 100) / horas_ano
+    return duracao * custo_por_hora
+
+def calcular_total(itens: dict):
+    return sum(itens.values())
+
+def calcular_economia(custo_total, preco_mercado):
+    return preco_mercado - custo_total

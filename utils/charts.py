@@ -1,45 +1,21 @@
-"""charts.py - funções para gerar gráficos"""
+"""charts.py - funções para gráficos"""
 
-import plotly.express as px
+import plotly.graph_objects as go
 
-def grafico_composicao(custos):
-    """
-    Gera um gráfico de pizza mostrando a composição dos custos.
+def grafico_composicao(itens: dict):
+    labels = list(itens.keys())
+    values = list(itens.values())
 
-    Parâmetros:
-    - custos: dict com labels como chaves e valores numéricos.
-
-    Retorna:
-    - figura Plotly Express de pizza.
-    """
-    labels = list(custos.keys())
-    values = list(custos.values())
-    fig = px.pie(
-        names=labels,
-        values=values,
-        title='Composição de Custos',
-        hole=0.4
-    )
-    fig.update_traces(textposition='inside', textinfo='percent+label')
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.4)])
+    fig.update_layout(title="Composição de Custos", legend_title="Categorias")
     return fig
 
-def grafico_comparativo(amaro, mercado):
-    """
-    Gera um gráfico de barras comparando custo Amaro vs Mercado.
-
-    Parâmetros:
-    - amaro: valor numérico do custo Amaro.
-    - mercado: valor numérico do custo de mercado.
-
-    Retorna:
-    - figura Plotly Express de barras.
-    """
-    fig = px.bar(
-        x=['Amaro', 'Mercado'],
-        y=[amaro, mercado],
-        title='Comparativo Amaro vs Mercado',
-        text=[f"R$ {amaro:,.2f}", f"R$ {mercado:,.2f}"]
-    )
-    fig.update_traces(textposition='outside')
-    fig.update_layout(yaxis_tickprefix='R$ ')
+def grafico_comparativo(custo_amaro, preco_mercado):
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=["Amaro Aviation", "Preço de Mercado"],
+        y=[custo_amaro, preco_mercado],
+        marker_color=["#a80000", "#555555"]
+    ))
+    fig.update_layout(title="Comparativo de Custos", yaxis_title="Custo Total (R$)")
     return fig
