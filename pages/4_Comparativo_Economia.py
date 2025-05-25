@@ -744,16 +744,16 @@ if st.button("🚀 Executar Análise Comparativa Completa", type="primary", use_
         
         with col2:
             st.markdown(f"""
-            <div class="benchmark-box">
-                <h4>📊 Métricas de Break-even</h4>
-                <p><strong>Economia por Hora:</strong> R$ {economia_por_hora:,.0f}</p>
-                <p><strong>Economia Anual:</strong> R$ {economia_por_hora * horas_anuais:,.0f}</p>
-                {"<p><strong>Break-even:</strong> {:.1f} anos</p>".format(break_even_anos) if incluir_aquisicao and break_even_anos < 20 else ""}
-                {"<p><strong>Horas Break-even:</strong> {:,.0f}h</p>".format(break_even_horas) if incluir_aquisicao and break_even_horas < 10000 else ""}
-                <p><strong>ROI Anual:</strong> {:.1f}%</p>
-            </div>
-            """.format((economia_por_hora * horas_anuais / vpl_total_amaro * 100) if vpl_total_amaro > 0 else 0), 
-            unsafe_allow_html=True)
+<div class="benchmark-box">
+    <h4>📊 Métricas de Break-even</h4>
+    <p><strong>Economia por Hora:</strong> R$ {economia_por_hora:,.0f}</p>
+    <p><strong>Economia Anual:</strong> R$ {economia_por_hora * horas_anuais:,.0f}</p>
+    {f"<p><strong>Break-even:</strong> {break_even_anos:.1f} anos</p>" if incluir_aquisicao and break_even_anos < 20 else ""}
+    {f"<p><strong>Horas Break-even:</strong> {break_even_horas:,.0f}h</p>" if incluir_aquisicao and break_even_horas < 10000 else ""}
+    <p><strong>ROI Anual:</strong> {((economia_por_hora * horas_anuais / vpl_total_amaro * 100) if vpl_total_amaro > 0 else 0):.1f}%</p>
+</div>
+""", unsafe_allow_html=True)
+
         
         # 4. Resumo Executivo e Recomendações
         economia_percentual_total = (economia_total_mercado / vpl_total_mercado * 100) if vpl_total_mercado > 0 else 0

@@ -662,3 +662,4 @@ with st.sidebar:
     **Equipe Técnica Amaro**
     📧 operacoes@amaroaviation.com
     """)
+    

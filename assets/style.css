@@ -1,7 +1,127 @@
-/* style.css - Custom styles */
-div[data-testid="stMetric"] {
-  background-color: #f9f9f9;
-  border-radius: 16px;
-  padding: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+/* Amaro Aviation - Estilos Corporativos */
+
+:root {
+  --amaro-primary: #8c1d40;
+  --amaro-secondary: #a02050;
+  --amaro-success: #27AE60;
+  --amaro-warning: #F39C12;
+  --amaro-danger: #E74C3C;
+  --amaro-info: #3498DB;
+  --amaro-dark: #2C3E50;
+  --amaro-light: #F8F9FA;
 }
+
+/* Reset de margens do Streamlit */
+.block-container {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+/* Métricas personalizadas */
+div[data-testid="stMetric"] {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  border-left: 4px solid var(--amaro-primary);
+}
+
+/* Botões corporativos */
+.stButton > button {
+  background-color: var(--amaro-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+  background-color: var(--amaro-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(140, 29, 64, 0.3);
+}
+
+/* Sidebar profissional */
+.css-1d391kg {
+  background-color: var(--amaro-light);
+}
+
+/* Headers */
+h1, h2, h3 {
+  color: var(--amaro-dark);
+  font-weight: 600;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+  background-color: var(--amaro-light);
+  border-radius: 10px;
+  padding: 0.5rem;
+}
+
+.stTabs [data-baseweb="tab"] {
+  border-radius: 8px;
+  color: var(--amaro-dark);
+  font-weight: 500;
+}
+
+.stTabs [aria-selected="true"] {
+  background-color: var(--amaro-primary);
+  color: white;
+}
+
+/* Forms */
+.stSelectbox > div > div,
+.stNumberInput > div > div > input,
+.stTextInput > div > div > input {
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+/* Success/Warning/Error boxes */
+.stSuccess {
+  background-color: rgba(39, 174, 96, 0.1);
+  border-left: 4px solid var(--amaro-success);
+}
+
+.stWarning {
+  background-color: rgba(243, 156, 18, 0.1);
+  border-left: 4px solid var(--amaro-warning);
+}
+
+.stError {
+  background-color: rgba(231, 76, 60, 0.1);
+  border-left: 4px solid var(--amaro-danger);
+}
+
+/* Info boxes */
+.stInfo {
+  background-color: rgba(52, 152, 219, 0.1);
+  border-left: 4px solid var(--amaro-info);
+}
+
+/* Download buttons */
+.stDownloadButton > button {
+  background-color: var(--amaro-success);
+  color: white;
+}
+
+.stDownloadButton > button:hover {
+  background-color: #229954;
+}
+
+/* Expanders */
+.streamlit-expanderHeader {
+  background-color: var(--amaro-light);
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Progress bars */
+.stProgress > div > div > div {
+  background-color: var(--amaro-primary);
+}
+
+/*
