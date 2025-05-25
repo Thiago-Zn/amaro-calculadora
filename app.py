@@ -1,4 +1,5 @@
 import streamlit as st
+from PIL import Image, UnidentifiedImageError
 from PIL import Image
 from pathlib import Path
 
@@ -12,6 +13,16 @@ st.set_page_config(
 
 # Caminho da logo
 logo_path = Path("assets/logo_amaro.png")
+
+with st.sidebar:
+    try:
+        if logo_path.exists():
+            logo = Image.open(logo_path)
+            st.image(logo, use_column_width=True)
+        else:
+            st.warning("Logo não encontrada em assets/logo_amaro.png")
+    except UnidentifiedImageError:
+        st.warning("Arquivo de logo inválido. Use uma imagem .png válida.")
 
 # Barra lateral com logo e menu
 with st.sidebar:
