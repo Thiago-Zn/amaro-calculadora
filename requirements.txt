@@ -1,6 +1,40 @@
-streamlit
-plotly
-pandas
-openpyxl
-reportlab
-pillow
+# Streamlit Framework
+streamlit>=1.28.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Visualization
+plotly>=5.15.0
+
+# Excel Processing
+openpyxl>=3.1.0
+xlsxwriter>=3.1.0
+
+# PDF Generation
+reportlab>=4.0.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Date and Time
+python-dateutil>=2.8.0
+
+# JSON Processing (built-in, but for compatibility)
+# json is built-in
+
+# File Path Management (built-in)
+# pathlib is built-in
+
+# IO Operations (built-in)
+# io is built-in
+
+# Optional: Enhanced styling and components
+streamlit-extras>=0.3.0
+
+# Optional: Enhanced charts
+plotly-express>=0.4.0
+
+# Optional: Data validation
+pydantic>=2.0.0
