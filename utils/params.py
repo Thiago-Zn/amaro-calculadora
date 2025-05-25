@@ -1,4 +1,4 @@
-"""params.py - leitura e escrita de parâmetros""\"
+"""params.py - leitura e escrita de parâmetros"""
 import json
 from pathlib import Path
 
