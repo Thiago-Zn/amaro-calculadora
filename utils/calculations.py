@@ -1,4 +1,4 @@
-"""calculations.py - funções de cálculo de custos e economia""\"
+"""calculations.py - funções de cálculo de custos e economia"""
 
 def calcula_custo_trecho(modelo, duracao_h, params):
     consumo = params['consumo_modelos'].get(modelo, 0) * duracao_h
