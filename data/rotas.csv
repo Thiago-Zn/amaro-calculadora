@@ -1,0 +1,5 @@
+origem,destino,duracao_h
+GRU,SDU,1.0
+GRU,CGH,0.5
+CGH,BSB,1.4
+BSB,SDU,1.7

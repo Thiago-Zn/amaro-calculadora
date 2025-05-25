@@ -1,0 +1,28 @@
+{
+  "preco_combustivel": 8.66,
+  "consumo_modelos": {
+    "Pilatus PC-12": 265,
+    "Cessna Citation XLS": 550,
+    "Embraer Phenom 300E": 600
+  },
+  "custo_manutencao": {
+    "Pilatus PC-12": 1500,
+    "Cessna Citation XLS": 2500,
+    "Embraer Phenom 300E": 3000
+  },
+  "custo_piloto_hora": {
+    "Pilatus PC-12": 1000,
+    "Cessna Citation XLS": 2000,
+    "Embraer Phenom 300E": 2000
+  },
+  "depreciacao_hora": {
+    "Pilatus PC-12": 7000,
+    "Cessna Citation XLS": 15000,
+    "Embraer Phenom 300E": 20000
+  },
+  "preco_mercado_hora": {
+    "Pilatus PC-12": 8000,
+    "Cessna Citation XLS": 12000,
+    "Embraer Phenom 300E": 15000
+  }
+}
