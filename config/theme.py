@@ -1,4 +1,6 @@
 """
+config/theme.py
+
 Tema Claro Definitivo Amaro Aviation
 Compatível com Streamlit ≥ 1.30
 """
@@ -6,7 +8,7 @@ Compatível com Streamlit ≥ 1.30
 import streamlit as st
 
 def load_theme() -> None:
-    """Injeta o CSS corporativo essencial e as correções finais."""
+    """Injeta o CSS corporativo essencial e garante contraste ideal."""
     st.markdown(
         """
 <style>
@@ -17,18 +19,28 @@ html, body, [data-testid="stAppViewContainer"] {
     font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
 }
 
-/* ——— 2. SIDEBAR — fundo claro e texto escuro ——— */
+/* ——— 2. SIDEBAR — fundo bordô e texto branco ——— */
 section[data-testid="stSidebar"] {
-    background: #F8F9FA !important;
-    color:      #374151 !important;
+    background: #8C1D40 !important;
+    color:      #FFFFFF !important;
 }
 
-/* ——— 2.1. ITEM ATIVO DA SIDEBAR — bordô e texto branco ——— */
+/* ——— 2.1. Todos os links da sidebar — texto branco ——— */
+section[data-testid="stSidebar"] a {
+    color: #FFFFFF !important;
+}
+
+/* ——— 2.2. Item ativo na sidebar — bordô mais escuro, texto branco ——— */
 section[data-testid="stSidebar"] a[aria-current="page"] {
-    background:    #8C1D40 !important;
+    background:    #A02050 !important;
     color:         #FFFFFF !important;
     border-radius: 6px !important;
     font-weight:   600   !important;
+}
+
+/* ——— 2.3. Sombra nos links da sidebar ao hover ——— */
+section[data-testid="stSidebar"] a:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* ——— 3. HEADER PRINCIPAL — gradiente bordô ——— */
@@ -87,30 +99,19 @@ div[data-testid="stMetric"] span {
     font-size:  1.25rem!important;
 }
 
-/* ——— 7. CARTÕES DE MÉTRICA (se usar .metric-card) ——— */
-.metric-card {
+/* ——— 7. FEATURE CARDS — sombra ao hover ——— */
+.feature-card {
     background:    #FFFFFF!important;
     border:        1px solid #E5E7EB!important;
-    border-radius: 8px!important;
-    padding:       1.5rem!important;
-    margin:        1rem 0!important;
-    box-shadow:    0 2px 4px rgba(0,0,0,0.05)!important;
+    border-radius: 12px!important;
+    padding:       2rem!important;
+    margin-bottom: 1.5rem!important;
+    transition:    box-shadow 0.2s ease!important;
 }
-.metric-card-value {
-    font-size:   1.5rem!important;
-    font-weight: 600!important;
-    color:       #8C1D40!important;
-}
-.metric-card-label {
-    font-size:   0.875rem!important;
-    color:       #6B7280!important;
-    font-weight: 500!important;
+.feature-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1)!important;
 }
 
-/* ——— 8. OCULTAR ELEMENTOS PADRÕES DO STREAMLIT ——— */
-#MainMenu, header, footer {
-    visibility: hidden!important;
-}
 </style>
         """,
         unsafe_allow_html=True,
