@@ -108,5 +108,11 @@ div[data-baseweb="popover"] li[role="option"]:hover {{
 #MainMenu, header, footer {{
   visibility: hidden !important;
 }}
+    /* 3.2. Texto selecionado (valor atual) */
+    section[data-testid="stSidebar"] div[data-baseweb="select"] > div:first-child > div {
+      color: {AMARO_PRETO} !important;
+      opacity: 1 !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
