@@ -5,35 +5,64 @@ Componente para renderização de boxes de status e alertas
 import streamlit as st
 import textwrap
 
-def render_status_box(status_type, title, message, details=None):
-    # ... (mesmo dicionário `config`)
+import streamlit as st
+import textwrap
 
-    message = message.strip()          # ➋  remove quebras/recuos
-    details_html = ""
-    if details:
-        details_html = f"""
-<div style="font-size:0.875rem;margin-top:0.5rem;opacity:0.8;">
-    {details.strip()}
-</div>"""
+# ------------------------------------------------------------------------
+# Caixa de status genérica
+# ------------------------------------------------------------------------
+def render_status_box(status_type: str,
+                      title: str,
+                      message: str,
+                      details: str | None = None) -> None:
+    """
+    Exibe um bloco de status (success, warning, error ou info).
 
-    box_html = f"""
+    Args
+    ----
+    status_type : 'success' | 'warning' | 'error' | 'info'
+    title       : título do box
+    message     : texto principal (texto simples, SEM tags <div>)
+    details     : texto adicional opcional (também texto puro)
+    """
+
+    # mapa de estilos
+    _cfg = {
+        "success": dict(color="#10B981", bg="#F0FDF4", border="#10B981", icon="✅"),
+        "warning": dict(color="#F59E0B", bg="#FFFBEB", border="#F59E0B", icon="⚠️"),
+        "error"  : dict(color="#DC2626", bg="#FEF2F2", border="#DC2626", icon="❌"),
+        "info"   : dict(color="#0EA5E9", bg="#F0F9FF", border="#0EA5E9", icon="ℹ️"),
+    }
+
+    # garante fallback seguro
+    style = _cfg.get(status_type.lower(), _cfg["info"])
+
+    # limpa quebras de linha/recuo
+    message = message.strip()
+    details_html = f"""
+<p style="font-size:0.875rem;margin-top:0.5rem;opacity:0.8">{details.strip()}</p>
+""" if details else ""
+
+    html = f"""
 <div style="
-    background:{style_config['bg_color']};
-    border:1px solid {style_config['border_color']};
-    border-left:4px solid {style_config['border_color']};
+    background:{style['bg']};
+    border:1px solid {style['border']};
+    border-left:4px solid {style['border']};
     border-radius:8px;
     padding:1rem 1.5rem;
     margin:1rem 0;">
-    <div style="color:{style_config['color']};font-weight:600;font-size:1rem;margin-bottom:0.25rem;">
-        {style_config['icon']} {title}
-    </div>
-    <div style="color:#374151;font-size:0.875rem;line-height:1.5;">
-        {message}
-        {details_html}
-    </div>
-</div>"""
+   <p style="margin:0;color:{style['color']};font-weight:600">
+      {style['icon']} {title}
+   </p>
+   <p style="margin:.25rem 0 0 0;color:#374151;font-size:0.875rem">
+      {message}
+   </p>
+   {details_html}
+</div>
+"""
 
-    st.markdown(textwrap.dedent(box_html), unsafe_allow_html=True)   # ➌
+    st.markdown(textwrap.dedent(html), unsafe_allow_html=True)
+
     
     # Configurações por tipo
     config = {
