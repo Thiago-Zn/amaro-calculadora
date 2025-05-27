@@ -27,7 +27,7 @@ section[data-testid="stSidebar"] {{
 }}
 section[data-testid="stSidebar"] * {{
     color: {AMARO_BRANCO} !important;
-    text-transform: capitalize !important;     /* Capitaliza itens */
+    text-transform: none !important;     
 }}
 section[data-testid="stSidebar"] a[aria-current="page"] {{
     background: {AMARO_BORDO_HOVER};
@@ -143,6 +143,15 @@ p, li {{
 #MainMenu, header, footer {{
     visibility: hidden;
 }}
+
+  /* ——— Métricas (st.metric) ——— */
+  [data-testid="stMetricValue"],
+  [data-testid="stMetricLabel"] {{
+      color: {AMARO_TXT_CINZA} !important;
+      opacity: 1 !important;
+  }}
+
+  /* …continua o restante do CSS… */
 </style>
 """,
         unsafe_allow_html=True,
