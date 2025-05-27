@@ -18,23 +18,23 @@ def render_sidebar(lang: str = 'pt', current_page: str = "") -> str:
     Returns:
         O código do idioma selecionado ('pt' ou 'en').
     """
-    # CSS injetado para corrigir cores do select e opções
+    # Injeção de CSS para legibilidade do selectbox
     st.markdown(
         """
         <style>
         /* Label do select em branco */
-        section[data-testid="stSidebar"] label[for="language_selector"] {
+        section[data-testid=\"stSidebar\"] label[for=\"language_selector\"] {
             color: #FFFFFF !important;
             font-size: 0.875rem !important;
             margin-bottom: 0.25rem !important;
         }
         /* Fundo do dropdown */
-        div[role="listbox"] {
+        div[role=\"listbox\"] {
             background: #FFFFFF !important;
             border: 1px solid #DADDE1 !important;
         }
         /* Texto de cada opção */
-        div[role="option"] {
+        div[role=\"option\"] {
             color: #1F2937 !important;
         }
         </style>
@@ -46,9 +46,9 @@ def render_sidebar(lang: str = 'pt', current_page: str = "") -> str:
         # Cabeçalho da sidebar
         st.markdown(
             """
-            <div style="text-align: center; padding: 1rem; margin-bottom: 1rem;">
-                <h3 style="color: #8C1D40; margin: 0;">✈️ Amaro Aviation</h3>
-                <p style="color: #FFFFFF; font-size: 0.875rem; margin-top: 0.5rem;">
+            <div style=\"text-align: center; padding: 1rem; margin-bottom: 1rem;\">
+                <h3 style=\"color: #8C1D40; margin: 0;\">✈️ Amaro Aviation</h3>
+                <p style=\"color: #FFFFFF; font-size: 0.875rem; margin-top: 0.5rem;\">
                     Simulador Estratégico de Custos
                 </p>
             </div>
@@ -100,11 +100,11 @@ def render_navigation_help(current_page: str = "", lang: str = 'pt') -> None:
 
     for page_key, description in pages_info[lang].items():
         is_current = current_page.endswith(page_key)
-        bg_color = '#FFFFFF' if not is_current else '#8C1D40'
-        text_color = '#8C1D40' if is_current else '#FFFFFF'
+        bg_color = '#8C1D40' if is_current else '#FFFFFF'
+        text_color = '#FFFFFF' if is_current else '#8C1D40'
         icon = "👉" if is_current else "📄"
         st.markdown(
-            f"<div style='display: flex; align-items: center; padding: 0.25rem 1rem; ``background: {bg_color}; color: {text_color}; border-radius: 4px;'>"
+            f"<div style='display: flex; align-items: center; padding: 0.25rem 1rem; background: {bg_color}; color: {text_color}; border-radius: 4px;'>"
             f"{icon}&nbsp;<span>{description}</span></div>",
             unsafe_allow_html=True
         )
