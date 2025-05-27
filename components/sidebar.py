@@ -1,85 +1,126 @@
 """
-Componente de sidebar reutilizável para Amaro Aviation com correções de legibilidade
+Componente de sidebar reutilizável para Amaro Aviation – corrigido para legibilidade e funcionamento.
 """
-
 import streamlit as st
 from config.idiomas import get_text, detect_language_from_selection
 
 
-def render_sidebar(lang: str = 'pt', current_page: str = "") -> str:
+def render_sidebar(lang: str = 'pt', current_page: str = '') -> str:
     """
-    Renderiza a sidebar principal com cabeçalho, seleção de idioma e navegação,
-    aplicando correções CSS para garantir legibilidade dos elementos.
+    Renderiza a sidebar principal com cabeçalho, seleção de idioma e navegação.
+    Aplica CSS para garantir legibilidade dos elementos em fundo bordô.
 
     Args:
-        lang: Código do idioma ('pt' ou 'en').
-        current_page: Identificador da página atual (opcional).
+        lang: Código do idioma inicial ('pt' ou 'en').
+        current_page: Identificador da página atual (nome do arquivo ou chave).
 
     Returns:
         O código do idioma selecionado ('pt' ou 'en').
     """
-    # Injeção de CSS para legibilidade do selectbox
+    _inject_sidebar_css()
+    with st.sidebar:
+        _render_header()
+        lang = _render_language_selector(lang)
+        _render_navigation(current_page, lang)
+    return lang
+
+
+def _inject_sidebar_css() -> None:
+    """
+    Injeta CSS personalizado na sidebar para corrigir cores do seletor,
+    fundo do dropdown e estilo de navegação.
+    """
     st.markdown(
         """
         <style>
-        /* Label do select em branco */
-        section[data-testid=\"stSidebar\"] label[for=\"language_selector\"] {
+        /* Fundo geral da sidebar */
+        section[data-testid="stSidebar"]>div>div {
+            background-color: #8C1D40 !important;
+        }
+        /* Label do seletor de idioma */
+        section[data-testid="stSidebar"] label[for="language_selector"] {
             color: #FFFFFF !important;
             font-size: 0.875rem !important;
             margin-bottom: 0.25rem !important;
         }
-        /* Fundo do dropdown */
-        div[role=\"listbox\"] {
-            background: #FFFFFF !important;
+        /* Campo de seleção (input) */
+        section[data-testid="stSidebar"] div[data-baseweb="select"]>div {
+            background-color: #FFFFFF !important;
+            color: #1F2937 !important;
+        }
+        /* Dropdown de opções */
+        section[data-testid="stSidebar"] div[data-baseweb="popover"] {
+            background-color: #FFFFFF !important;
             border: 1px solid #DADDE1 !important;
         }
-        /* Texto de cada opção */
-        div[role=\"option\"] {
+        section[data-testid="stSidebar"] div[role="option"] {
+            background-color: #FFFFFF !important;
             color: #1F2937 !important;
+        }
+        /* Itens de navegação */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            color: #FFFFFF;
+            text-decoration: none;
+        }
+        .nav-item:hover {
+            background-color: #731734;
+        }
+        .nav-item-active {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background-color: #FFFFFF;
+            color: #8C1D40 !important;
+            font-weight: 600;
+        }
+        /* Oculta header/rodapé padrão */
+        #MainMenu, header, footer {
+            visibility: hidden;
         }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
-    with st.sidebar:
-        # Cabeçalho da sidebar
-        st.markdown(
-            """
-            <div style=\"text-align: center; padding: 1rem; margin-bottom: 1rem;\">
-                <h3 style=\"color: #8C1D40; margin: 0;\">✈️ Amaro Aviation</h3>
-                <p style=\"color: #FFFFFF; font-size: 0.875rem; margin-top: 0.5rem;\">
-                    Simulador Estratégico de Custos
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.markdown("---")
 
-        # Seletor de idioma
-        idioma_selecionado = st.selectbox(
-            get_text('language', lang),
-            ["🇧🇷 Português", "🇺🇸 English"],
-            index=0 if lang == 'pt' else 1,
-            key="language_selector"
-        )
-        lang = detect_language_from_selection(idioma_selecionado)
-        st.markdown("---")
-
-        # Navegação entre páginas
-        render_navigation_help(current_page, lang)
-
-    return lang
-
-
-def render_navigation_help(current_page: str = "", lang: str = 'pt') -> None:
+def _render_header() -> None:
     """
-    Renderiza a lista de navegação na sidebar, destacando a página atual.
+    Renderiza o cabeçalho fixo da sidebar.
+    """
+    st.markdown(
+        """
+        <div style="text-align:center; padding:1rem; margin-bottom:1rem;">
+            <h3 style="color:#FFFFFF; margin:0;">✈️ Amaro Aviation</h3>
+            <p style="color:#FFFFFF; font-size:0.875rem; margin-top:0.5rem;">
+                Simulador Estratégico de Custos
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    Args:
-        current_page: Identificador da página atual.
-        lang: Código do idioma ('pt' ou 'en').
+
+def _render_language_selector(lang: str) -> str:
+    """
+    Renderiza o selectbox de idioma e retorna o idioma escolhido.
+    """
+    idioma_selecionado = st.selectbox(
+        get_text('language', lang),
+        ["🇧🇷 Português", "🇺🇸 English"],
+        index=0 if lang == 'pt' else 1,
+        key="language_selector"
+    )
+    return detect_language_from_selection(idioma_selecionado)
+
+
+def _render_navigation(current_page: str, lang: str) -> None:
+    """
+    Renderiza a lista de navegação sem título, destacando a página ativa.
     """
     pages_info = {
         'pt': {
@@ -97,14 +138,13 @@ def render_navigation_help(current_page: str = "", lang: str = 'pt') -> None:
             'Configuracoes': 'Parameters and settings'
         }
     }
-
-    for page_key, description in pages_info[lang].items():
-        is_current = current_page.endswith(page_key)
-        bg_color = '#8C1D40' if is_current else '#FFFFFF'
-        text_color = '#FFFFFF' if is_current else '#8C1D40'
-        icon = "👉" if is_current else "📄"
+    # Espaçamento antes da navegação
+    st.markdown('---')
+    for key, desc in pages_info[lang].items():
+        is_active = current_page.endswith(key)
+        css_class = 'nav-item-active' if is_active else 'nav-item'
+        icon = '👉' if is_active else '📄'
         st.markdown(
-            f"<div style='display: flex; align-items: center; padding: 0.25rem 1rem; background: {bg_color}; color: {text_color}; border-radius: 4px;'>"
-            f"{icon}&nbsp;<span>{description}</span></div>",
+            f"<div class=\"{css_class}\">{icon}&nbsp;{desc}</div>",
             unsafe_allow_html=True
         )
