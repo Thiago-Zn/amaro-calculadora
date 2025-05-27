@@ -1,17 +1,21 @@
+"""
+Componente de sidebar reutilizável para Amaro Aviation
+"""
+
 import streamlit as st
 from config.idiomas import get_text, detect_language_from_selection
 
 
-def render_sidebar(current_page: str, lang: str = 'pt') -> str:
+def render_sidebar(lang: str = 'pt', current_page: str = "") -> str:
     """
-    Renderiza a sidebar principal com seleção de idioma e navegação
+    Renderiza a sidebar principal com cabeçalho, seleção de idioma e navegação.
 
     Args:
-        current_page: Identificador da página atual (nome do arquivo ou chave).
         lang: Código do idioma ('pt' ou 'en').
+        current_page: Identificador da página atual (nome da página ou chave).
 
     Returns:
-        Código do idioma selecionado ('pt' ou 'en').
+        O código do idioma selecionado ('pt' ou 'en').
     """
     with st.sidebar:
         # Cabeçalho da sidebar
@@ -24,7 +28,7 @@ def render_sidebar(current_page: str, lang: str = 'pt') -> str:
                 </p>
             </div>
             """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
         st.markdown("---")
 
@@ -35,16 +39,16 @@ def render_sidebar(current_page: str, lang: str = 'pt') -> str:
             index=0 if lang == 'pt' else 1,
             key="language_selector"
         )
-        lang_atual = detect_language_from_selection(idioma_selecionado)
+        lang = detect_language_from_selection(idioma_selecionado)
         st.markdown("---")
 
         # Navegação entre páginas
-        render_navigation_help(current_page, lang_atual)
+        render_navigation_help(current_page, lang)
 
-    return lang_atual
+    return lang
 
 
-def render_navigation_help(current_page: str, lang: str = 'pt') -> None:
+def render_navigation_help(current_page: str = "", lang: str = 'pt') -> None:
     """
     Renderiza a lista de navegação na sidebar, destacando a página atual.
 
@@ -52,6 +56,7 @@ def render_navigation_help(current_page: str, lang: str = 'pt') -> None:
         current_page: Identificador da página atual.
         lang: Código do idioma ('pt' ou 'en').
     """
+    # Dicionário de páginas e descrições por idioma
     pages_info = {
         'pt': {
             '1_Estimativa_de_Lucro': 'Análise de rentabilidade mensal com charter',
@@ -69,17 +74,16 @@ def render_navigation_help(current_page: str, lang: str = 'pt') -> None:
         }
     }
 
+    # Título da seção de navegação
     title = "📚 Páginas Disponíveis" if lang == 'pt' else "📚 Available Pages"
     st.markdown(f"### {title}")
 
+    # Listagem de páginas
     for page_key, description in pages_info[lang].items():
-        # Comparação exata do identificador da página
         is_current = current_page.endswith(page_key)
         icon = "👉" if is_current else "📄"
         style = (
-            "font-weight: 600; color: #8C1D40;"
-            if is_current else
-            "color: #6B7280;"
+            "font-weight: 600; color: #8C1D40;" if is_current else "color: #6B7280;"
         )
         st.markdown(
             f"{icon} <span style='{style}'>{description}</span>",
