@@ -80,62 +80,72 @@ def _inject_css() -> None:
     st.markdown(
         f"""
         <style>
-            /* Sidebar container */
+            /* ---------- 1. CONTÊINER DA SIDEBAR ---------- */
             section[data-testid="stSidebar"] > div:first-child {{
-                background-color: {AMARO_BORDO} !important;
+                background: {AMARO_BORDO} !important;
             }}
 
-            /* Oculta footer/header padrão, se quiser */
-            #MainMenu, header, footer {{
-                visibility: hidden !important;
-            }}
-
-            /* Label do selectbox */
+            /* ---------- 2. LABEL DO SELECTBOX ---------- */
             section[data-testid="stSidebar"] label[for*='{LANGUAGE_SELECTOR_KEY}'] {{
-                color: {AMARO_BRANCO} !important;
+                color: {AMARO_BRANCO} !important;          /* texto branco sobre bordô */
                 font-size: 0.875rem !important;
                 font-weight: 500 !important;
                 margin-bottom: 0.25rem !important;
             }}
 
-            /* Caixa principal do selectbox */
-            section[data-testid="stSidebar"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:first-child {{
-                background-color: {AMARO_BRANCO} !important;
-                color: {AMARO_PRETO} !important;
+            /* ---------- 3. CAIXA FECHADA (campo visível) ---------- */
+            /* outer wrapper criado pelo Streamlit */
+            section[data-testid="stSidebar"] div[data-testid="stSelectbox"] {{
+                background: {AMARO_BORDO} !important;      /* bordô sólido — sem cinza */
+                padding: 0 !important;                     /* remove “almofada” cinza */
+            }}
+            /* a verdadeira “caixa” onde aparece o valor selecionado */
+            section[data-testid="stSidebar"] div[data-testid="stSelectbox"] \
+            div[data-baseweb="select"] > div:first-child {{
+                background: {AMARO_BRANCO} !important;     /* BRANCO */
+                color: {AMARO_PRETO} !important;           /* texto preto */
                 border: 1px solid {AMARO_BORDO} !important;
                 border-radius: 6px !important;
                 padding: 0.4rem 0.75rem !important;
                 font-size: 0.875rem !important;
             }}
-
-            /* Ícone dropdown */
+            /* ícone da seta */
             section[data-testid="stSidebar"] div[data-testid="stSelectbox"] svg {{
                 fill: {AMARO_PRETO} !important;
             }}
 
-            /* Dropdown popover */
+            /* ---------- 4. POPOVER / DROPDOWN ABERTO ---------- */
+            /* contêiner gerado pelo BaseWeb */
             div[data-baseweb="popover"][role="listbox"] {{
-                 background-color: {AMARO_BRANCO} !important;
+                 background: {AMARO_BRANCO} !important;    /* BRANCO */
                  border: 1px solid {AMARO_BORDO} !important;
                  border-radius: 6px !important;
-                 box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+                 box-shadow: 0 4px 12px rgba(0,0,0,0.10) !important;
+            }}
+            /* camada interna que, às vezes, insiste em cinza */
+            div[data-baseweb="menu"] {{
+                 background: {AMARO_BRANCO} !important;
             }}
 
-            /* Itens do dropdown */
-            div[data-baseweb="popover"] ul[role="listbox"] li[role="option"] {{
-                padding: 0.5rem 0.85rem !important;
+            /* itens individuais */
+            div[data-baseweb="menu"] ul[role="listbox"] li[role="option"] {{
+                background: {AMARO_BRANCO} !important;
                 color: {AMARO_PRETO} !important;
-                background-color: {AMARO_BRANCO} !important;
+                padding: 0.5rem 0.85rem !important;
                 font-size: 0.875rem !important;
             }}
 
-            /* Hover */
-            div[data-baseweb="popover"] ul[role="listbox"] li[role="option"]:hover,
-            div[data-baseweb="popover"] ul[role="listbox"] li[aria-selected="true"] {{
-                background-color: {AMARO_BORDO} !important;
+            /* hover + item selecionado */
+            div[data-baseweb="menu"] ul[role="listbox"] li[role="option"]:hover,
+            div[data-baseweb="menu"] ul[role="listbox"] li[aria-selected="true"] {{
+                background: {AMARO_BORDO} !important;
                 color: {AMARO_BRANCO} !important;
             }}
+
+            /* ---------- 5. LIMPA HEADER/FOOTER PADRÕES ---------- */
+            #MainMenu, header, footer {{ visibility: hidden !important; }}
         </style>
         """,
         unsafe_allow_html=True,
     )
+
