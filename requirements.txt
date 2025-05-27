@@ -1,67 +1,61 @@
 # ====================================================================
-# Amaro Aviation Calculator v3.0 REFATORADO - Dependências Simplificadas
-# Sistema consolidado com fallbacks automáticos e foco na UX
+# Amaro Aviation Calculator v3.0 CORPORATIVO - Dependências Essenciais
+# Sistema corporativo minimalista com máxima estabilidade
 # ====================================================================
 
-# === FRAMEWORK PRINCIPAL ===
+# === FRAMEWORK WEB PRINCIPAL ===
 streamlit>=1.28.0,<2.0.0
-# Framework web principal - interface moderna e responsiva
+# Interface web corporativa principal
 
 # === PROCESSAMENTO DE DADOS ===
 pandas>=2.0.0,<3.0.0
-# Manipulação de dados, CSVs e DataFrames
+# Manipulação de dados e planilhas
 
 numpy>=1.24.0,<2.0.0
 # Computação numérica essencial
 
-# === VISUALIZAÇÃO PREMIUM ===
+# === VISUALIZAÇÃO CORPORATIVA ===
 plotly>=5.15.0,<6.0.0
-# Gráficos interativos de alta qualidade
+# Gráficos profissionais sem elementos decorativos
 
 # === EXPORTAÇÃO ROBUSTA ===
 openpyxl>=3.1.0,<4.0.0
-# Exportação Excel (formato xlsx) - principal
+# Exportação Excel principal
 
 xlsxwriter>=3.1.0,<4.0.0
-# Exportação Excel com formatação avançada - fallback
+# Exportação Excel com formatação - fallback
 
 reportlab>=4.0.0,<5.0.0
-# Geração de PDFs profissionais
+# Geração de PDFs corporativos
 
-# === UTILITÁRIOS ===
+# === UTILITÁRIOS MÍNIMOS ===
 Pillow>=10.0.0,<11.0.0
-# Processamento de imagens (logos, gráficos)
+# Processamento de logos corporativos
 
 python-dateutil>=2.8.0,<3.0.0
-# Manipulação de datas e timestamps
+# Manipulação de datas
 
 # ====================================================================
-# OBSERVAÇÕES IMPORTANTES PARA A VERSÃO REFATORADA:
+# VERSÃO CORPORATIVA - CARACTERÍSTICAS:
 #
-# 1. ARQUITETURA SIMPLIFICADA:
-#    - App.py consolidado com 3 abas principais
-#    - Removidas dependências desnecessárias
-#    - Foco em performance e estabilidade
+# 1. DESIGN MINIMALISTA:
+#    - Sem emojis ou elementos decorativos
+#    - Paleta corporativa: #8C1D40, #FFFFFF, #333333, #E0E0E0
+#    - Tipografia: Inter, Helvetica Neue, Segoe UI
 #
-# 2. FALLBACKS AUTOMÁTICOS:
-#    - Excel (openpyxl) → Excel (xlsxwriter) → CSV → JSON
-#    - PDF (reportlab) → TXT → HTML
-#    - Sistema robusto que sempre funciona
+# 2. FUNCIONALIDADE ESSENCIAL:
+#    - 3 abas principais consolidadas
+#    - Sistema bilíngue profissional
+#    - Exportação robusta com fallbacks
 #
-# 3. COMPATIBILIDADE:
-#    - Python 3.8+ (testado até 3.11)
-#    - Streamlit Cloud ready
-#    - Deploy local e cloud
+# 3. PERFORMANCE OTIMIZADA:
+#    - Dependências mínimas necessárias
+#    - Carregamento rápido
+#    - Estabilidade máxima
 #
-# 4. INSTALAÇÃO SIMPLIFICADA:
-#    pip install -r requirements.txt
-#    python setup_initial.py
-#    streamlit run app.py
-#
-# 5. VERSÕES TESTADAS (Outubro 2024):
-#    - streamlit==1.29.0
-#    - pandas==2.1.3
-#    - plotly==5.17.0
-#    - openpyxl==3.1.2
+# 4. COMPATIBILIDADE EMPRESARIAL:
+#    - Deploy em ambientes corporativos
+#    - Configurações de proxy/firewall
+#    - Logs estruturados
 #
 # ====================================================================

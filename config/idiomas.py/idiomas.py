@@ -1,21 +1,21 @@
 """
-Sistema de idiomas simplificado para Amaro Aviation Calculator v3.0
-Suporte para Português e Inglês com fallbacks automáticos
+Sistema de idiomas corporativo para Amaro Aviation Calculator v3.0
+Design minimalista e profissional - sem emojis ou elementos decorativos
 """
 
 def get_translations():
-    """Traduções centralizadas do sistema"""
+    """Traduções corporativas do sistema"""
     return {
         'pt': {
             # Interface Principal
-            'app_title': 'Amaro Aviation',
-            'app_subtitle': 'Calculadora Inteligente de Custos Operacionais',
-            'language': 'Idioma',
+            'app_title': 'AMARO AVIATION',
+            'app_subtitle': 'CALCULADORA DE CUSTOS OPERACIONAIS',
+            'language': 'IDIOMA',
             
             # Abas
-            'tab_profit': '📈 Estimativa de Lucro Mensal',
-            'tab_comparison': '⚖️ Comparativo de Custos',
-            'tab_settings': '⚙️ Configurações e Fórmulas',
+            'tab_profit': 'ESTIMATIVA DE LUCRO MENSAL',
+            'tab_comparison': 'COMPARATIVO DE CUSTOS',
+            'tab_settings': 'CONFIGURAÇÕES',
             
             # Campos
             'aircraft_model': 'Modelo da Aeronave',
@@ -24,12 +24,12 @@ def get_translations():
             'annual_hours': 'Horas de Voo por Ano',
             'fixed_costs': 'Custos Fixos Anuais (R$)',
             'include_charter': 'Incluir Receita de Charter',
-            'calculate': '🚀 Calcular',
+            'calculate': 'CALCULAR',
             
             # Resultados
             'gross_revenue': 'Receita Bruta',
-            'owner_revenue': 'Receita do Proprietário (90%)',
-            'amaro_fee': 'Taxa Amaro (10%)',
+            'owner_revenue': 'Receita do Proprietário',
+            'amaro_fee': 'Taxa Amaro Aviation',
             'operational_costs': 'Custos Operacionais',
             'net_profit': 'Lucro Líquido',
             'monthly_roi': 'ROI Mensal',
@@ -46,31 +46,31 @@ def get_translations():
             'maintenance_jet': 'Manutenção Jato (R$/h)',
             'market_price_turboprop': 'Preço Mercado Turboprop (R$/h)',
             'market_price_jet': 'Preço Mercado Jato (R$/h)',
-            'save_settings': '💾 Salvar Configurações',
+            'save_settings': 'SALVAR CONFIGURAÇÕES',
             
             # Status
             'system_operational': 'Sistema Operacional',
             'models_configured': 'modelos configurados',
             'profitable_operation': 'Operação Rentável',
-            'operation_at_loss': 'Atenção: Operação no Prejuízo',
-            'settings_saved': 'Configurações salvas com sucesso!',
+            'operation_at_loss': 'Operação com Prejuízo',
+            'settings_saved': 'Configurações salvas com sucesso',
             'calculation_error': 'Erro no cálculo',
             
             # Exportação
-            'export_excel': '📊 Baixar Excel',
-            'export_pdf': '📄 Baixar PDF',
-            'developed_with_love': 'Desenvolvido com ❤️ para excelência comercial'
+            'export_excel': 'EXPORTAR EXCEL',
+            'export_pdf': 'EXPORTAR PDF',
+            'developed_with_love': 'Desenvolvido pela Amaro Aviation'
         },
         'en': {
             # Main Interface
-            'app_title': 'Amaro Aviation',
-            'app_subtitle': 'Smart Operating Cost Calculator',
-            'language': 'Language',
+            'app_title': 'AMARO AVIATION',
+            'app_subtitle': 'OPERATING COST CALCULATOR',
+            'language': 'LANGUAGE',
             
             # Tabs
-            'tab_profit': '📈 Monthly Profit Estimation',
-            'tab_comparison': '⚖️ Cost Comparison',
-            'tab_settings': '⚙️ Settings & Formulas',
+            'tab_profit': 'MONTHLY PROFIT ESTIMATION',
+            'tab_comparison': 'COST COMPARISON',
+            'tab_settings': 'SETTINGS',
             
             # Fields
             'aircraft_model': 'Aircraft Model',
@@ -79,12 +79,12 @@ def get_translations():
             'annual_hours': 'Annual Flight Hours',
             'fixed_costs': 'Annual Fixed Costs (R$)',
             'include_charter': 'Include Charter Revenue',
-            'calculate': '🚀 Calculate',
+            'calculate': 'CALCULATE',
             
             # Results
             'gross_revenue': 'Gross Revenue',
-            'owner_revenue': 'Owner Revenue (90%)',
-            'amaro_fee': 'Amaro Fee (10%)',
+            'owner_revenue': 'Owner Revenue',
+            'amaro_fee': 'Amaro Aviation Fee',
             'operational_costs': 'Operational Costs',
             'net_profit': 'Net Profit',
             'monthly_roi': 'Monthly ROI',
@@ -101,20 +101,20 @@ def get_translations():
             'maintenance_jet': 'Jet Maintenance (R$/h)',
             'market_price_turboprop': 'Turboprop Market Price (R$/h)',
             'market_price_jet': 'Jet Market Price (R$/h)',
-            'save_settings': '💾 Save Settings',
+            'save_settings': 'SAVE SETTINGS',
             
             # Status
             'system_operational': 'System Operational',
             'models_configured': 'models configured',
             'profitable_operation': 'Profitable Operation',
-            'operation_at_loss': 'Warning: Operation at Loss',
-            'settings_saved': 'Settings saved successfully!',
+            'operation_at_loss': 'Operation at Loss',
+            'settings_saved': 'Settings saved successfully',
             'calculation_error': 'Calculation error',
             
             # Export
-            'export_excel': '📊 Download Excel',
-            'export_pdf': '📄 Download PDF', 
-            'developed_with_love': 'Developed with ❤️ for commercial excellence'
+            'export_excel': 'EXPORT EXCEL',
+            'export_pdf': 'EXPORT PDF', 
+            'developed_with_love': 'Developed by Amaro Aviation'
         }
     }
 
@@ -140,12 +140,12 @@ def detect_language(selection):
     Detecta idioma a partir da seleção do usuário
     
     Args:
-        selection: String selecionada ("🇧🇷 Português" ou "🇺🇸 English")
+        selection: String selecionada ("Português" ou "English")
     
     Returns:
         String: 'pt' ou 'en'
     """
-    return 'pt' if '🇧🇷' in selection else 'en'
+    return 'pt' if selection == 'Português' else 'en'
 
 def format_currency(value, lang='pt'):
     """
@@ -188,12 +188,12 @@ def format_percentage(value, lang='pt'):
         return str(value)
 
 def get_language_options():
-    """Opções de idioma para selectbox"""
-    return ["🇧🇷 Português", "🇺🇸 English"]
+    """Opções de idioma para selectbox - corporativo"""
+    return ["Português", "English"]
 
-# Classe de conveniência
+# Classe de gerenciamento simplificada
 class LanguageManager:
-    """Gerenciador de idioma simplificado"""
+    """Gerenciador de idioma corporativo"""
     
     def __init__(self, default_lang='pt'):
         self.current_lang = default_lang
@@ -224,10 +224,10 @@ def t(key, lang='pt'):
     return get_text(key, lang)
 
 if __name__ == "__main__":
-    # Teste do sistema
-    print("=== Teste Sistema de Idiomas ===")
+    # Teste corporativo do sistema
+    print("=== TESTE SISTEMA DE IDIOMAS CORPORATIVO ===")
     print(f"PT: {get_text('app_title', 'pt')}")
     print(f"EN: {get_text('app_title', 'en')}")
     print(f"Moeda PT: {format_currency(1234.56, 'pt')}")
     print(f"Moeda EN: {format_currency(1234.56, 'en')}")
-    print("✅ Sistema funcionando!")
+    print("Sistema funcionando corretamente.")
