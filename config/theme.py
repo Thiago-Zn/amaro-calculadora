@@ -16,21 +16,28 @@ def load_theme() -> None:
 html, body, [data-testid="stAppViewContainer"] {
     background: #FFFFFF !important;
     color:      #1F2937  !important;
-    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
-/* ——— 2. SIDEBAR — fundo bordô e texto branco ——— */
+/* ——— 2. SIDEBAR — fundo bordô ——— */
 section[data-testid="stSidebar"] {
     background: #8C1D40 !important;
+    /* Força TODO texto dentro da sidebar a ser branco */
     color:      #FFFFFF !important;
 }
 
-/* ——— 2.1. Todos os links da sidebar — texto branco ——— */
-section[data-testid="stSidebar"] a {
+/* ——— 2.1. Força branco em todos os links e labels da sidebar ——— */
+section[data-testid="stSidebar"] *,
+section[data-testid="stSidebar"] a,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] div,
+section[data-testid="stSidebar"] span {
     color: #FFFFFF !important;
+    fill:  #FFFFFF !important;
+    stroke:#FFFFFF !important;
 }
 
-/* ——— 2.2. Item ativo na sidebar — bordô mais escuro, texto branco ——— */
+/* ——— 2.2. Item ativo na sidebar — bordô mais escuro ——— */
 section[data-testid="stSidebar"] a[aria-current="page"] {
     background:    #A02050 !important;
     color:         #FFFFFF !important;
@@ -112,6 +119,7 @@ div[data-testid="stMetric"] span {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1)!important;
 }
 
+}
 </style>
         """,
         unsafe_allow_html=True,
