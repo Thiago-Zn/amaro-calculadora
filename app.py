@@ -916,9 +916,9 @@ with tab3:
         custo_piloto = st.number_input(
             t('pilot_cost', lang).upper(),
             value=float(params['custo_piloto_hora']),
-            min_value=500,
-            max_value=5000,
-            step=50
+            min_value=500.0,
+            max_value=5000.0,
+            step=50.0
         )
         
         depreciacao = st.number_input(
@@ -936,34 +936,35 @@ with tab3:
         manut_turboprop = st.number_input(
             t('maintenance_turboprop', lang).upper(),
             value=float(params['custo_manutencao_hora']['turboprop']),
-            min_value=500,
-            max_value=5000,
-            step=100
+            min_value=500.0,
+            max_value=5000.0,
+            step=100.0
         )
         
         manut_jato = st.number_input(
             t('maintenance_jet', lang).upper(),
             value=float(params['custo_manutencao_hora']['jato']),
-            min_value=1000,
-            max_value=10000,
-            step=200
+            min_value=1000.0,
+            max_value=10000.0,
+            step=200.0
         )
         
         mercado_turboprop = st.number_input(
             t('market_price_turboprop', lang).upper(),
             value=float(params['preco_mercado']['turboprop']),
-            min_value=3000,
-            max_value=15000,
-            step=500
+            min_value=3000.0,
+            max_value=15000.0,
+            step=500.0
         )
         
         mercado_jato = st.number_input(
             t('market_price_jet', lang).upper(),
             value=float(params['preco_mercado']['jato']),
-            min_value=8000,
-            max_value=30000,
-            step=1000
+            min_value=8000.0,
+            max_value=30000.0,
+            step=1000.0
         )
+
     
     # Botão de salvar centralizado
     col1, col2, col3 = st.columns([1, 2, 1])
