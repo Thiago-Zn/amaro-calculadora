@@ -1,17 +1,13 @@
 import streamlit as st
 import plotly.graph_objects as go
-import plotly.express as px
-from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from pathlib import Path
-import json
 from io import BytesIO
 
 # Imports locais
 from utils.params import load_params, save_params
-from utils.calculations import calcula_custo_trecho, calcular_projecao_mensal
+from utils.calculations import calcula_custo_trecho
 from utils.exportador_excel import criar_relatorio_dados, gerar_excel_simples
 from utils.exportador_pdf import gerar_pdf
 
@@ -19,23 +15,20 @@ from utils.exportador_pdf import gerar_pdf
 # CONFIGURAÇÃO DA PÁGINA
 # ========================================================================
 st.set_page_config(
-    page_title="Amaro Aviation - Calculadora de Custos",
-    page_icon="🛩",
+    page_title="Amaro Aviation - Calculadora Corporativa",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ========================================================================
-# SISTEMA DE IDIOMAS CORPORATIVO
+# SISTEMA DE TRADUÇÃO CORPORATIVO
 # ========================================================================
 @st.cache_data
 def get_translations():
-    """Sistema de traduções corporativo - sem emojis"""
     return {
         'pt': {
             'app_title': 'AMARO AVIATION',
             'app_subtitle': 'CALCULADORA DE CUSTOS OPERACIONAIS',
-            'language': 'IDIOMA',
             'tab_profit': 'ESTIMATIVA DE LUCRO MENSAL',
             'tab_comparison': 'COMPARATIVO DE CUSTOS',
             'tab_settings': 'CONFIGURAÇÕES',
@@ -48,14 +41,11 @@ def get_translations():
             'calculate': 'CALCULAR',
             'gross_revenue': 'Receita Bruta',
             'owner_revenue': 'Receita do Proprietário',
-            'amaro_fee': 'Taxa Amaro Aviation',
             'operational_costs': 'Custos Operacionais',
             'net_profit': 'Lucro Líquido',
-            'monthly_roi': 'ROI Mensal',
             'own_management': 'Gestão Própria',
             'amaro_management': 'Gestão Amaro Aviation',
             'annual_savings': 'Economia Anual',
-            'savings_percentage': 'Percentual de Economia',
             'fuel_price': 'Preço do Combustível (R$/L)',
             'pilot_cost': 'Custo Piloto (R$/h)',
             'depreciation': 'Depreciação Anual (%)',
@@ -64,20 +54,15 @@ def get_translations():
             'market_price_turboprop': 'Preço Mercado Turboprop (R$/h)',
             'market_price_jet': 'Preço Mercado Jato (R$/h)',
             'save_settings': 'SALVAR CONFIGURAÇÕES',
-            'system_operational': 'Sistema Operacional',
-            'models_configured': 'modelos configurados',
             'profitable_operation': 'OPERAÇÃO RENTÁVEL',
             'operation_at_loss': 'OPERAÇÃO COM PREJUÍZO',
             'settings_saved': 'Configurações salvas com sucesso',
-            'calculation_error': 'Erro no cálculo',
             'export_excel': 'EXPORTAR EXCEL',
-            'export_pdf': 'EXPORTAR PDF',
-            'developed_with_love': 'Desenvolvido pela Amaro Aviation'
+            'export_pdf': 'EXPORTAR PDF'
         },
         'en': {
             'app_title': 'AMARO AVIATION',
             'app_subtitle': 'OPERATING COST CALCULATOR',
-            'language': 'LANGUAGE',
             'tab_profit': 'MONTHLY PROFIT ESTIMATION',
             'tab_comparison': 'COST COMPARISON',
             'tab_settings': 'SETTINGS',
@@ -90,14 +75,11 @@ def get_translations():
             'calculate': 'CALCULATE',
             'gross_revenue': 'Gross Revenue',
             'owner_revenue': 'Owner Revenue',
-            'amaro_fee': 'Amaro Aviation Fee',
             'operational_costs': 'Operational Costs',
             'net_profit': 'Net Profit',
-            'monthly_roi': 'Monthly ROI',
             'own_management': 'Own Management',
             'amaro_management': 'Amaro Aviation Management',
             'annual_savings': 'Annual Savings',
-            'savings_percentage': 'Savings Percentage',
             'fuel_price': 'Fuel Price (R$/L)',
             'pilot_cost': 'Pilot Cost (R$/h)',
             'depreciation': 'Annual Depreciation (%)',
@@ -106,324 +88,207 @@ def get_translations():
             'market_price_turboprop': 'Turboprop Market Price (R$/h)',
             'market_price_jet': 'Jet Market Price (R$/h)',
             'save_settings': 'SAVE SETTINGS',
-            'system_operational': 'System Operational',
-            'models_configured': 'models configured',
             'profitable_operation': 'PROFITABLE OPERATION',
             'operation_at_loss': 'OPERATION AT LOSS',
             'settings_saved': 'Settings saved successfully',
-            'calculation_error': 'Calculation error',
             'export_excel': 'EXPORT EXCEL',
-            'export_pdf': 'EXPORT PDF',
-            'developed_with_love': 'Developed by Amaro Aviation'
+            'export_pdf': 'EXPORT PDF'
         }
     }
 
 def t(key, lang='pt'):
-    """Função de tradução"""
     translations = get_translations()
     return translations.get(lang, translations['pt']).get(key, key)
 
 def format_currency(value, lang='pt'):
-    """Formata valores monetários"""
     try:
         if lang == 'pt':
             return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         else:
             return f"R$ {value:,.2f}"
-    except Exception:
+    except:
         return str(value)
 
 def format_percentage(value, lang='pt'):
-    """Formata percentuais"""
     try:
         if lang == 'pt':
             return f"{value:.1f}%".replace(".", ",")
         else:
             return f"{value:.1f}%"
-    except Exception:
+    except:
         return str(value)
 
 # ========================================================================
-# CSS CORPORATIVO MINIMALISTA
+# CSS CORPORATIVO
 # ========================================================================
-def load_corporate_css():
-    st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
-    .stApp {
-        font-family: 'Inter', 'Helvetica Neue', 'Segoe UI', sans-serif;
-        background-color: #FFFFFF;
-        color: #333333;
-    }
-    
-    .corporate-header {
-        background-color: #FFFFFF;
-        border-bottom: 3px solid #8C1D40;
-        padding: 3rem 0;
-        margin-bottom: 2rem;
-        text-align: center;
-    }
-    
-    .corporate-header h1 {
-        color: #8C1D40;
-        font-size: 3rem;
-        font-weight: 700;
-        letter-spacing: 3px;
-        margin: 0;
-        text-transform: uppercase;
-    }
-    
-    .corporate-header p {
-        color: #333333;
-        font-size: 1.2rem;
-        font-weight: 500;
-        margin: 1rem 0 0 0;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-    }
-    
-    .corporate-card {
-        background-color: #FFFFFF;
-        border: 1px solid #E0E0E0;
-        border-radius: 0;
-        padding: 2rem;
-        margin: 2rem 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    
-    .corporate-card h3 {
-        color: #8C1D40;
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin: 0 0 1rem 0;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        border-bottom: 2px solid #8C1D40;
-        padding-bottom: 0.5rem;
-    }
-    
-    .corporate-card p {
-        color: #333333;
-        font-size: 1rem;
-        line-height: 1.6;
-        margin: 0;
-        font-weight: 400;
-    }
-    
-    .metric-card {
-        background-color: #FFFFFF;
-        border: 2px solid #E0E0E0;
-        border-left: 6px solid #8C1D40;
-        padding: 2rem;
-        margin: 1rem 0;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        text-align: center;
-    }
-    
-    .metric-value {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #8C1D40;
-        margin: 1rem 0;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    .metric-label {
-        font-size: 0.9rem;
-        color: #333333;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 600;
-        margin: 0;
-    }
-    
-    .stButton > button {
-        background-color: #8C1D40;
-        color: white;
-        border: none;
-        border-radius: 0;
-        padding: 1rem 3rem;
-        font-weight: 700;
-        font-size: 1rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        transition: all 0.3s ease;
-        width: 100%;
-        box-shadow: 0 4px 12px rgba(140,29,64,0.3);
-    }
-    
-    .stButton > button:hover {
-        background-color: #6D1530;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(140,29,64,0.4);
-    }
-    
-    .stTabs [data-baseweb="tab-list"] {
-        background-color: #F8F9FA;
-        border-bottom: 2px solid #E0E0E0;
-        padding: 0;
-        margin-bottom: 2rem;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        background-color: transparent;
-        color: #333333;
-        font-weight: 600;
-        font-size: 1rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        padding: 1.5rem 2rem;
-        border: none;
-        border-bottom: 4px solid transparent;
-        margin: 0;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background-color: #FFFFFF;
-        color: #8C1D40;
-        border-bottom: 4px solid #8C1D40;
-        font-weight: 700;
-    }
-    
-    .sidebar-header {
-        background-color: #8C1D40;
-        color: white;
-        padding: 2rem;
-        margin: -1rem -1rem 2rem -1rem;
-        text-align: center;
-    }
-    
-    .sidebar-header h2 {
-        font-size: 1.3rem;
-        font-weight: 700;
-        margin: 0;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-    }
-    
-    .stSelectbox > div > div,
-    .stNumberInput > div > div > input,
-    .stSlider > div > div > div {
-        border: 2px solid #E0E0E0;
-        border-radius: 0;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    .stSelectbox > div > div:focus-within,
-    .stNumberInput > div > div:focus-within {
-        border-color: #8C1D40;
-        box-shadow: 0 0 0 2px rgba(140,29,64,0.2);
-    }
-    
-    .stSelectbox > label,
-    .stNumberInput > label,
-    .stSlider > label,
-    .stCheckbox > label {
-        font-weight: 600;
-        color: #333333;
-        font-size: 0.95rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 0.5rem;
-    }
-    
-    .success-highlight {
-        background-color: #E8F5E8;
-        border: 2px solid #4CAF50;
-        border-left: 6px solid #4CAF50;
-        padding: 2rem;
-        margin: 2rem 0;
-        border-radius: 0;
-    }
-    
-    .warning-highlight {
-        background-color: #FFF3E0;
-        border: 2px solid #FF9800;
-        border-left: 6px solid #FF9800;
-        padding: 2rem;
-        margin: 2rem 0;
-        border-radius: 0;
-    }
-    
-    .success-highlight h4,
-    .warning-highlight h4 {
-        margin: 0 0 1rem 0;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-size: 1.2rem;
-    }
-    
-    .success-highlight p,
-    .warning-highlight p {
-        margin: 0.5rem 0;
-        font-weight: 500;
-        font-size: 1rem;
-    }
-    
-    /* Remover elementos desnecessários */
-    .stDeployButton {
-        display: none;
-    }
-    
-    /* Estilo para informações */
-    .stSuccess, .stInfo, .stWarning, .stError {
-        border-radius: 0;
-        border-left: 6px solid;
-        font-weight: 500;
-    }
-    
-    .stSuccess {
-        border-left-color: #4CAF50;
-        background-color: #E8F5E8;
-    }
-    
-    .stWarning {
-        border-left-color: #FF9800;
-        background-color: #FFF3E0;
-    }
-    
-    .stError {
-        border-left-color: #F44336;
-        background-color: #FFEBEE;
-    }
-    
-    .stInfo {
-        border-left-color: #2196F3;
-        background-color: #E3F2FD;
-    }
-    
-    /* Responsividade */
-    @media (max-width: 768px) {
-        .corporate-header h1 {
-            font-size: 2rem;
-            letter-spacing: 2px;
-        }
-        
-        .corporate-header p {
-            font-size: 1rem;
-            letter-spacing: 1px;
-        }
-        
-        .metric-value {
-            font-size: 2rem;
-        }
-        
-        .stTabs [data-baseweb="tab"] {
-            padding: 1rem;
-            font-size: 0.9rem;
-        }
-    }
-    </style>
-    """, unsafe_allow_html=True)
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.stApp {
+    font-family: 'Inter', 'Helvetica Neue', sans-serif;
+    background-color: #FFFFFF;
+    color: #333333;
+}
+
+.corporate-header {
+    background-color: #8C1D40;
+    color: white;
+    padding: 3rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.corporate-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.corporate-header p {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 1rem 0 0 0;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.corporate-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.corporate-card h3 {
+    color: #8C1D40;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 2px solid #8C1D40;
+    padding-bottom: 0.5rem;
+}
+
+.metric-card {
+    background-color: #FFFFFF;
+    border: 2px solid #E0E0E0;
+    border-left: 6px solid #8C1D40;
+    padding: 2rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #8C1D40;
+    margin: 1rem 0;
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: #333333;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.stButton > button {
+    background-color: #8C1D40;
+    color: white;
+    border: none;
+    padding: 1rem 3rem;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    width: 100%;
+}
+
+.stButton > button:hover {
+    background-color: #6D1530;
+}
+
+.stTabs [data-baseweb="tab-list"] {
+    background-color: #F8F9FA;
+    border-bottom: 2px solid #E0E0E0;
+}
+
+.stTabs [data-baseweb="tab"] {
+    color: #333333;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 1.5rem 2rem;
+}
+
+.stTabs [aria-selected="true"] {
+    background-color: #FFFFFF;
+    color: #8C1D40;
+    border-bottom: 4px solid #8C1D40;
+    font-weight: 700;
+}
+
+.sidebar-header {
+    background-color: #8C1D40;
+    color: white;
+    padding: 2rem;
+    margin: -1rem -1rem 2rem -1rem;
+    text-align: center;
+}
+
+.sidebar-header h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.stSelectbox > label,
+.stNumberInput > label,
+.stSlider > label,
+.stCheckbox > label {
+    font-weight: 600;
+    color: #333333;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.success-highlight {
+    background-color: #E8F5E8;
+    border: 2px solid #4CAF50;
+    border-left: 6px solid #4CAF50;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.warning-highlight {
+    background-color: #FFF3E0;
+    border: 2px solid #FF9800;
+    border-left: 6px solid #FF9800;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.success-highlight h4,
+.warning-highlight h4 {
+    margin: 0 0 1rem 0;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ========================================================================
-# INICIALIZAÇÃO
+# SIDEBAR
 # ========================================================================
-load_corporate_css()
-
-# Sidebar
 with st.sidebar:
     st.markdown("""
     <div class="sidebar-header">
@@ -433,13 +298,14 @@ with st.sidebar:
     
     language_option = st.selectbox(
         "IDIOMA / LANGUAGE",
-        ["Português", "English"],
-        key="language_selector"
+        ["Português", "English"]
     )
     
     lang = 'pt' if language_option == 'Português' else 'en'
 
-# Header Principal
+# ========================================================================
+# HEADER
+# ========================================================================
 st.markdown(f"""
 <div class="corporate-header">
     <h1>{t('app_title', lang)}</h1>
@@ -447,13 +313,15 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Carregamento de dados
+# ========================================================================
+# CARREGAMENTO DE DADOS
+# ========================================================================
 try:
     params = load_params()
     modelos = params.get('modelos_disponiveis', [])
     
     if not modelos:
-        st.error("ERRO: Nenhum modelo configurado. Verifique os dados em data/modelos.csv")
+        st.error("ERRO: Nenhum modelo configurado")
         st.stop()
         
 except Exception as e:
@@ -485,8 +353,7 @@ with tab1:
     with col1:
         modelo_lucro = st.selectbox(
             t('aircraft_model', lang),
-            modelos,
-            key="modelo_lucro"
+            modelos
         )
     
     with col2:
@@ -495,8 +362,7 @@ with tab1:
             min_value=10,
             max_value=200,
             value=80,
-            step=10,
-            key="horas_mes"
+            step=10
         )
     
     with col3:
@@ -504,11 +370,10 @@ with tab1:
             t('occupancy_rate', lang),
             min_value=50,
             max_value=95,
-            value=75,
-            key="ocupacao"
+            value=75
         )
     
-    if st.button(t('calculate', lang), key="calc_lucro", type="primary"):
+    if st.button(t('calculate', lang), type="primary"):
         try:
             resultado_hora = calcula_custo_trecho(modelo_lucro, 1.0, params)
             horas_efetivas = horas_mes * (ocupacao / 100)
@@ -517,14 +382,8 @@ with tab1:
             receita_bruta = preco_hora_mercado * horas_efetivas
             custo_operacional = resultado_hora['total'] * horas_efetivas
             
-            percentual_proprietario = 0.9
-            percentual_amaro = 0.1
-            
-            receita_proprietario = receita_bruta * percentual_proprietario
-            receita_amaro = receita_bruta * percentual_amaro
+            receita_proprietario = receita_bruta * 0.9
             lucro_liquido = receita_proprietario - custo_operacional
-            
-            roi_mensal = (lucro_liquido / custo_operacional * 100) if custo_operacional > 0 else 0
             
             st.markdown("### RESULTADOS DA SIMULAÇÃO")
             
@@ -563,58 +422,35 @@ with tab1:
                 </div>
                 """, unsafe_allow_html=True)
             
-            # Gráfico de breakdown
-            fig_breakdown = go.Figure(data=[go.Pie(
-                labels=[
-                    'Lucro Proprietário',
-                    'Taxa Amaro Aviation',
-                    'Custos Operacionais'
-                ],
-                values=[
-                    receita_proprietario - custo_operacional,
-                    receita_amaro,
-                    custo_operacional
-                ],
+            # Gráfico
+            fig = go.Figure(data=[go.Pie(
+                labels=['Lucro Proprietário', 'Taxa Amaro', 'Custos Operacionais'],
+                values=[receita_proprietario - custo_operacional, receita_bruta * 0.1, custo_operacional],
                 hole=0.4,
-                marker=dict(colors=['#4CAF50', '#8C1D40', '#F44336']),
-                textinfo='label+percent+value',
-                texttemplate='<b>%{label}</b><br>%{percent}<br>%{value:,.0f}',
-                textfont=dict(size=12, family='Inter')
+                marker_colors=['#4CAF50', '#8C1D40', '#F44336']
             )])
             
-            fig_breakdown.update_layout(
+            fig.update_layout(
                 title='BREAKDOWN FINANCEIRO MENSAL',
-                font=dict(family='Inter, sans-serif', size=12),
                 height=500,
-                template='plotly_white',
-                title_font=dict(size=18, color='#333333', family='Inter'),
-                showlegend=True,
-                legend=dict(
-                    orientation="h",
-                    yanchor="bottom",
-                    y=-0.2,
-                    xanchor="center",
-                    x=0.5
-                )
+                font=dict(family='Inter', size=12)
             )
             
-            st.plotly_chart(fig_breakdown, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True)
             
-            # Status da operação
+            # Status
             if lucro_liquido > 0:
                 st.markdown(f"""
                 <div class="success-highlight">
                     <h4>{t('profitable_operation', lang)}</h4>
                     <p><strong>{t('net_profit', lang)}:</strong> {format_currency(lucro_liquido, lang)}</p>
-                    <p><strong>{t('monthly_roi', lang)}:</strong> {format_percentage(roi_mensal, lang)}</p>
                 </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown(f"""
                 <div class="warning-highlight">
                     <h4>{t('operation_at_loss', lang)}</h4>
-                    <p><strong>Prejuízo Mensal:</strong> {format_currency(abs(lucro_liquido), lang)}</p>
-                    <p><strong>Recomendação:</strong> Revisar parâmetros operacionais</p>
+                    <p><strong>Prejuízo:</strong> {format_currency(abs(lucro_liquido), lang)}</p>
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -622,55 +458,46 @@ with tab1:
             st.markdown("### EXPORTAR RELATÓRIO")
             col1, col2 = st.columns(2)
             
-            dados_lucro = {
-                "Análise": "Estimativa de Lucro Mensal",
+            dados = {
                 "Modelo": modelo_lucro,
                 "Horas Mensais": horas_mes,
                 "Taxa Ocupação": f"{ocupacao}%",
                 "Receita Bruta": receita_bruta,
-                "Receita Proprietário": receita_proprietario,
-                "Custos Operacionais": custo_operacional,
-                "Lucro Líquido": lucro_liquido,
-                "ROI Mensal": f"{roi_mensal:.1f}%"
+                "Lucro Líquido": lucro_liquido
             }
             
-            relatorio_lucro = criar_relatorio_dados(
-                "Estimativa de Lucro Mensal",
-                {"modelo": modelo_lucro, "horas": horas_mes, "ocupacao": ocupacao},
-                dados_lucro
-            )
+            relatorio = criar_relatorio_dados("Lucro Mensal", dados, dados)
             
             with col1:
                 try:
-                    excel_buffer = gerar_excel_simples(relatorio_lucro)
+                    excel_buffer = gerar_excel_simples(relatorio)
                     if excel_buffer:
                         st.download_button(
                             t('export_excel', lang),
                             data=excel_buffer.getvalue(),
-                            file_name=f"amaro_lucro_mensal_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                            file_name=f"amaro_lucro_{datetime.now().strftime('%Y%m%d')}.xlsx",
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             use_container_width=True
                         )
-                except Exception as e:
-                    st.error(f"Erro ao gerar Excel: {e}")
+                except:
+                    pass
             
             with col2:
                 try:
                     pdf_buffer = BytesIO()
-                    if gerar_pdf(pdf_buffer, dados_lucro):
-                        pdf_buffer.seek(0)
+                    if gerar_pdf(pdf_buffer, dados):
                         st.download_button(
                             t('export_pdf', lang),
                             data=pdf_buffer.getvalue(),
-                            file_name=f"amaro_lucro_mensal_{datetime.now().strftime('%Y%m%d')}.pdf",
+                            file_name=f"amaro_lucro_{datetime.now().strftime('%Y%m%d')}.pdf",
                             mime="application/pdf",
                             use_container_width=True
                         )
-                except Exception as e:
-                    st.error(f"Erro ao gerar PDF: {e}")
+                except:
+                    pass
                     
         except Exception as e:
-            st.error(f"{t('calculation_error', lang)}: {e}")
+            st.error(f"Erro no cálculo: {e}")
 
 # ========================================================================
 # TAB 2: COMPARATIVO DE CUSTOS
@@ -689,7 +516,7 @@ with tab2:
         modelo_comp = st.selectbox(
             t('aircraft_model', lang),
             modelos,
-            key="modelo_comp"
+            key="comp_modelo"
         )
         
         horas_anuais = st.number_input(
@@ -697,175 +524,87 @@ with tab2:
             min_value=50,
             max_value=800,
             value=300,
-            step=25,
-            key="horas_anuais"
+            step=25
         )
     
     with col2:
-        custos_fixos_anuais = st.number_input(
+        custos_fixos = st.number_input(
             t('fixed_costs', lang),
             min_value=50000,
             max_value=2000000,
             value=500000,
-            step=25000,
-            key="custos_fixos"
+            step=25000
         )
         
         include_charter = st.checkbox(
             t('include_charter', lang),
-            value=True,
-            key="include_charter"
+            value=True
         )
     
     if st.button(t('calculate', lang), key="calc_comp", type="primary"):
         try:
             resultado_ano = calcula_custo_trecho(modelo_comp, horas_anuais, params)
-            custo_operacional_ano = resultado_ano['total']
-            custo_total_proprio = custo_operacional_ano + custos_fixos_anuais
-            
-            custo_amaro_ano = custo_operacional_ano
+            custo_operacional = resultado_ano['total']
+            custo_proprio = custo_operacional + custos_fixos
+            custo_amaro = custo_operacional
             
             receita_charter = 0
             if include_charter:
                 preco_hora = params['preco_mercado_hora'][modelo_comp]
                 receita_charter = preco_hora * horas_anuais * 0.6
             
-            custo_liquido_proprio = custo_total_proprio - receita_charter
-            custo_liquido_amaro = custo_amaro_ano - receita_charter
+            custo_liquido_proprio = custo_proprio - receita_charter
+            custo_liquido_amaro = custo_amaro - receita_charter
+            economia = custo_liquido_proprio - custo_liquido_amaro
             
-            economia_anual = custo_liquido_proprio - custo_liquido_amaro
-            percentual_economia = (economia_anual / custo_liquido_proprio * 100) if custo_liquido_proprio > 0 else 0
-            
-            st.markdown("### COMPARATIVO ANUAL DE CUSTOS")
+            st.markdown("### COMPARATIVO ANUAL")
             
             col1, col2, col3 = st.columns(3)
             
             with col1:
                 st.markdown(f"""
                 <div class="corporate-card" style="background: #FFF8E1; border-left: 6px solid #FF9800;">
-                    <h4 style="color: #E65100; margin: 0 0 1rem 0; font-size: 1.2rem; font-weight: 700;">{t('own_management', lang)}</h4>
-                    <div class="metric-value" style="color: #E65100; font-size: 2rem;">{format_currency(custo_liquido_proprio, lang)}</div>
-                    <hr style="border-color: #E0E0E0; margin: 1rem 0;">
-                    <p><strong>Custos Operacionais:</strong> {format_currency(custo_operacional_ano, lang)}</p>
-                    <p><strong>Custos Fixos:</strong> {format_currency(custos_fixos_anuais, lang)}</p>
-                    {f"<p><strong>Receita Charter:</strong> -{format_currency(receita_charter, lang)}</p>" if include_charter else ""}
+                    <h4 style="color: #E65100;">{t('own_management', lang)}</h4>
+                    <div class="metric-value" style="color: #E65100;">{format_currency(custo_liquido_proprio, lang)}</div>
                 </div>
                 """, unsafe_allow_html=True)
             
             with col2:
                 st.markdown(f"""
                 <div class="corporate-card" style="background: #E8F5E8; border-left: 6px solid #4CAF50;">
-                    <h4 style="color: #2E7D32; margin: 0 0 1rem 0; font-size: 1.2rem; font-weight: 700;">{t('amaro_management', lang)}</h4>
-                    <div class="metric-value" style="color: #2E7D32; font-size: 2rem;">{format_currency(custo_liquido_amaro, lang)}</div>
-                    <hr style="border-color: #E0E0E0; margin: 1rem 0;">
-                    <p><strong>Custos Operacionais:</strong> {format_currency(custo_amaro_ano, lang)}</p>
-                    <p><strong>Custos Fixos:</strong> {format_currency(0, lang)}</p>
-                    {f"<p><strong>Receita Charter:</strong> -{format_currency(receita_charter, lang)}</p>" if include_charter else ""}
+                    <h4 style="color: #2E7D32;">{t('amaro_management', lang)}</h4>
+                    <div class="metric-value" style="color: #2E7D32;">{format_currency(custo_liquido_amaro, lang)}</div>
                 </div>
                 """, unsafe_allow_html=True)
             
             with col3:
-                cor_economia = '#4CAF50' if economia_anual > 0 else '#F44336'
-                bg_economia = '#E8F5E8' if economia_anual > 0 else '#FFEBEE'
+                cor = '#4CAF50' if economia > 0 else '#F44336'
                 st.markdown(f"""
-                <div class="corporate-card" style="background: {bg_economia}; border-left: 6px solid {cor_economia};">
-                    <h4 style="color: {cor_economia}; margin: 0 0 1rem 0; font-size: 1.2rem; font-weight: 700;">{t('annual_savings', lang)}</h4>
-                    <div class="metric-value" style="color: {cor_economia}; font-size: 2rem;">{format_currency(abs(economia_anual), lang)}</div>
-                    <hr style="border-color: #E0E0E0; margin: 1rem 0;">
-                    <p><strong>{t('savings_percentage', lang)}:</strong> {format_percentage(percentual_economia, lang)}</p>
-                    <p><strong>Economia Mensal:</strong> {format_currency(economia_anual/12, lang)}</p>
+                <div class="corporate-card" style="background: {'#E8F5E8' if economia > 0 else '#FFEBEE'}; border-left: 6px solid {cor};">
+                    <h4 style="color: {cor};">{t('annual_savings', lang)}</h4>
+                    <div class="metric-value" style="color: {cor};">{format_currency(abs(economia), lang)}</div>
                 </div>
                 """, unsafe_allow_html=True)
             
             # Gráfico comparativo
-            fig_comp = go.Figure()
-            
-            categorias = [t('own_management', lang), t('amaro_management', lang)]
-            valores = [custo_liquido_proprio, custo_liquido_amaro]
-            cores = ['#FF9800', '#8C1D40']
-            
-            fig_comp.add_trace(go.Bar(
-                x=categorias,
-                y=valores,
-                marker_color=cores,
-                text=[format_currency(v, lang) for v in valores],
-                textposition='outside',
-                textfont=dict(size=14, color='#333333', family='Inter')
+            fig = go.Figure()
+            fig.add_trace(go.Bar(
+                x=[t('own_management', lang), t('amaro_management', lang)],
+                y=[custo_liquido_proprio, custo_liquido_amaro],
+                marker_color=['#FF9800', '#8C1D40']
             ))
             
-            if economia_anual > 0:
-                fig_comp.add_annotation(
-                    x=0.5, y=max(valores) * 0.8,
-                    text=f"{t('annual_savings', lang)}<br><b>{format_currency(economia_anual, lang)}</b>",
-                    showarrow=True,
-                    arrowhead=2,
-                    arrowcolor='#4CAF50',
-                    font=dict(size=16, color='#4CAF50', family='Inter')
-                )
-            
-            fig_comp.update_layout(
+            fig.update_layout(
                 title='COMPARATIVO ANUAL DE CUSTOS',
-                yaxis_title='Custo Anual (R$)' if lang == 'pt' else 'Annual Cost (R$)',
-                template='plotly_white',
+                yaxis_title='Custo Anual (R$)',
                 height=500,
-                font=dict(family='Inter, sans-serif', size=12),
-                title_font=dict(size=18, color='#333333', family='Inter')
+                font=dict(family='Inter', size=12)
             )
             
-            st.plotly_chart(fig_comp, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True)
             
-            # Exportação
-            st.markdown("### EXPORTAR RELATÓRIO")
-            col1, col2 = st.columns(2)
-            
-            dados_comp = {
-                "Análise": "Comparativo de Custos",
-                "Modelo": modelo_comp,
-                "Horas Anuais": horas_anuais,
-                "Custos Fixos": custos_fixos_anuais,
-                "Custo Gestão Própria": custo_liquido_proprio,
-                "Custo Gestão Amaro": custo_liquido_amaro,
-                "Economia Anual": economia_anual,
-                "Percentual Economia": f"{percentual_economia:.1f}%"
-            }
-            
-            relatorio_comp = criar_relatorio_dados(
-                "Comparativo de Custos",
-                {"modelo": modelo_comp, "horas": horas_anuais, "fixos": custos_fixos_anuais},
-                dados_comp
-            )
-            
-            with col1:
-                try:
-                    excel_buffer = gerar_excel_simples(relatorio_comp)
-                    if excel_buffer:
-                        st.download_button(
-                            t('export_excel', lang),
-                            data=excel_buffer.getvalue(),
-                            file_name=f"amaro_comparativo_{datetime.now().strftime('%Y%m%d')}.xlsx",
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            use_container_width=True
-                        )
-                except Exception as e:
-                    st.error(f"Erro ao gerar Excel: {e}")
-            
-            with col2:
-                try:
-                    pdf_buffer = BytesIO()
-                    if gerar_pdf(pdf_buffer, dados_comp):
-                        pdf_buffer.seek(0)
-                        st.download_button(
-                            t('export_pdf', lang),
-                            data=pdf_buffer.getvalue(),
-                            file_name=f"amaro_comparativo_{datetime.now().strftime('%Y%m%d')}.pdf",
-                            mime="application/pdf",
-                            use_container_width=True
-                        )
-                except Exception as e:
-                    st.error(f"Erro ao gerar PDF: {e}")
-                    
         except Exception as e:
-            st.error(f"{t('calculation_error', lang)}: {e}")
+            st.error(f"Erro no cálculo: {e}")
 
 # ========================================================================
 # TAB 3: CONFIGURAÇÕES
@@ -874,212 +613,135 @@ with tab3:
     st.markdown(f"""
     <div class="corporate-card">
         <h3>{t('tab_settings', lang)}</h3>
-        <p>Ajuste os parâmetros de cálculo e visualize as fórmulas utilizadas</p>
+        <p>Ajuste os parâmetros de cálculo</p>
     </div>
     """, unsafe_allow_html=True)
     
-    config_tab1, config_tab2 = st.tabs([
-        "PARÂMETROS" if lang == 'pt' else "PARAMETERS",
-        "FÓRMULAS" if lang == 'pt' else "FORMULAS"
-    ])
+    st.markdown("### PARÂMETROS OPERACIONAIS")
     
-    with config_tab1:
-        st.markdown("### PARÂMETROS OPERACIONAIS" if lang == 'pt' else "### OPERATIONAL PARAMETERS")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            # CORREÇÃO CRÍTICA: Todos os valores devem ser float
-            preco_combustivel = st.number_input(
-                t('fuel_price', lang),
-                min_value=1.0,
-                max_value=50.0,
-                value=float(params['preco_combustivel']),
-                step=0.1,
-                format="%.2f",
-                key="config_combustivel"
-            )
-            
-            custo_piloto = st.number_input(
-                t('pilot_cost', lang),
-                min_value=500.0,
-                max_value=5000.0,
-                value=float(params['custo_piloto_hora']),
-                step=50.0,
-                format="%.0f",
-                key="config_piloto"
-            )
-            
-            depreciacao = st.number_input(
-                t('depreciation', lang),
-                min_value=1.0,
-                max_value=20.0,
-                value=float(params['depreciacao_anual_pct']),
-                step=0.5,
-                format="%.1f",
-                key="config_depreciacao"
-            )
-        
-        with col2:
-            manut_turboprop = st.number_input(
-                t('maintenance_turboprop', lang),
-                min_value=500.0,
-                max_value=5000.0,
-                value=float(params['custo_manutencao_hora']['turboprop']),
-                step=100.0,
-                format="%.0f",
-                key="config_manut_turbo"
-            )
-            
-            manut_jato = st.number_input(
-                t('maintenance_jet', lang),
-                min_value=1000.0,
-                max_value=10000.0,
-                value=float(params['custo_manutencao_hora']['jato']),
-                step=200.0,
-                format="%.0f",
-                key="config_manut_jato"
-            )
-            
-            mercado_turboprop = st.number_input(
-                t('market_price_turboprop', lang),
-                min_value=3000.0,
-                max_value=15000.0,
-                value=float(params['preco_mercado']['turboprop']),
-                step=500.0,
-                format="%.0f",
-                key="config_mercado_turbo"
-            )
-            
-            mercado_jato = st.number_input(
-                t('market_price_jet', lang),
-                min_value=8000.0,
-                max_value=30000.0,
-                value=float(params['preco_mercado']['jato']),
-                step=1000.0,
-                format="%.0f",
-                key="config_mercado_jato"
-            )
-        
-        # Botão de salvar
-        st.markdown("---")
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.button(t('save_settings', lang), type="primary", use_container_width=True, key="save_config"):
-                try:
-                    novos_params = {
-                        'preco_combustivel': float(preco_combustivel),
-                        'custo_piloto_hora': float(custo_piloto),
-                        'depreciacao_anual_pct': float(depreciacao),
-                        'custo_manutencao_hora': {
-                            'turboprop': float(manut_turboprop),
-                            'jato': float(manut_jato)
-                        },
-                        'percentual_proprietario': float(params.get('percentual_proprietario', 0.9)),
-                        'preco_mercado': {
-                            'turboprop': float(mercado_turboprop),
-                            'jato': float(mercado_jato)
-                        }
-                    }
-                    
-                    if save_params(novos_params):
-                        st.success(t('settings_saved', lang))
-                        st.rerun()
-                    else:
-                        st.error("ERRO ao salvar configurações")
-                        
-                except Exception as e:
-                    st.error(f"ERRO ao processar dados: {e}")
+    col1, col2 = st.columns(2)
     
-    with config_tab2:
-        st.markdown("### FÓRMULAS UTILIZADAS" if lang == 'pt' else "### FORMULAS USED")
+    with col1:
+        preco_combustivel = st.number_input(
+            t('fuel_price', lang),
+            min_value=1.0,
+            max_value=50.0,
+            value=float(params['preco_combustivel']),
+            step=0.1,
+            format="%.2f"
+        )
         
-        st.markdown(f"""
-        <div class="corporate-card">
-            <h4>CÁLCULO DE CUSTO POR HORA</h4>
-            <div style="background: #F5F5F5; padding: 2rem; border-radius: 0; margin: 1rem 0; border-left: 6px solid #8C1D40;">
-                <code style="font-family: 'Courier New', monospace; color: #333333; font-size: 0.95rem; line-height: 1.6;">
-                {'Custo Total/Hora = Combustível + Piloto + Manutenção + Depreciação' if lang == 'pt' else 'Total Cost/Hour = Fuel + Pilot + Maintenance + Depreciation'}
-                <br><br>
-                <strong>{'Onde:' if lang == 'pt' else 'Where:'}</strong><br>
-                • {'Combustível = Consumo (L/h) × Preço Combustível (R$/L)' if lang == 'pt' else 'Fuel = Consumption (L/h) × Fuel Price (R$/L)'}<br>
-                • {'Piloto = Custo Piloto (R$/h)' if lang == 'pt' else 'Pilot = Pilot Cost (R$/h)'}<br>
-                • {'Manutenção = Custo Manutenção por tipo (R$/h)' if lang == 'pt' else 'Maintenance = Maintenance Cost per type (R$/h)'}<br>
-                • {'Depreciação = (Valor Aeronave × % Depreciação Anual) ÷ Horas Anuais' if lang == 'pt' else 'Depreciation = (Aircraft Value × Annual Depreciation %) ÷ Annual Hours'}
-                </code>
-            </div>
-        </div>
+        custo_piloto = st.number_input(
+            t('pilot_cost', lang),
+            min_value=500.0,
+            max_value=5000.0,
+            value=float(params['custo_piloto_hora']),
+            step=50.0,
+            format="%.0f"
+        )
         
-        <div class="corporate-card">
-            <h4>CÁLCULO DE ECONOMIA</h4>
-            <div style="background: #F5F5F5; padding: 2rem; border-radius: 0; margin: 1rem 0; border-left: 6px solid #8C1D40;">
-                <code style="font-family: 'Courier New', monospace; color: #333333; font-size: 0.95rem; line-height: 1.6;">
-                {'Economia = Preço Mercado - Custo Amaro' if lang == 'pt' else 'Savings = Market Price - Amaro Cost'}
-                <br><br>
-                {'Percentual Economia = (Economia ÷ Preço Mercado) × 100' if lang == 'pt' else 'Savings Percentage = (Savings ÷ Market Price) × 100'}
-                </code>
-            </div>
-        </div>
+        depreciacao = st.number_input(
+            t('depreciation', lang),
+            min_value=1.0,
+            max_value=20.0,
+            value=float(params['depreciacao_anual_pct']),
+            step=0.5,
+            format="%.1f"
+        )
+    
+    with col2:
+        manut_turboprop = st.number_input(
+            t('maintenance_turboprop', lang),
+            min_value=500.0,
+            max_value=5000.0,
+            value=float(params['custo_manutencao_hora']['turboprop']),
+            step=100.0,
+            format="%.0f"
+        )
         
-        <div class="corporate-card">
-            <h4>MODELO DE RECEITA AMARO AVIATION</h4>
-            <div style="background: #F5F5F5; padding: 2rem; border-radius: 0; margin: 1rem 0; border-left: 6px solid #8C1D40;">
-                <code style="font-family: 'Courier New', monospace; color: #333333; font-size: 0.95rem; line-height: 1.6;">
-                {'Receita do Proprietário = Receita Bruta × 90%' if lang == 'pt' else 'Owner Revenue = Gross Revenue × 90%'}<br>
-                {'Taxa Amaro Aviation = Receita Bruta × 10%' if lang == 'pt' else 'Amaro Aviation Fee = Gross Revenue × 10%'}<br>
-                {'Lucro Líquido = Receita do Proprietário - Custos Operacionais' if lang == 'pt' else 'Net Profit = Owner Revenue - Operational Costs'}
-                </code>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        manut_jato = st.number_input(
+            t('maintenance_jet', lang),
+            min_value=1000.0,
+            max_value=10000.0,
+            value=float(params['custo_manutencao_hora']['jato']),
+            step=200.0,
+            format="%.0f"
+        )
+        
+        mercado_turboprop = st.number_input(
+            t('market_price_turboprop', lang),
+            min_value=3000.0,
+            max_value=15000.0,
+            value=float(params['preco_mercado']['turboprop']),
+            step=500.0,
+            format="%.0f"
+        )
+        
+        mercado_jato = st.number_input(
+            t('market_price_jet', lang),
+            min_value=8000.0,
+            max_value=30000.0,
+            value=float(params['preco_mercado']['jato']),
+            step=1000.0,
+            format="%.0f"
+        )
+    
+    st.markdown("---")
+    if st.button(t('save_settings', lang), type="primary", use_container_width=True):
+        try:
+            novos_params = {
+                'preco_combustivel': float(preco_combustivel),
+                'custo_piloto_hora': float(custo_piloto),
+                'depreciacao_anual_pct': float(depreciacao),
+                'custo_manutencao_hora': {
+                    'turboprop': float(manut_turboprop),
+                    'jato': float(manut_jato)
+                },
+                'percentual_proprietario': 0.9,
+                'preco_mercado': {
+                    'turboprop': float(mercado_turboprop),
+                    'jato': float(mercado_jato)
+                }
+            }
+            
+            if save_params(novos_params):
+                st.success(t('settings_saved', lang))
+                st.rerun()
+            else:
+                st.error("Erro ao salvar")
+                
+        except Exception as e:
+            st.error(f"Erro: {e}")
 
 # ========================================================================
-# SIDEBAR - INFORMAÇÕES E STATUS
+# SIDEBAR INFO
 # ========================================================================
 with st.sidebar:
     st.markdown("---")
-    st.markdown("### STATUS DO SISTEMA" if lang == 'pt' else "### SYSTEM STATUS")
-    
+    st.markdown("### STATUS DO SISTEMA")
     st.success(f"""
-    **{t('system_operational', lang)}**
-    - {'Modelos' if lang == 'pt' else 'Models'}: {len(modelos)} {t('models_configured', lang)}
-    - {'Parâmetros' if lang == 'pt' else 'Parameters'}: {'Carregados' if lang == 'pt' else 'Loaded'}
-    - {'Idioma' if lang == 'pt' else 'Language'}: {language_option}
+    **Sistema Operacional**
+    - Modelos: {len(modelos)} configurados
+    - Idioma: {language_option}
     """)
     
-    st.markdown("### FUNCIONALIDADES" if lang == 'pt' else "### FEATURES")
+    st.markdown("### FUNCIONALIDADES")
     st.info("""
     **ESTIMATIVA DE LUCRO:**
     Simula receitas e custos mensais
     
-    **COMPARATIVO DE CUSTOS:**
-    Compara gestão própria vs. Amaro
+    **COMPARATIVO:**
+    Gestão própria vs. Amaro
     
     **CONFIGURAÇÕES:**
-    Ajusta parâmetros e visualiza fórmulas
+    Ajusta parâmetros
     """)
     
-    st.markdown("### INSTRUÇÕES DE USO" if lang == 'pt' else "### USAGE INSTRUCTIONS")
-    if lang == 'pt':
-        st.markdown("""
-        - Use ocupação de 70-80% para projeções realistas
-        - Considere custos fixos reais (hangar, seguro, etc.)
-        - Revise parâmetros periodicamente
-        - Exporte relatórios para apresentações
-        """)
-    else:
-        st.markdown("""
-        - Use 70-80% occupancy for realistic projections
-        - Consider real fixed costs (hangar, insurance, etc.)
-        - Review parameters periodically
-        - Export reports for presentations
-        """)
-    
     st.markdown("---")
-    st.markdown(f"""
-    <div style="text-align: center; color: #333333; font-size: 0.85rem; font-weight: 500; font-family: 'Inter', sans-serif;">
+    st.markdown("""
+    <div style="text-align: center; color: #333333; font-size: 0.8rem;">
         <p><strong>AMARO AVIATION CALCULATOR</strong></p>
         <p>VERSÃO 3.0 CORPORATIVA</p>
-        <p>{t('developed_with_love', lang)}</p>
+        <p>Desenvolvido pela Amaro Aviation</p>
     </div>
     """, unsafe_allow_html=True)
