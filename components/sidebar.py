@@ -72,27 +72,32 @@ def render_sidebar_amaro_simplified(current_lang: str = "pt") -> str:
 # 4. Alias para manter compatibilidade com páginas antigas
 # ---------------------------------------------------------------------
 render_sidebar = render_sidebar_amaro_simplified  # noqa: E305
+
 # ---------------------------------------------------------------------
-# 5. CSS   (versão definitiva – só bordô, branco e preto)
+# 5. CSS
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# 5. CSS   (substitua a função antiga por esta)
 # ---------------------------------------------------------------------
 def _inject_css() -> None:
-    """Injeta a folha de estilos da sidebar Amaro (paleta bordô/branco/preto)."""
+    """Injeta a folha de estilos da sidebar (preto / branco / bordô)."""
     st.markdown(
         f"""
         <style>
-        /* ===== 1. CONTAINER DA SIDEBAR ===== */
-        section[data-testid="stSidebar"] > div:first-child {{
-            background: {AMARO_BORDO} !important;
-        }}
+            /* ---------- 1. CONTÊINER DA SIDEBAR ---------- */
+            section[data-testid="stSidebar"] > div:first-child {{
+                background: {AMARO_BORDO} !important;
+            }}
 
-        /* ===== 2. LABEL DO SELECTBOX ===== */
-        section[data-testid="stSidebar"] label[for*='{LANGUAGE_SELECTOR_KEY}'] {{
-            color: {AMARO_BRANCO} !important;
-            font-size: 0.875rem !important;
-            font-weight: 500 !important;
-            margin-bottom: 0.25rem !important;
-        }}
+            /* ---------- 2. LABEL DO SELECTBOX ---------- */
+            section[data-testid="stSidebar"] label[for*='{LANGUAGE_SELECTOR_KEY}'] {{
+                color: {AMARO_BRANCO} !important;
+                font-size: 0.875rem !important;
+                font-weight: 500 !important;
+                margin-bottom: 0.25rem !important;
+            }}
 
+<<<<<<< HEAD
         /* ===== 3. SELECTBOX FECHADO ===== */
         section[data-testid="stSidebar"] div[data-testid="stSelectbox"] {
             background: transparent !important;
@@ -135,6 +140,59 @@ def _inject_css() -> None:
 
         /* ===== 5. ESCONDE HEADER/FOOTER PADRÕES ===== */
         #MainMenu, header, footer {{ visibility: hidden !important; }}
+=======
+            /* ---------- 3. CAIXA FECHADA (campo visível) ---------- */
+            /* invólucro externo criado pelo Streamlit */
+            section[data-testid="stSidebar"] div[data-testid="stSelectbox"] {{
+                background: {AMARO_BORDO} !important;
+                padding: 0 !important;
+            }}
+            /* elemento interno onde aparece o valor selecionado */
+            section[data-testid="stSidebar"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:first-child {{
+                background: {AMARO_BRANCO} !important;
+                color: {AMARO_PRETO} !important;
+                border: 1px solid {AMARO_BORDO} !important;
+                border-radius: 6px !important;
+                padding: 0.4rem 0.75rem !important;
+                font-size: 0.875rem !important;
+            }}
+            /* ícone (seta) */
+            section[data-testid="stSidebar"] div[data-testid="stSelectbox"] svg {{
+                fill: {AMARO_PRETO} !important;
+            }}
+
+            /* ---------- 4. POPOVER / DROPDOWN ABERTO ---------- */
+            /* contêiner que envolve toda a lista */
+            div[data-baseweb="popover"][role="listbox"] {{
+                background: {AMARO_BRANCO} !important;
+                border: 1px solid {AMARO_BORDO} !important;
+                border-radius: 6px !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.10) !important;
+            }}
+            /* camada interna que antes ficava grafite */
+            div[data-baseweb="menu"] {{
+                background: {AMARO_BRANCO} !important;
+            }}
+
+            /* ---------- 5. ITENS DA LISTA ---------- */
+            div[data-baseweb="option"] {{
+                background: {AMARO_BRANCO} !important;
+                color: {AMARO_PRETO} !important;
+                padding: 0.5rem 0.85rem !important;
+                font-size: 0.875rem !important;
+            }}
+            /* hover + item selecionado */
+            div[data-baseweb="option"]:hover,
+            div[data-baseweb="option"][aria-selected="true"] {{
+                background: {AMARO_BORDO} !important;
+                color: {AMARO_BRANCO} !important;
+            }}
+
+            /* ---------- 6. ESCONDE HEADER/FOOTER PADRÕES ---------- */
+            #MainMenu, header, footer {{
+                visibility: hidden !important;
+            }}
+>>>>>>> parent of c7e8336 (Update sidebar.py)
         </style>
         """,
         unsafe_allow_html=True,
