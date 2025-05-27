@@ -1,126 +1,153 @@
 """
-config/theme.py
-Tema Amaro Aviation ― inspirado no site oficial
+Tema corporativo Amaro Aviation – 100 % estável
+Compatível Streamlit 1.30+ (sem depender de st-emotion-cache-xxxx)
 """
 
 import streamlit as st
 
+AMARO_BORDO          = "#8C1D40"
+AMARO_BORDO_HOVER    = "#A02050"
+AMARO_BORDO_ACTIVE   = "#731734"
+AMARO_BRANCO         = "#FFFFFF"
+AMARO_TXT_CINZA      = "#28323F"   # texto principal (quase‐preto)
+AMARO_BG_CINZA_CLARO = "#F6F7FA"   # fundos suaves / cards
+
 def load_theme() -> None:
     st.markdown(
-        """
+        f"""
 <style>
-/* === Paleta === */
-:root{
-  --bordo:#8C1D40;
-  --bordo-light:#A02050;
-  --bordo-dark:#731734;
-  --grafite:#424242;
-  --white:#FFFFFF;
-  --gray-text:#1F2937;
-  --gray-bg:#F4F4F4;
-  --gray-border:#D6D6D6;
-}
 
-/* === Corpo === */
-html,body,[data-testid="stAppViewContainer"]{
-  background:var(--white)!important;
-  color:var(--gray-text)!important;
-  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
-}
+/* ===========================================
+   0. Reset básico
+=========================================== */
+html, body, [data-testid="stAppViewContainer"] {{
+    background-color:{AMARO_BRANCO};
+    color:{AMARO_TXT_CINZA};
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}}
 
-/* === Sidebar === */
-section[data-testid="stSidebar"]{
-  background:var(--bordo)!important;
-  color:var(--white)!important;
-}
-section[data-testid="stSidebar"] *{
-  color:var(--white)!important;
-}
-section[data-testid="stSidebar"] a{
-  padding:.5rem .9rem;
-  border-radius:6px;
-  transition:background .2s,box-shadow .2s;
-}
-section[data-testid="stSidebar"] a:hover{
-  background:var(--bordo-light)!important;
-  box-shadow:0 2px 6px rgba(0,0,0,.25);
-}
-section[data-testid="stSidebar"] a[aria-current="page"]{
-  background:var(--bordo-dark)!important;
-  font-weight:600;
-}
+/* ===========================================
+   1. SIDEBAR
+=========================================== */
+section[data-testid="stSidebar"] {{
+    background:{AMARO_BORDO};
+}}
 
-/* === Header (barra preta do site) === */
-[data-testid="stHeader"]{
-  background:var(--grafite)!important;
-  color:var(--white)!important;
-}
+section[data-testid="stSidebar"] div[data-testid="stVerticalBlock"] p,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3,
+section[data-testid="stSidebar"] h4,
+section[data-testid="stSidebar"] h5,
+section[data-testid="stSidebar"] h6 {{
+    color:{AMARO_BRANCO} !important;
+}}
 
-/* === Botões === */
-.stButton>button{
-  background:var(--bordo)!important;
-  color:var(--white)!important;
-  border:1px solid var(--bordo);
-  border-radius:6px!important;
-  padding:.45rem 1.2rem!important;
-  text-transform:uppercase;
-  font-weight:600;
-}
-.stButton>button:hover{
-  background:var(--bordo-light)!important;
-}
+section[data-testid="stSidebar"] a {{
+    color:{AMARO_BRANCO};
+    border-radius:6px;
+    padding:.45rem .8rem;
+    display:block;
+}}
 
-/* === Tabs === */
-[data-testid="stTabs"] [role="tablist"]{
-  background:var(--gray-bg);
-  border-radius:8px;
-  padding:.2rem;
-}
-[data-testid="stTabs"] [data-baseweb="tab"]{
-  background:transparent;
-  color:var(--gray-text);
-  padding:.55rem 1rem;
-  border-radius:6px;
-  transition:background .2s;
-}
-[data-testid="stTabs"] [data-baseweb="tab"]:hover{
-  background:var(--gray-bg);
-}
-[data-testid="stTabs"] [aria-selected="true"]{
-  background:var(--bordo);
-  color:var(--white);
-  font-weight:600;
-}
+section[data-testid="stSidebar"] a[aria-current="page"] {{
+    background:{AMARO_BORDO_HOVER};
+    font-weight:600;
+}}
 
-/* === Card utilitário (classe opcional `card-style`) === */
-.card-style{
-  background:var(--white);
-  border:1px solid var(--gray-border);
-  border-radius:8px;
-  padding:1rem;
-  box-shadow:0 1px 3px rgba(0,0,0,.05);
-}
+section[data-testid="stSidebar"] a:hover {{
+    background:{AMARO_BORDO_HOVER};
+}}
 
-/* ==== Esconder menu/rodapé === */
-header,footer,#MainMenu{visibility:hidden}
-/* === Correção de contraste na sidebar === */
-section[data-testid="stSidebar"] *,
-section[data-testid="stSidebar"] svg{
-  color: #FFFFFF !important;
-  fill : #FFFFFF !important;
-}
-/* ícone / texto do item ativo já ficam bordô-escuro de fundo;
-   mantenha o texto branco: */
-section[data-testid="stSidebar"] a[aria-current="page"] *,
-section[data-testid="stSidebar"] a:hover *{
-  color:#FFFFFF !important;
-  fill :#FFFFFF !important;
-}
-.stButton>button{
-  color:#FFFFFF !important;
-}
+/* remove a linha vertical que separa o body da sidebar  */
+section[data-testid="stSidebar"] + div div[data-testid="stVerticalBlock"] {{
+    border-left:none;
+}}
+
+/* ===========================================
+   2. BOTÕES
+=========================================== */
+.stButton > button, .stDownloadButton > button {{
+    background:{AMARO_BORDO};
+    color:{AMARO_BRANCO} !important;
+    border:1px solid {AMARO_BORDO};
+    border-radius:6px;
+    font-weight:600;
+    text-transform:uppercase;
+    padding:.5rem 1.25rem;
+}}
+
+.stButton > button:hover,
+.stDownloadButton > button:hover {{
+    background:{AMARO_BORDO_HOVER};
+    border-color:{AMARO_BORDO_HOVER};
+}}
+
+.stButton > button:active,
+.stDownloadButton > button:active {{
+    background:{AMARO_BORDO_ACTIVE};
+    border-color:{AMARO_BORDO_ACTIVE};
+}}
+
+/* ===========================================
+   3. TABS
+=========================================== */
+[data-testid="stTabs"] [role="tablist"] {{
+    background:{AMARO_BG_CINZA_CLARO};
+    border-radius:8px;
+    padding:2px;
+}}
+
+[data-testid="stTabs"] [data-baseweb="tab"] {{
+    color:{AMARO_TXT_CINZA};
+    background:{AMARO_BRANCO};
+    border:none;
+    border-radius:6px;
+    padding:.45rem 1.1rem;
+    font-weight:500;
+}}
+
+[data-testid="stTabs"] [data-baseweb="tab"]:hover {{
+    background:{AMARO_BG_CINZA_CLARO};
+}}
+
+[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"] {{
+    background:{AMARO_BORDO};
+    color:{AMARO_BRANCO};
+    font-weight:600;
+}}
+
+/* ===========================================
+   4. CARDS / CONTAINERS
+=========================================== */
+.card-style, div[data-testid="stMarkdownContainer"].card-style {{
+    background:{AMARO_BRANCO};
+    border:1px solid #E3E4E8;
+    border-radius:8px;
+    padding:1.25rem;
+    box-shadow:0 2px 4px rgba(0,0,0,.08);
+}}
+
+.card-style:hover {{
+    box-shadow:0 4px 8px rgba(0,0,0,.12);
+}}
+
+/* ===========================================
+   5. STATUS BOXES  (success / warn / info)
+   (usa classes que já existem no seu projeto)
+=========================================== */
+.status-success {{background:#ECFDF5;border-left:5px solid #10B981;color:#065F46}}
+.status-warning {{background:#FFFBEB;border-left:5px solid #F59E0B;color:#92400E}}
+.status-info    {{background:#F0F9FF;border-left:5px solid #0EA5E9;color:#0C4A6E}}
+
+/* ===========================================
+   6. ESCONDE cabeçalho/rodapé nativos
+=========================================== */
+#MainMenu, header, footer {{visibility:hidden}}
 
 </style>
-        """,
-        unsafe_allow_html=True
+""",
+        unsafe_allow_html=True,
     )
