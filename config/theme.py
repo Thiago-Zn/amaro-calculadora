@@ -139,11 +139,6 @@ p, li {{
     /* converte tons para aproximar do #8C1D40 */
 }}
 
-/* ——— Esconde header/rodapé nativos ——— */
-#MainMenu, header, footer {{
-    visibility: hidden;
-}}
-
   /* ——— Métricas (st.metric) ——— */
   [data-testid="stMetricValue"],
   [data-testid="stMetricLabel"] {{
