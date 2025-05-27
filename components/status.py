@@ -186,7 +186,11 @@ def render_system_status(params, lang='pt'):
 
     modelos = len(params["modelos_disponiveis"])
     msg = f"✅ Sistema Operacional — {modelos} modelos configurados"
-    st.success(msg)
+    st.markdown(f"<div style='background:#E5F2ED;"
+            "border:1px solid #2FA26E;"
+            "border-left:6px solid #2FA26E;"
+            "border-radius:6px;padding:.6rem 1rem;'>"
+            f"✅ {msg}</div>", unsafe_allow_html=True)
     return True
 
     

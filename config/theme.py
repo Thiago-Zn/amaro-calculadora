@@ -103,6 +103,23 @@ section[data-testid="stSidebar"] a[aria-current="page"]{
 
 /* ==== Esconder menu/rodapé === */
 header,footer,#MainMenu{visibility:hidden}
+/* === Correção de contraste na sidebar === */
+section[data-testid="stSidebar"] *,
+section[data-testid="stSidebar"] svg{
+  color: #FFFFFF !important;
+  fill : #FFFFFF !important;
+}
+/* ícone / texto do item ativo já ficam bordô-escuro de fundo;
+   mantenha o texto branco: */
+section[data-testid="stSidebar"] a[aria-current="page"] *,
+section[data-testid="stSidebar"] a:hover *{
+  color:#FFFFFF !important;
+  fill :#FFFFFF !important;
+}
+.stButton>button{
+  color:#FFFFFF !important;
+}
+
 </style>
         """,
         unsafe_allow_html=True
