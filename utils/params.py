@@ -8,6 +8,7 @@ import streamlit as st
 PARAMS_FILE = "config/parametros.json"
 MODELOS_FILE = "data/modelos.csv"
 
+@st.cache_data(show_spinner=False)
 def get_default_params():
     """Parâmetros padrão caso o arquivo não exista ou seja inválido"""
     return {
