@@ -16,25 +16,17 @@ def load_theme() -> None:
 html, body, [data-testid="stAppViewContainer"] {
     background: #FFFFFF !important;
     color:      #1F2937  !important;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-family: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
 }
 
 /* ——— 2. SIDEBAR — fundo bordô ——— */
 section[data-testid="stSidebar"] {
     background: #8C1D40 !important;
-    /* Força TODO texto dentro da sidebar a ser branco */
-    color:      #FFFFFF !important;
 }
 
-/* ——— 2.1. Força branco em todos os links e labels da sidebar ——— */
-section[data-testid="stSidebar"] *,
-section[data-testid="stSidebar"] a,
-section[data-testid="stSidebar"] label,
-section[data-testid="stSidebar"] div,
-section[data-testid="stSidebar"] span {
+/* ——— 2.1. Apenas links da navegação em branco ——— */
+section[data-testid="stSidebar"] a {
     color: #FFFFFF !important;
-    fill:  #FFFFFF !important;
-    stroke:#FFFFFF !important;
 }
 
 /* ——— 2.2. Item ativo na sidebar — bordô mais escuro ——— */
@@ -47,7 +39,7 @@ section[data-testid="stSidebar"] a[aria-current="page"] {
 
 /* ——— 2.3. Sombra nos links da sidebar ao hover ——— */
 section[data-testid="stSidebar"] a:hover {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
 }
 
 /* ——— 3. HEADER PRINCIPAL — gradiente bordô ——— */
@@ -72,13 +64,13 @@ section[data-testid="stSidebar"] a:hover {
 
 /* ——— 4. BOTÕES — bordô com hover leve ——— */
 .stButton>button {
-    background:      #8C1D40!important;
-    color:           #FFFFFF!important;
-    border:          none!important;
-    border-radius:   6px!important;
-    padding:         0.5rem 1rem!important;
-    font-weight:     500!important;
-    text-transform:  uppercase!important;
+    background:     #8C1D40!important;
+    color:          #FFFFFF!important;
+    border:         none!important;
+    border-radius:  6px!important;
+    padding:        0.5rem 1rem!important;
+    font-weight:    500!important;
+    text-transform: uppercase!important;
 }
 .stButton>button:hover {
     background: #A02050!important;
@@ -119,6 +111,9 @@ div[data-testid="stMetric"] span {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1)!important;
 }
 
+/* ——— 8. OCULTAR ELEMENTOS PADRÕES DO STREAMLIT ——— */
+#MainMenu, header, footer {
+    visibility: hidden!important;
 }
 </style>
         """,
