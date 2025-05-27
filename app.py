@@ -1,8 +1,8 @@
 import streamlit as st
+import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
-import pandas as pd
 import numpy as np
 from datetime import datetime
 from pathlib import Path
@@ -19,1029 +19,1331 @@ from utils.exportador_pdf import gerar_pdf
 # CONFIGURAÇÃO DA PÁGINA
 # ========================================================================
 st.set_page_config(
-    page_title="Amaro Aviation - Calculadora de Custos",
+    page_title="Amaro Aviation - Simulador Estratégico de Custos",
     page_icon="✈️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ========================================================================
-# SISTEMA DE IDIOMAS SIMPLIFICADO
+# ESTILOS CSS ALINHADOS À IDENTIDADE VISUAL AMARO
 # ========================================================================
-@st.cache_data
-def get_translations():
-    return {
-        'pt': {
-            'app_title': 'Amaro Aviation',
-            'app_subtitle': 'Análise Estratégica de Custos Operacionais',
-            'language': 'Idioma',
-            'tab_profit': 'Estimativa de Receita Mensal',
-            'tab_comparison': 'Análise Comparativa de Custos',
-            'tab_settings': 'Configurações do Sistema',
-            'aircraft_model': 'Modelo da Aeronave',
-            'monthly_hours': 'Horas de Voo Mensais',
-            'occupancy_rate': 'Taxa de Ocupação (%)',
-            'annual_hours': 'Horas de Voo Anuais',
-            'fixed_costs': 'Custos Fixos Anuais (R$)',
-            'include_charter': 'Incluir Receita de Charter',
-            'calculate': 'Calcular Análise',
-            'gross_revenue': 'Receita Bruta',
-            'owner_revenue': 'Receita do Proprietário (90%)',
-            'amaro_fee': 'Taxa de Administração (10%)',
-            'operational_costs': 'Custos Operacionais',
-            'net_profit': 'Resultado Líquido',
-            'monthly_roi': 'ROI Mensal',
-            'own_management': 'Gestão Própria',
-            'amaro_management': 'Gestão Amaro Aviation',
-            'annual_savings': 'Economia Anual',
-            'savings_percentage': 'Percentual de Economia',
-            'fuel_price': 'Preço do Combustível (R$/L)',
-            'pilot_cost': 'Custo Piloto (R$/h)',
-            'depreciation': 'Depreciação Anual (%)',
-            'maintenance_turboprop': 'Manutenção Turboprop (R$/h)',
-            'maintenance_jet': 'Manutenção Jato (R$/h)',
-            'market_price_turboprop': 'Preço Mercado Turboprop (R$/h)',
-            'market_price_jet': 'Preço Mercado Jato (R$/h)',
-            'save_settings': 'Salvar Configurações',
-            'system_operational': 'Sistema Operacional',
-            'models_configured': 'modelos configurados',
-            'profitable_operation': 'Operação Rentável',
-            'operation_at_loss': 'Operação em Déficit',
-            'settings_saved': 'Configurações salvas com sucesso',
-            'calculation_error': 'Erro no cálculo',
-            'export_excel': 'Exportar para Excel',
-            'export_pdf': 'Exportar para PDF',
-            'developed_with_love': 'Desenvolvido para excelência operacional'
-        },
-        'en': {
-            'app_title': 'Amaro Aviation',
-            'app_subtitle': 'Strategic Operational Cost Analysis',
-            'language': 'Language',
-            'tab_profit': 'Monthly Revenue Estimation',
-            'tab_comparison': 'Comparative Cost Analysis',
-            'tab_settings': 'System Settings',
-            'aircraft_model': 'Aircraft Model',
-            'monthly_hours': 'Monthly Flight Hours',
-            'occupancy_rate': 'Occupancy Rate (%)',
-            'annual_hours': 'Annual Flight Hours',
-            'fixed_costs': 'Annual Fixed Costs (R$)',
-            'include_charter': 'Include Charter Revenue',
-            'calculate': 'Calculate Analysis',
-            'gross_revenue': 'Gross Revenue',
-            'owner_revenue': 'Owner Revenue (90%)',
-            'amaro_fee': 'Management Fee (10%)',
-            'operational_costs': 'Operational Costs',
-            'net_profit': 'Net Result',
-            'monthly_roi': 'Monthly ROI',
-            'own_management': 'Own Management',
-            'amaro_management': 'Amaro Aviation Management',
-            'annual_savings': 'Annual Savings',
-            'savings_percentage': 'Savings Percentage',
-            'fuel_price': 'Fuel Price (R$/L)',
-            'pilot_cost': 'Pilot Cost (R$/h)',
-            'depreciation': 'Annual Depreciation (%)',
-            'maintenance_turboprop': 'Turboprop Maintenance (R$/h)',
-            'maintenance_jet': 'Jet Maintenance (R$/h)',
-            'market_price_turboprop': 'Turboprop Market Price (R$/h)',
-            'market_price_jet': 'Jet Market Price (R$/h)',
-            'save_settings': 'Save Settings',
-            'system_operational': 'System Operational',
-            'models_configured': 'models configured',
-            'profitable_operation': 'Profitable Operation',
-            'operation_at_loss': 'Deficit Operation',
-            'settings_saved': 'Settings saved successfully',
-            'calculation_error': 'Calculation error',
-            'export_excel': 'Export to Excel',
-            'export_pdf': 'Export to PDF',
-            'developed_with_love': 'Developed for operational excellence'
-        }
-    }
-
-def t(key, lang='pt'):
-    translations = get_translations()
-    return translations.get(lang, translations['pt']).get(key, key)
-
-# ========================================================================
-# CSS CORPORATIVO PROFISSIONAL
-# ========================================================================
-def load_professional_css():
+def load_custom_css():
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    /* Reset e configurações globais */
+    /* Configurações globais */
     .stApp {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         background-color: #FFFFFF;
-        color: #333333;
     }
     
-    /* Remover padding padrão */
-    .block-container {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-        max-width: 1200px;
-    }
-    
-    /* Header corporativo */
-    .corporate-header {
+    /* Header principal */
+    .main-header {
         background: linear-gradient(135deg, #8C1D40 0%, #A02050 100%);
         color: white;
-        padding: 2rem;
+        padding: 3rem 2rem;
         margin: -1rem -1rem 2rem -1rem;
         text-align: center;
-        border-bottom: 3px solid #8C1D40;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
-    .corporate-header h1 {
+    .main-header h1 {
         font-size: 2.5rem;
         font-weight: 700;
         margin: 0;
         letter-spacing: -0.02em;
     }
     
-    .corporate-header p {
-        font-size: 1.1rem;
-        font-weight: 400;
-        margin: 0.5rem 0 0 0;
-        opacity: 0.95;
-        letter-spacing: 0.01em;
+    .main-header p {
+        font-size: 1.2rem;
+        margin-top: 0.5rem;
+        opacity: 0.9;
     }
     
-    /* Cards profissionais */
-    .professional-card {
-        background: #FFFFFF;
-        border: 1px solid #E5E5E5;
-        border-radius: 8px;
+    /* Cards de métricas */
+    .metric-card {
+        background: white;
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
         padding: 1.5rem;
-        margin: 1rem 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
     }
     
-    .professional-card:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-        border-color: #8C1D40;
+    .metric-card:hover {
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
     }
     
-    /* Métricas corporativas */
-    .metric-container {
-        background: #F8F9FA;
-        border-left: 4px solid #8C1D40;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        border-radius: 0 6px 6px 0;
-    }
-    
-    .metric-value {
+    .metric-card-value {
         font-size: 2rem;
         font-weight: 700;
         color: #8C1D40;
-        margin: 0;
-        line-height: 1.2;
+        margin: 0.5rem 0;
     }
     
-    .metric-label {
-        font-size: 0.9rem;
-        color: #666666;
+    .metric-card-label {
+        font-size: 0.875rem;
+        color: #6B7280;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        font-weight: 500;
-        margin-top: 0.5rem;
     }
     
-    /* Botões corporativos */
+    /* Tabelas customizadas */
+    .comparison-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .comparison-table th {
+        background: #F3F4F6;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        padding: 1rem;
+    }
+    
+    .comparison-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #E5E7EB;
+    }
+    
+    /* Botões personalizados */
     .stButton > button {
-        background-color: #8C1D40;
+        background: #8C1D40;
         color: white;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         padding: 0.75rem 2rem;
         font-weight: 600;
-        font-size: 0.95rem;
-        letter-spacing: 0.02em;
         transition: all 0.2s ease;
-        text-transform: uppercase;
-        min-height: 48px;
     }
     
     .stButton > button:hover {
-        background-color: #A02050;
+        background: #A02050;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(140, 29, 64, 0.3);
     }
     
-    .stButton > button:focus {
-        box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.2);
-    }
-    
-    /* Tabs corporativas */
+    /* Tabs estilizadas */
     .stTabs [data-baseweb="tab-list"] {
-        background: #F8F9FA;
-        border-radius: 8px;
+        background: #F9FAFB;
+        border-radius: 12px;
         padding: 0.25rem;
-        margin-bottom: 2rem;
-        border: 1px solid #E5E5E5;
+        gap: 0.25rem;
     }
     
     .stTabs [data-baseweb="tab"] {
         background: transparent;
-        border-radius: 6px;
-        color: #666666;
+        border-radius: 8px;
         font-weight: 500;
         padding: 0.75rem 1.5rem;
-        font-size: 0.95rem;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: #8C1D40;
+        background: #8C1D40;
         color: white;
     }
     
-    /* Inputs profissionais */
-    .stSelectbox > div > div,
-    .stNumberInput > div > div > input,
-    .stSlider > div > div > div {
-        border-radius: 6px;
-        border: 1px solid #D1D5DB;
-        font-size: 0.95rem;
-    }
-    
-    .stSelectbox > div > div:focus-within,
-    .stNumberInput > div > div:focus-within {
-        border-color: #8C1D40;
-        box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.1);
-    }
-    
-    /* Labels */
-    .stSelectbox label,
-    .stNumberInput label,
-    .stSlider label {
-        font-weight: 500;
-        color: #374151;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
-    }
-    
-    /* Sidebar profissional */
+    /* Sidebar refinada */
     .css-1d391kg {
-        background-color: #F8F9FA;
-        border-right: 1px solid #E5E5E5;
+        background: #F9FAFB;
     }
     
-    .sidebar-header {
+    /* Métricas de destaque */
+    .highlight-metric {
         background: linear-gradient(135deg, #8C1D40 0%, #A02050 100%);
         color: white;
-        padding: 1.5rem;
-        margin: -1rem -1rem 1.5rem -1rem;
-        text-align: center;
-    }
-    
-    /* Status boxes */
-    .status-success {
-        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-        color: white;
-        padding: 1rem;
-        border-radius: 6px;
+        padding: 2rem;
+        border-radius: 12px;
         text-align: center;
         margin: 1rem 0;
     }
     
-    .status-warning {
-        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-        color: white;
-        padding: 1rem;
-        border-radius: 6px;
-        text-align: center;
+    .highlight-metric h3 {
+        font-size: 1.5rem;
+        margin: 0;
+    }
+    
+    .highlight-metric .value {
+        font-size: 3rem;
+        font-weight: 700;
         margin: 1rem 0;
     }
     
-    .status-info {
-        background: #F0F9FF;
-        color: #0C4A6E;
-        padding: 1rem;
-        border-radius: 6px;
-        border-left: 4px solid #0EA5E9;
-        margin: 1rem 0;
-    }
-    
-    /* Tabelas */
-    .dataframe {
-        border: 1px solid #E5E5E5;
-        border-radius: 6px;
+    /* Configurações do data editor */
+    .stDataFrame {
+        border-radius: 8px;
         overflow: hidden;
     }
     
-    .dataframe th {
-        background-color: #8C1D40;
-        color: white;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
-        font-size: 0.85rem;
-    }
-    
-    /* Download buttons */
-    .stDownloadButton > button {
-        background-color: #10B981;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
-    }
-    
-    .stDownloadButton > button:hover {
-        background-color: #059669;
-    }
-    
-    /* Logo container */
-    .logo-container {
-        text-align: center;
-        margin: -1rem 0 2rem 0;
-        padding: 1rem;
-        background: #F8F9FA;
-        border-bottom: 1px solid #E5E5E5;
-    }
-    
-    /* Hide Streamlit elements */
+    /* Ocultar elementos Streamlit */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-    
-    /* Typography refinements */
-    h1, h2, h3, h4, h5, h6 {
-        color: #1F2937;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-    }
-    
-    p {
-        color: #4B5563;
-        line-height: 1.6;
-    }
-    
-    /* Dividers */
-    hr {
-        border: none;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, #E5E5E5, transparent);
-        margin: 2rem 0;
-    }
     </style>
     """, unsafe_allow_html=True)
 
 # ========================================================================
-# COMPONENTES PROFISSIONAIS
+# FUNÇÕES AUXILIARES
 # ========================================================================
-def render_corporate_header(title, subtitle, lang='pt'):
-    """Renderiza cabeçalho corporativo"""
-    st.markdown(f"""
-    <div class="corporate-header">
-        <h1>{title}</h1>
-        <p>{subtitle}</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-def render_metric_card(label, value, format_type="currency", lang='pt'):
-    """Renderiza card de métrica profissional"""
-    if format_type == "currency":
-        formatted_value = format_currency(value, lang)
-    elif format_type == "percentage":
-        formatted_value = format_percentage(value, lang)
-    else:
-        formatted_value = str(value)
+def create_metric_card(label, value, delta=None, format_type="currency"):
+    """Cria um card de métrica customizado"""
+    formatted_value = format_currency(value) if format_type == "currency" else format_percentage(value)
     
-    st.markdown(f"""
-    <div class="metric-container">
-        <div class="metric-value">{formatted_value}</div>
-        <div class="metric-label">{label}</div>
+    delta_html = ""
+    if delta is not None:
+        delta_color = "#10B981" if delta > 0 else "#EF4444"
+        delta_symbol = "▲" if delta > 0 else "▼"
+        delta_html = f'<div style="color: {delta_color}; font-size: 0.875rem;">{delta_symbol} {abs(delta):.1f}%</div>'
+    
+    return f"""
+    <div class="metric-card">
+        <div class="metric-card-label">{label}</div>
+        <div class="metric-card-value">{formatted_value}</div>
+        {delta_html}
     </div>
-    """, unsafe_allow_html=True)
+    """
 
-def render_status_box(message, status_type="info"):
-    """Renderiza caixa de status profissional"""
-    st.markdown(f"""
-    <div class="status-{status_type}">
-        {message}
-    </div>
-    """, unsafe_allow_html=True)
+def create_comparison_table(data_proprio, data_amaro, items):
+    """Cria tabela comparativa lado a lado"""
+    df = pd.DataFrame({
+        'Item': items,
+        'Gestão Própria': data_proprio,
+        'Gestão Amaro': data_amaro,
+        'Economia': [p - a for p, a in zip(data_proprio, data_amaro)],
+        'Economia %': [(p - a) / p * 100 if p > 0 else 0 for p, a in zip(data_proprio, data_amaro)]
+    })
+    
+    # Formatação
+    for col in ['Gestão Própria', 'Gestão Amaro', 'Economia']:
+        df[col] = df[col].apply(lambda x: format_currency(x))
+    df['Economia %'] = df['Economia %'].apply(lambda x: f"{x:.1f}%")
+    
+    return df
 
 # ========================================================================
-# CARREGAMENTO E INICIALIZAÇÃO
+# CARREGAMENTO DE DADOS
 # ========================================================================
-load_professional_css()
+load_custom_css()
 
-# Sidebar corporativa
+# Sidebar com configurações
 with st.sidebar:
     st.markdown("""
-    <div class="sidebar-header">
-        <h3 style="margin: 0; font-weight: 600;">Amaro Aviation</h3>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.9;">Sistema de Análise</p>
+    <div style="text-align: center; padding: 1rem;">
+        <h3 style="color: #8C1D40; margin: 0;">✈️ Amaro Aviation</h3>
+        <p style="color: #6B7280; font-size: 0.875rem; margin-top: 0.5rem;">Simulador Estratégico de Custos</p>
     </div>
     """, unsafe_allow_html=True)
     
-    language_option = st.selectbox(
-        "IDIOMA / LANGUAGE",
-        ["🇧🇷 Português", "🇺🇸 English"],
-        key="language_selector"
-    )
+    st.markdown("---")
     
-    lang = 'pt' if '🇧🇷' in language_option else 'en'
+    # Seleção de idioma
+    idioma = st.selectbox(
+        "🌐 Idioma / Language",
+        ["🇧🇷 Português", "🇺🇸 English"],
+        key="language"
+    )
+    lang = 'pt' if '🇧🇷' in idioma else 'en'
 
 # Header principal
-render_corporate_header(
-    t('app_title', lang),
-    t('app_subtitle', lang),
-    lang
-)
+st.markdown("""
+<div class="main-header">
+    <h1>Simulador Estratégico de Custos Operacionais</h1>
+    <p>Demonstre o valor da gestão Amaro Aviation com dados reais e personalizados</p>
+</div>
+""", unsafe_allow_html=True)
 
-# Carregamento de dados com tratamento robusto
+# Carregamento de parâmetros
 try:
     params = load_params()
     modelos = params.get('modelos_disponiveis', [])
     
     if not modelos:
-        st.error("Sistema não configurado. Verifique os dados em data/modelos.csv")
+        st.error("⚠️ Sistema não configurado. Execute o setup inicial.")
         st.stop()
         
 except Exception as e:
-    st.error(f"Erro crítico no sistema: {e}")
+    st.error(f"❌ Erro ao carregar sistema: {e}")
     st.stop()
 
 # ========================================================================
-# INTERFACE PRINCIPAL
+# INTERFACE PRINCIPAL - TABS
 # ========================================================================
-tab1, tab2, tab3 = st.tabs([
-    t('tab_profit', lang),
-    t('tab_comparison', lang), 
-    t('tab_settings', lang)
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "💰 Estimativa de Lucro Mensal",
+    "⚖️ Comparativo de Custos", 
+    "✈️ Simulador de Rotas",
+    "📈 Projeção de Longo Prazo",
+    "⚙️ Configurações"
 ])
 
 # ========================================================================
-# TAB 1: ESTIMATIVA DE RECEITA MENSAL
+# TAB 1: ESTIMATIVA DE LUCRO MENSAL
 # ========================================================================
 with tab1:
-    st.markdown(f"""
-    <div class="professional-card">
-        <h3 style="margin-top: 0; color: #1F2937;">Análise de Receita Mensal</h3>
-        <p style="color: #6B7280;">Configure os parâmetros operacionais para análise de viabilidade econômica mensal.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("### 💰 Análise de Rentabilidade Mensal com Charter")
     
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         modelo_lucro = st.selectbox(
-            t('aircraft_model', lang).upper(),
+            "Modelo da Aeronave",
             modelos,
-            key="modelo_lucro"
+            key="modelo_lucro_tab1"
         )
     
     with col2:
-        horas_mes = st.number_input(
-            t('monthly_hours', lang).upper(),
+        horas_charter = st.number_input(
+            "Horas Disponíveis para Charter/mês",
             min_value=10,
             max_value=200,
             value=80,
             step=10,
-            key="horas_mes"
+            help="Quantidade de horas mensais disponíveis para charter"
         )
     
     with col3:
-        ocupacao = st.slider(
-            t('occupancy_rate', lang).upper(),
+        taxa_ocupacao = st.slider(
+            "Taxa de Ocupação (%)",
             min_value=50,
             max_value=95,
             value=75,
-            key="ocupacao"
+            help="Percentual de ocupação das horas disponíveis"
         )
     
-    if st.button(t('calculate', lang).upper(), key="calc_lucro", type="primary"):
-        try:
-            # Cálculos
-            resultado_hora = calcula_custo_trecho(modelo_lucro, 1.0, params)
-            horas_efetivas = float(horas_mes) * (float(ocupacao) / 100.0)
+    with col4:
+        preco_hora_charter = st.number_input(
+            "Preço por Hora Charter (R$)",
+            value=float(params['preco_mercado_hora'].get(modelo_lucro, 8000)),
+            step=500.0,
+            help="Valor cobrado por hora de charter"
+        )
+    
+    if st.button("🚀 Calcular Projeção Mensal", type="primary", use_container_width=True):
+        # Cálculos
+        horas_efetivas = horas_charter * (taxa_ocupacao / 100)
+        receita_bruta = preco_hora_charter * horas_efetivas
+        
+        # Divisão Amaro (90/10)
+        receita_proprietario = receita_bruta * 0.9
+        taxa_amaro = receita_bruta * 0.1
+        
+        # Custos operacionais detalhados
+        resultado_hora = calcula_custo_trecho(modelo_lucro, 1.0, params)
+        
+        custo_combustivel = float(resultado_hora['preco_comb']) * horas_efetivas
+        custo_piloto = float(resultado_hora['piloto']) * horas_efetivas
+        custo_manutencao = float(resultado_hora['manut']) * horas_efetivas
+        custo_depreciacao = float(resultado_hora['depr']) * horas_efetivas
+        
+        custo_total = custo_combustivel + custo_piloto + custo_manutencao + custo_depreciacao
+        lucro_liquido = receita_proprietario - custo_total
+        roi_mensal = (lucro_liquido / custo_total * 100) if custo_total > 0 else 0
+        
+        # Display de resultados
+        st.markdown("---")
+        st.markdown("### 📊 Resultados da Análise Mensal")
+        
+        # Métricas principais
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.markdown(create_metric_card("Receita Bruta Mensal", receita_bruta), unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(create_metric_card("Receita do Proprietário (90%)", receita_proprietario), unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(create_metric_card("Lucro Líquido", lucro_liquido, 
+                                         delta=roi_mensal if lucro_liquido > 0 else None), unsafe_allow_html=True)
+        
+        with col4:
+            st.markdown(create_metric_card("ROI Mensal", roi_mensal, format_type="percentage"), unsafe_allow_html=True)
+        
+        # Breakdown de custos
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### 📊 Composição de Receitas")
             
-            # Receitas e custos
-            preco_hora_mercado = float(params['preco_mercado_hora'][modelo_lucro])
-            receita_bruta = preco_hora_mercado * horas_efetivas
-            custo_operacional = float(resultado_hora['total']) * horas_efetivas
-            
-            # Cálculos financeiros
-            percentual_proprietario = 0.9
-            percentual_amaro = 0.1
-            
-            receita_proprietario = receita_bruta * percentual_proprietario
-            receita_amaro = receita_bruta * percentual_amaro
-            lucro_liquido = receita_proprietario - custo_operacional
-            
-            roi_mensal = (lucro_liquido / custo_operacional * 100.0) if custo_operacional > 0 else 0.0
-            
-            # Exibição profissional dos resultados
-            st.markdown("<hr>", unsafe_allow_html=True)
-            st.markdown("### Resultados da Análise Financeira")
-            
-            col1, col2, col3, col4 = st.columns(4)
-            
-            with col1:
-                render_metric_card(t('gross_revenue', lang), receita_bruta, "currency", lang)
-            
-            with col2:
-                render_metric_card(t('owner_revenue', lang), receita_proprietario, "currency", lang)
-            
-            with col3:
-                render_metric_card(t('operational_costs', lang), custo_operacional, "currency", lang)
-            
-            with col4:
-                render_metric_card(t('net_profit', lang), lucro_liquido, "currency", lang)
-            
-            # Gráfico profissional
-            fig_breakdown = go.Figure(data=[go.Pie(
-                labels=[
-                    'Resultado Líquido',
-                    'Taxa de Administração',
-                    'Custos Operacionais'
-                ],
-                values=[
-                    max(0, receita_proprietario - custo_operacional),
-                    receita_amaro,
-                    custo_operacional
-                ],
+            fig_receita = go.Figure(data=[go.Pie(
+                labels=['Proprietário (90%)', 'Taxa Amaro (10%)'],
+                values=[receita_proprietario, taxa_amaro],
                 hole=0.5,
-                marker=dict(colors=['#10B981', '#8C1D40', '#F59E0B']),
-                textinfo='label+percent',
-                textfont=dict(size=12, color='white'),
-                hovertemplate='<b>%{label}</b><br>%{value:,.0f} R$<br>%{percent}<extra></extra>'
+                marker=dict(colors=['#10B981', '#8C1D40']),
+                textinfo='label+value',
+                texttemplate='<b>%{label}</b><br>R$ %{value:,.0f}'
             )])
             
-            fig_breakdown.update_layout(
-                title={
-                    'text': 'Composição Financeira Mensal',
-                    'x': 0.5,
-                    'font': {'size': 16, 'color': '#1F2937'}
-                },
-                font=dict(family="Inter, sans-serif", size=11),
-                height=400,
-                showlegend=True,
-                legend=dict(
-                    orientation="h",
-                    yanchor="bottom",
-                    y=-0.2,
-                    xanchor="center",
-                    x=0.5
-                ),
-                plot_bgcolor='white',
-                paper_bgcolor='white'
+            fig_receita.update_layout(
+                height=300,
+                showlegend=False,
+                margin=dict(l=0, r=0, t=0, b=0)
             )
             
-            st.plotly_chart(fig_breakdown, use_container_width=True)
+            st.plotly_chart(fig_receita, use_container_width=True)
+        
+        with col2:
+            st.markdown("#### 💸 Breakdown de Custos Operacionais")
             
-            # Status da operação
-            if lucro_liquido > 0:
-                render_status_box(
-                    f"<strong>OPERAÇÃO RENTÁVEL</strong><br>"
-                    f"Resultado líquido: {format_currency(lucro_liquido, lang)}<br>"
-                    f"ROI mensal: {format_percentage(roi_mensal, lang)}",
-                    "success"
-                )
-            else:
-                render_status_box(
-                    f"<strong>ATENÇÃO: OPERAÇÃO EM DÉFICIT</strong><br>"
-                    f"Déficit mensal: {format_currency(abs(lucro_liquido), lang)}",
-                    "warning"
-                )
+            custos_detalhados = pd.DataFrame({
+                'Item': ['Combustível', 'Piloto', 'Manutenção', 'Depreciação'],
+                'Valor': [custo_combustivel, custo_piloto, custo_manutencao, custo_depreciacao],
+                'Percentual': [
+                    custo_combustivel/custo_total*100,
+                    custo_piloto/custo_total*100,
+                    custo_manutencao/custo_total*100,
+                    custo_depreciacao/custo_total*100
+                ]
+            })
             
-            # Exportação
-            col1, col2 = st.columns(2)
+            fig_custos = go.Figure(data=[go.Bar(
+                x=custos_detalhados['Percentual'],
+                y=custos_detalhados['Item'],
+                orientation='h',
+                text=[f'R$ {v:,.0f} ({p:.1f}%)' for v, p in zip(custos_detalhados['Valor'], custos_detalhados['Percentual'])],
+                textposition='inside',
+                marker_color=['#EF4444', '#F59E0B', '#3B82F6', '#10B981']
+            )])
             
-            dados_lucro = {
-                "Análise": "Estimativa de Receita Mensal",
-                "Modelo": modelo_lucro,
-                "Horas Mensais": horas_mes,
-                "Taxa Ocupação": f"{ocupacao}%",
-                "Receita Bruta": receita_bruta,
-                "Receita Proprietário": receita_proprietario,
-                "Custos Operacionais": custo_operacional,
-                "Lucro Líquido": lucro_liquido,
-                "ROI Mensal": f"{roi_mensal:.1f}%"
-            }
-            
-            relatorio_lucro = criar_relatorio_dados(
-                "Estimativa de Receita Mensal",
-                {"modelo": modelo_lucro, "horas": horas_mes, "ocupacao": ocupacao},
-                dados_lucro
+            fig_custos.update_layout(
+                height=300,
+                xaxis_title='Percentual do Custo Total',
+                showlegend=False,
+                margin=dict(l=0, r=0, t=0, b=0)
             )
             
-            with col1:
-                try:
-                    excel_buffer = gerar_excel_simples(relatorio_lucro)
-                    if excel_buffer:
-                        st.download_button(
-                            t('export_excel', lang).upper(),
-                            data=excel_buffer.getvalue(),
-                            file_name=f"amaro_receita_mensal_{datetime.now().strftime('%Y%m%d')}.xlsx",
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            use_container_width=True
-                        )
-                except Exception as e:
-                    st.error(f"Erro ao gerar Excel: {e}")
-            
-            with col2:
-                try:
-                    pdf_buffer = BytesIO()
-                    if gerar_pdf(pdf_buffer, dados_lucro):
-                        pdf_buffer.seek(0)
-                        st.download_button(
-                            t('export_pdf', lang).upper(),
-                            data=pdf_buffer.getvalue(),
-                            file_name=f"amaro_receita_mensal_{datetime.now().strftime('%Y%m%d')}.pdf",
-                            mime="application/pdf",
-                            use_container_width=True
-                        )
-                except Exception as e:
-                    st.error(f"Erro ao gerar PDF: {e}")
-                    
-        except Exception as e:
-            st.error(f"{t('calculation_error', lang)}: {e}")
+            st.plotly_chart(fig_custos, use_container_width=True)
+        
+        # Análise de viabilidade
+        if lucro_liquido > 0:
+            st.success(f"""
+            ✅ **Operação Lucrativa**: O proprietário terá um lucro líquido de {format_currency(lucro_liquido)} por mês, 
+            representando um ROI de {roi_mensal:.1f}% sobre os custos operacionais.
+            """)
+        else:
+            st.warning(f"""
+            ⚠️ **Atenção**: A operação apresenta déficit de {format_currency(abs(lucro_liquido))} mensalmente. 
+            Considere ajustar o preço da hora ou aumentar a taxa de ocupação.
+            """)
 
 # ========================================================================
-# TAB 2: ANÁLISE COMPARATIVA
+# TAB 2: COMPARATIVO DE CUSTOS
 # ========================================================================
 with tab2:
-    st.markdown(f"""
-    <div class="professional-card">
-        <h3 style="margin-top: 0; color: #1F2937;">Análise Comparativa de Custos</h3>
-        <p style="color: #6B7280;">Compare os custos totais entre gestão própria e gestão Amaro Aviation.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("### ⚖️ Comparativo: Gestão Própria vs. Gestão Amaro")
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         modelo_comp = st.selectbox(
-            t('aircraft_model', lang).upper(),
+            "Modelo da Aeronave",
             modelos,
-            key="modelo_comp"
+            key="modelo_comp_tab2"
         )
-        
+    
+    with col2:
         horas_anuais = st.number_input(
-            t('annual_hours', lang).upper(),
+            "Horas de Voo Anuais",
             min_value=50,
             max_value=800,
             value=300,
             step=25,
-            key="horas_anuais"
+            help="Total de horas voadas por ano"
         )
     
-    with col2:
-        custos_fixos_anuais = st.number_input(
-            t('fixed_costs', lang).upper(),
-            min_value=50000,
-            max_value=2000000,
-            value=500000,
-            step=25000,
-            key="custos_fixos"
-        )
-        
-        include_charter = st.checkbox(
-            t('include_charter', lang).upper(),
+    with col3:
+        incluir_charter_comp = st.checkbox(
+            "Incluir Receita de Charter na Comparação",
             value=True,
-            key="include_charter"
+            help="Considera a receita de charter como redução de custos"
         )
     
-    if st.button(t('calculate', lang).upper(), key="calc_comp", type="primary"):
-        try:
-            # Cálculos comparativos
-            resultado_ano = calcula_custo_trecho(modelo_comp, float(horas_anuais), params)
-            custo_operacional_ano = float(resultado_ano['total'])
-            custo_total_proprio = custo_operacional_ano + float(custos_fixos_anuais)
-            
-            # Gestão Amaro (sem custos fixos)
-            custo_amaro_ano = custo_operacional_ano
-            
-            # Receita de charter
-            receita_charter = 0.0
-            if include_charter:
-                preco_hora = float(params['preco_mercado_hora'][modelo_comp])
-                receita_charter = preco_hora * float(horas_anuais) * 0.6
-            
-            # Custos líquidos
-            custo_liquido_proprio = custo_total_proprio - receita_charter
-            custo_liquido_amaro = custo_amaro_ano - receita_charter
-            
-            economia_anual = custo_liquido_proprio - custo_liquido_amaro
-            percentual_economia = (economia_anual / custo_liquido_proprio * 100.0) if custo_liquido_proprio > 0 else 0.0
-            
-            # Exibição profissional
-            st.markdown("<hr>", unsafe_allow_html=True)
-            st.markdown("### Comparativo Anual de Custos")
-            
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                st.markdown(f"""
-                <div class="professional-card" style="background: #FEF3C7; border-left: 4px solid #F59E0B;">
-                    <h4 style="color: #92400E; margin-top: 0;">GESTÃO PRÓPRIA</h4>
-                    <div style="font-size: 1.5rem; font-weight: 700; color: #92400E; margin: 1rem 0;">
-                        {format_currency(custo_liquido_proprio, lang)}
-                    </div>
-                    <div style="font-size: 0.85rem; color: #78350F;">
-                        <strong>Custos Operacionais:</strong> {format_currency(custo_operacional_ano, lang)}<br>
-                        <strong>Custos Fixos:</strong> {format_currency(custos_fixos_anuais, lang)}
-                        {f"<br><strong>Receita Charter:</strong> -{format_currency(receita_charter, lang)}" if include_charter else ""}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col2:
-                st.markdown(f"""
-                <div class="professional-card" style="background: #D1FAE5; border-left: 4px solid #10B981;">
-                    <h4 style="color: #047857; margin-top: 0;">GESTÃO AMARO AVIATION</h4>
-                    <div style="font-size: 1.5rem; font-weight: 700; color: #047857; margin: 1rem 0;">
-                        {format_currency(custo_liquido_amaro, lang)}
-                    </div>
-                    <div style="font-size: 0.85rem; color: #065F46;">
-                        <strong>Custos Operacionais:</strong> {format_currency(custo_amaro_ano, lang)}<br>
-                        <strong>Custos Fixos:</strong> {format_currency(0, lang)}
-                        {f"<br><strong>Receita Charter:</strong> -{format_currency(receita_charter, lang)}" if include_charter else ""}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col3:
-                cor_economia = '#047857' if economia_anual > 0 else '#DC2626'
-                bg_economia = '#D1FAE5' if economia_anual > 0 else '#FEE2E2'
-                st.markdown(f"""
-                <div class="professional-card" style="background: {bg_economia}; border-left: 4px solid {cor_economia};">
-                    <h4 style="color: {cor_economia}; margin-top: 0;">ECONOMIA ANUAL</h4>
-                    <div style="font-size: 1.5rem; font-weight: 700; color: {cor_economia}; margin: 1rem 0;">
-                        {format_currency(abs(economia_anual), lang)}
-                    </div>
-                    <div style="font-size: 0.85rem; color: {cor_economia};">
-                        <strong>Percentual:</strong> {format_percentage(percentual_economia, lang)}<br>
-                        <strong>Economia Mensal:</strong> {format_currency(economia_anual/12, lang)}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            # Gráfico comparativo profissional
-            fig_comp = go.Figure()
-            
-            categorias = ['Gestão Própria', 'Gestão Amaro Aviation']
-            valores = [custo_liquido_proprio, custo_liquido_amaro]
-            cores = ['#F59E0B', '#8C1D40']
-            
-            fig_comp.add_trace(go.Bar(
-                x=categorias,
-                y=valores,
-                marker_color=cores,
-                text=[format_currency(v, lang) for v in valores],
-                textposition='outside',
-                textfont=dict(size=14, color='#1F2937'),
-                hovertemplate='<b>%{x}</b><br>Custo: %{text}<extra></extra>'
-            ))
-            
-            if economia_anual > 0:
-                fig_comp.add_annotation(
-                    x=0.5, y=max(valores) * 0.8,
-                    text=f"ECONOMIA ANUAL<br><b>{format_currency(economia_anual, lang)}</b>",
-                    showarrow=True,
-                    arrowhead=2,
-                    arrowcolor='#10B981',
-                    font=dict(size=14, color='#10B981'),
-                    bgcolor='white',
-                    bordercolor='#10B981',
-                    borderwidth=1
-                )
-            
-            fig_comp.update_layout(
-                title={
-                    'text': 'Análise Comparativa Anual',
-                    'x': 0.5,
-                    'font': {'size': 16, 'color': '#1F2937'}
-                },
-                yaxis_title='Custo Anual (R$)',
-                font=dict(family="Inter, sans-serif"),
-                plot_bgcolor='white',
-                paper_bgcolor='white',
-                height=500,
-                showlegend=False
-            )
-            
-            st.plotly_chart(fig_comp, use_container_width=True)
-            
-            # Exportação
-            col1, col2 = st.columns(2)
-            
-            dados_comp = {
-                "Análise": "Comparativo de Custos",
-                "Modelo": modelo_comp,
-                "Horas Anuais": horas_anuais,
-                "Custos Fixos": custos_fixos_anuais,
-                "Custo Gestão Própria": custo_liquido_proprio,
-                "Custo Gestão Amaro": custo_liquido_amaro,
-                "Economia Anual": economia_anual,
-                "Percentual Economia": f"{percentual_economia:.1f}%"
-            }
-            
-            relatorio_comp = criar_relatorio_dados(
-                "Comparativo de Custos",
-                {"modelo": modelo_comp, "horas": horas_anuais, "fixos": custos_fixos_anuais},
-                dados_comp
-            )
-            
-            with col1:
-                try:
-                    excel_buffer = gerar_excel_simples(relatorio_comp)
-                    if excel_buffer:
-                        st.download_button(
-                            t('export_excel', lang).upper(),
-                            data=excel_buffer.getvalue(),
-                            file_name=f"amaro_comparativo_{datetime.now().strftime('%Y%m%d')}.xlsx",
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            use_container_width=True
-                        )
-                except Exception as e:
-                    st.error(f"Erro ao gerar Excel: {e}")
-            
-            with col2:
-                try:
-                    pdf_buffer = BytesIO()
-                    if gerar_pdf(pdf_buffer, dados_comp):
-                        pdf_buffer.seek(0)
-                        st.download_button(
-                            t('export_pdf', lang).upper(),
-                            data=pdf_buffer.getvalue(),
-                            file_name=f"amaro_comparativo_{datetime.now().strftime('%Y%m%d')}.pdf",
-                            mime="application/pdf",
-                            use_container_width=True
-                        )
-                except Exception as e:
-                    st.error(f"Erro ao gerar PDF: {e}")
-                    
-        except Exception as e:
-            st.error(f"{t('calculation_error', lang)}: {e}")
-
-# ========================================================================
-# TAB 3: CONFIGURAÇÕES DO SISTEMA
-# ========================================================================
-with tab3:
-    st.markdown(f"""
-    <div class="professional-card">
-        <h3 style="margin-top: 0; color: #1F2937;">Configurações do Sistema</h3>
-        <p style="color: #6B7280;">Ajuste os parâmetros operacionais do sistema de análise.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Parâmetros de custos fixos
+    st.markdown("#### 💼 Custos Fixos Anuais (Gestão Própria)")
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.markdown("#### PARÂMETROS OPERACIONAIS")
-        
-        preco_combustivel = st.number_input(
-            t('fuel_price', lang).upper(),
-            value=float(params['preco_combustivel']),
-            min_value=1.0,
-            max_value=50.0,
-            step=0.1,
-            format="%.2f"
-        )
-        
-        custo_piloto = st.number_input(
-            t('pilot_cost', lang).upper(),
-            value=float(params['custo_piloto_hora']),
-            min_value=500.0,
-            max_value=5000.0,
-            step=50.0
-        )
-        
-        depreciacao = st.number_input(
-            t('depreciation', lang).upper(),
-            value=float(params['depreciacao_anual_pct']),
-            min_value=1.0,
-            max_value=20.0,
-            step=0.5,
-            format="%.1f"
+        custo_hangar = st.number_input(
+            "Hangaragem (R$/ano)",
+            value=120000,
+            step=10000,
+            help="Custo anual de hangaragem"
         )
     
     with col2:
-        st.markdown("#### CUSTOS DE MANUTENÇÃO E MERCADO")
+        custo_seguro = st.number_input(
+            "Seguro (R$/ano)",
+            value=250000,
+            step=10000,
+            help="Custo anual de seguro aeronáutico"
+        )
+    
+    with col3:
+        custo_tripulacao = st.number_input(
+            "Tripulação Fixa (R$/ano)",
+            value=300000,
+            step=10000,
+            help="Salários e encargos de tripulação dedicada"
+        )
+    
+    with col4:
+        custo_admin = st.number_input(
+            "Administração (R$/ano)",
+            value=50000,
+            step=5000,
+            help="Custos administrativos e planejamento"
+        )
+    
+    if st.button("📊 Comparar Cenários", type="primary", use_container_width=True):
+        # Custos variáveis
+        resultado_ano = calcula_custo_trecho(modelo_comp, float(horas_anuais), params)
         
-        manut_turboprop = st.number_input(
-            t('maintenance_turboprop', lang).upper(),
-            value=float(params['custo_manutencao_hora']['turboprop']),
-            min_value=500.0,
-            max_value=5000.0,
-            step=100.0
+        # GESTÃO PRÓPRIA
+        custos_fixos_proprio = custo_hangar + custo_seguro + custo_tripulacao + custo_admin
+        custos_variaveis_proprio = float(resultado_ano['total'])
+        custo_total_proprio = custos_fixos_proprio + custos_variaveis_proprio
+        
+        # GESTÃO AMARO
+        custos_fixos_amaro = 0  # Amaro assume custos fixos
+        custos_variaveis_amaro = float(resultado_ano['total'])
+        custo_total_amaro = custos_variaveis_amaro
+        
+        # Receita de charter (se aplicável)
+        receita_charter = 0
+        if incluir_charter_comp:
+            horas_charter_ano = horas_anuais * 0.3  # 30% das horas para charter
+            preco_hora = float(params['preco_mercado_hora'][modelo_comp])
+            receita_charter = horas_charter_ano * preco_hora * 0.75  # 75% ocupação
+        
+        # Custos líquidos
+        custo_liquido_proprio = custo_total_proprio - receita_charter
+        custo_liquido_amaro = custo_total_amaro - (receita_charter * 0.9)  # Proprietário recebe 90%
+        
+        economia_anual = custo_liquido_proprio - custo_liquido_amaro
+        economia_percentual = (economia_anual / custo_liquido_proprio * 100) if custo_liquido_proprio > 0 else 0
+        
+        # Display de resultados
+        st.markdown("---")
+        st.markdown("### 📊 Análise Comparativa Detalhada")
+        
+        # Cards de resumo
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown(f"""
+            <div class="metric-card" style="border-left: 4px solid #EF4444;">
+                <div class="metric-card-label">Custo Total - Gestão Própria</div>
+                <div class="metric-card-value" style="color: #EF4444;">{format_currency(custo_liquido_proprio)}</div>
+                <div style="font-size: 0.875rem; color: #6B7280;">Incluindo todos os custos fixos e variáveis</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(f"""
+            <div class="metric-card" style="border-left: 4px solid #10B981;">
+                <div class="metric-card-label">Custo Total - Gestão Amaro</div>
+                <div class="metric-card-value" style="color: #10B981;">{format_currency(custo_liquido_amaro)}</div>
+                <div style="font-size: 0.875rem; color: #6B7280;">Apenas custos operacionais</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(f"""
+            <div class="highlight-metric">
+                <h3>Economia Anual</h3>
+                <div class="value">{format_currency(economia_anual)}</div>
+                <div>{economia_percentual:.1f}% de redução de custos</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Tabela comparativa detalhada
+        st.markdown("#### 📋 Breakdown Detalhado de Custos")
+        
+        # Preparar dados para tabela
+        items_custos = [
+            'Hangaragem',
+            'Seguro Aeronáutico',
+            'Tripulação Dedicada',
+            'Administração/Planejamento',
+            'Combustível',
+            'Manutenção',
+            'Depreciação',
+            'Outros Custos Variáveis'
+        ]
+        
+        custos_proprio = [
+            custo_hangar,
+            custo_seguro,
+            custo_tripulacao,
+            custo_admin,
+            float(resultado_ano['preco_comb']),
+            float(resultado_ano['manut']),
+            float(resultado_ano['depr']),
+            float(resultado_ano['piloto'])
+        ]
+        
+        custos_amaro = [
+            0,  # Hangar
+            0,  # Seguro
+            0,  # Tripulação
+            0,  # Admin
+            float(resultado_ano['preco_comb']),
+            float(resultado_ano['manut']),
+            float(resultado_ano['depr']),
+            float(resultado_ano['piloto'])
+        ]
+        
+        df_comparativo = create_comparison_table(custos_proprio, custos_amaro, items_custos)
+        
+        # Adicionar linha de receita de charter
+        if incluir_charter_comp:
+            receita_row = pd.DataFrame({
+                'Item': ['Receita Charter (compensação)'],
+                'Gestão Própria': [format_currency(-receita_charter)],
+                'Gestão Amaro': [format_currency(-receita_charter * 0.9)],
+                'Economia': [''],
+                'Economia %': ['']
+            })
+            df_comparativo = pd.concat([df_comparativo, receita_row], ignore_index=True)
+        
+        # Adicionar linha de total
+        total_row = pd.DataFrame({
+            'Item': ['TOTAL LÍQUIDO'],
+            'Gestão Própria': [format_currency(custo_liquido_proprio)],
+            'Gestão Amaro': [format_currency(custo_liquido_amaro)],
+            'Economia': [format_currency(economia_anual)],
+            'Economia %': [f"{economia_percentual:.1f}%"]
+        })
+        df_comparativo = pd.concat([df_comparativo, total_row], ignore_index=True)
+        
+        # Estilizar dataframe
+        st.dataframe(
+            df_comparativo,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Item": st.column_config.TextColumn("Item de Custo", width="medium"),
+                "Gestão Própria": st.column_config.TextColumn("Gestão Própria", width="small"),
+                "Gestão Amaro": st.column_config.TextColumn("Gestão Amaro", width="small"),
+                "Economia": st.column_config.TextColumn("Economia", width="small"),
+                "Economia %": st.column_config.TextColumn("Economia %", width="small"),
+            }
         )
         
-        manut_jato = st.number_input(
-            t('maintenance_jet', lang).upper(),
-            value=float(params['custo_manutencao_hora']['jato']),
-            min_value=1000.0,
-            max_value=10000.0,
-            step=200.0
-        )
+        # Gráfico comparativo visual
+        col1, col2 = st.columns(2)
         
-        mercado_turboprop = st.number_input(
-            t('market_price_turboprop', lang).upper(),
-            value=float(params['preco_mercado']['turboprop']),
-            min_value=3000.0,
-            max_value=15000.0,
-            step=500.0
-        )
+        with col1:
+            st.markdown("#### 📊 Distribuição de Custos - Gestão Própria")
+            
+            fig_proprio = go.Figure(data=[go.Pie(
+                labels=['Custos Fixos', 'Custos Variáveis'],
+                values=[custos_fixos_proprio, custos_variaveis_proprio],
+                hole=0.5,
+                marker=dict(colors=['#EF4444', '#F59E0B']),
+                textinfo='label+percent',
+                texttemplate='<b>%{label}</b><br>%{percent}'
+            )])
+            
+            fig_proprio.update_layout(
+                height=300,
+                showlegend=True,
+                margin=dict(l=0, r=0, t=20, b=0)
+            )
+            
+            st.plotly_chart(fig_proprio, use_container_width=True)
         
-        mercado_jato = st.number_input(
-            t('market_price_jet', lang).upper(),
-            value=float(params['preco_mercado']['jato']),
-            min_value=8000.0,
-            max_value=30000.0,
-            step=1000.0
-        )
+        with col2:
+            st.markdown("#### 📊 Economia Acumulada em 5 Anos")
+            
+            anos = list(range(1, 6))
+            economia_acumulada = [economia_anual * ano for ano in anos]
+            
+            fig_economia = go.Figure()
+            fig_economia.add_trace(go.Bar(
+                x=anos,
+                y=economia_acumulada,
+                text=[format_currency(v) for v in economia_acumulada],
+                textposition='outside',
+                marker_color='#10B981'
+            ))
+            
+            fig_economia.update_layout(
+                height=300,
+                xaxis_title='Anos',
+                yaxis_title='Economia Acumulada (R$)',
+                showlegend=False,
+                margin=dict(l=0, r=0, t=20, b=0)
+            )
+            
+            st.plotly_chart(fig_economia, use_container_width=True)
 
+# ========================================================================
+# TAB 3: SIMULADOR DE ROTAS
+# ========================================================================
+with tab3:
+    st.markdown("### ✈️ Simulador de Custos por Rota")
     
-    # Botão de salvar centralizado
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Carregar rotas
+    try:
+        df_rotas = pd.read_csv('data/rotas.csv')
+        rotas_disponiveis = df_rotas.to_dict('records')
+    except:
+        st.warning("⚠️ Arquivo de rotas não encontrado. Usando rotas padrão.")
+        rotas_disponiveis = [
+            {"origem": "GRU", "destino": "SDU", "duracao_h": 1.0},
+            {"origem": "CGH", "destino": "BSB", "duracao_h": 1.4}
+        ]
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        origem = st.selectbox(
+            "Aeroporto de Origem",
+            options=list(set([r['origem'] for r in rotas_disponiveis])),
+            key="origem_rota"
+        )
+    
     with col2:
-        if st.button(t('save_settings', lang).upper(), type="primary", use_container_width=True):
-            try:
-                novos_params = {
-                    'preco_combustivel': preco_combustivel,
-                    'custo_piloto_hora': custo_piloto,
-                    'depreciacao_anual_pct': depreciacao,
-                    'custo_manutencao_hora': {
-                        'turboprop': manut_turboprop,
-                        'jato': manut_jato
-                    },
-                    'percentual_proprietario': params.get('percentual_proprietario', 0.9),
-                    'preco_mercado': {
-                        'turboprop': mercado_turboprop,
-                        'jato': mercado_jato
-                    }
+        # Filtrar destinos baseado na origem
+        destinos_validos = [r['destino'] for r in rotas_disponiveis if r['origem'] == origem]
+        destino = st.selectbox(
+            "Aeroporto de Destino",
+            options=destinos_validos,
+            key="destino_rota"
+        )
+    
+    with col3:
+        modelo_rota = st.selectbox(
+            "Modelo da Aeronave",
+            modelos,
+            key="modelo_rota"
+        )
+    
+    if st.button("✈️ Simular Rota", type="primary", use_container_width=True):
+        # Buscar duração da rota
+        rota_info = next((r for r in rotas_disponiveis if r['origem'] == origem and r['destino'] == destino), None)
+        
+        if rota_info:
+            duracao = float(rota_info['duracao_h'])
+            
+            # Calcular custos
+            resultado_rota = calcula_custo_trecho(modelo_rota, duracao, params)
+            
+            # Preço de mercado
+            preco_mercado = float(params['preco_mercado_hora'][modelo_rota]) * duracao
+            
+            # Display de resultados
+            st.markdown("---")
+            st.markdown(f"### 📊 Análise da Rota: {origem} → {destino}")
+            
+            # Informações da rota
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.markdown(create_metric_card("Duração do Voo", f"{duracao:.1f}h", format_type="text"), unsafe_allow_html=True)
+            
+            with col2:
+                st.markdown(create_metric_card("Custo Total Amaro", float(resultado_rota['total'])), unsafe_allow_html=True)
+            
+            with col3:
+                st.markdown(create_metric_card("Preço de Mercado", preco_mercado), unsafe_allow_html=True)
+            
+            with col4:
+                economia_rota = preco_mercado - float(resultado_rota['total'])
+                economia_pct = (economia_rota / preco_mercado * 100) if preco_mercado > 0 else 0
+                st.markdown(create_metric_card("Economia", economia_rota, delta=economia_pct), unsafe_allow_html=True)
+            
+            # Breakdown detalhado
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("#### 💸 Composição de Custos")
+                
+                custos_rota = {
+                    'Combustível': float(resultado_rota['preco_comb']),
+                    'Piloto': float(resultado_rota['piloto']),
+                    'Manutenção': float(resultado_rota['manut']),
+                    'Depreciação': float(resultado_rota['depr'])
                 }
                 
-                if save_params(novos_params):
-                    render_status_box(t('settings_saved', lang), "success")
-                    st.rerun()
-                else:
-                    st.error("Erro ao salvar configurações")
-                    
-            except Exception as e:
-                st.error(f"Erro ao processar dados: {e}")
+                fig_custos_rota = go.Figure(data=[go.Pie(
+                    labels=list(custos_rota.keys()),
+                    values=list(custos_rota.values()),
+                    hole=0.5,
+                    marker=dict(colors=['#EF4444', '#F59E0B', '#3B82F6', '#10B981']),
+                    textinfo='label+value',
+                    texttemplate='<b>%{label}</b><br>R$ %{value:,.0f}'
+                )])
+                
+                fig_custos_rota.update_layout(
+                    height=350,
+                    showlegend=True,
+                    margin=dict(l=0, r=0, t=20, b=0)
+                )
+                
+                st.plotly_chart(fig_custos_rota, use_container_width=True)
+            
+            with col2:
+                st.markdown("#### 📊 Comparativo Visual")
+                
+                fig_comp_rota = go.Figure()
+                
+                fig_comp_rota.add_trace(go.Bar(
+                    x=['Custo Amaro', 'Preço Mercado'],
+                    y=[float(resultado_rota['total']), preco_mercado],
+                    text=[format_currency(float(resultado_rota['total'])), format_currency(preco_mercado)],
+                    textposition='outside',
+                    marker_color=['#8C1D40', '#6B7280']
+                ))
+                
+                # Adicionar linha de economia
+                fig_comp_rota.add_shape(
+                    type="line",
+                    x0=-0.4, y0=float(resultado_rota['total']),
+                    x1=1.4, y1=float(resultado_rota['total']),
+                    line=dict(color="#10B981", width=2, dash="dash")
+                )
+                
+                fig_comp_rota.add_annotation(
+                    x=0.5, y=(float(resultado_rota['total']) + preco_mercado) / 2,
+                    text=f"Economia: {format_currency(economia_rota)}<br>({economia_pct:.1f}%)",
+                    showarrow=True,
+                    arrowhead=2,
+                    arrowcolor="#10B981",
+                    font=dict(color="#10B981", size=12, family="Inter")
+                )
+                
+                fig_comp_rota.update_layout(
+                    height=350,
+                    showlegend=False,
+                    yaxis_title="Valor (R$)",
+                    margin=dict(l=0, r=0, t=20, b=0)
+                )
+                
+                st.plotly_chart(fig_comp_rota, use_container_width=True)
+            
+            # Análise de viabilidade
+            if economia_rota > 0:
+                st.success(f"""
+                ✅ **Rota Vantajosa**: A gestão Amaro oferece economia de {format_currency(economia_rota)} ({economia_pct:.1f}%) 
+                em relação ao preço de mercado para esta rota.
+                """)
+            else:
+                st.warning(f"""
+                ⚠️ **Atenção**: O custo operacional está {format_currency(abs(economia_rota))} acima do preço de mercado. 
+                Considere otimizações operacionais para esta rota.
+                """)
 
 # ========================================================================
-# SIDEBAR - STATUS E INFORMAÇÕES
+# TAB 4: PROJEÇÃO DE LONGO PRAZO
 # ========================================================================
-with st.sidebar:
-    st.markdown("<hr>", unsafe_allow_html=True)
+with tab4:
+    st.markdown("### 📈 Projeção de Longo Prazo e Análise de Breakeven")
     
-    render_status_box(
-        f"<strong>{t('system_operational', lang).upper()}</strong><br>"
-        f"Modelos: {len(modelos)} {t('models_configured', lang)}<br>"
-        f"Parâmetros: Carregados<br>"
-        f"Idioma: {language_option}",
-        "info"
-    )
+    col1, col2, col3, col4 = st.columns(4)
     
-    st.markdown("#### RECURSOS DO SISTEMA")
-    st.markdown("""
-    **ANÁLISE DE RECEITA:**  
-    Simulação de receitas e custos mensais
+    with col1:
+        modelo_proj = st.selectbox(
+            "Modelo da Aeronave",
+            modelos,
+            key="modelo_proj"
+        )
     
-    **ANÁLISE COMPARATIVA:**  
-    Comparação entre gestão própria e Amaro Aviation
+    with col2:
+        horas_mes_proj = st.number_input(
+            "Horas de Voo/mês",
+            min_value=20,
+            max_value=150,
+            value=60,
+            step=10,
+            key="horas_mes_proj"
+        )
     
-    **CONFIGURAÇÕES:**  
-    Ajuste de parâmetros operacionais
+    with col3:
+        horizonte_meses = st.slider(
+            "Horizonte de Projeção (meses)",
+            min_value=12,
+            max_value=60,
+            value=36,
+            step=12,
+            key="horizonte_proj"
+        )
+    
+    with col4:
+        taxa_crescimento = st.number_input(
+            "Crescimento Anual (%)",
+            min_value=0.0,
+            max_value=20.0,
+            value=5.0,
+            step=1.0,
+            help="Taxa de crescimento anual das horas voadas"
+        )
+    
+    # Parâmetros adicionais
+    with st.expander("⚙️ Parâmetros Avançados"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            investimento_inicial = st.number_input(
+                "Investimento Inicial (R$)",
+                value=0,
+                step=100000,
+                help="Valor de entrada ou investimento inicial"
+            )
+            
+            taxa_ocupacao_proj = st.slider(
+                "Taxa de Ocupação Charter (%)",
+                min_value=50,
+                max_value=90,
+                value=70,
+                key="ocupacao_proj"
+            )
+        
+        with col2:
+            inflacao_custos = st.number_input(
+                "Inflação de Custos (%/ano)",
+                min_value=0.0,
+                max_value=15.0,
+                value=4.0,
+                step=0.5
+            )
+            
+            reajuste_charter = st.number_input(
+                "Reajuste Preço Charter (%/ano)",
+                min_value=0.0,
+                max_value=15.0,
+                value=5.0,
+                step=0.5
+            )
+    
+    if st.button("📊 Gerar Projeção", type="primary", use_container_width=True):
+        # Preparar dados para projeção
+        meses = list(range(1, horizonte_meses + 1))
+        
+        # Arrays para armazenar valores
+        receitas_acumuladas = []
+        custos_acumulados = []
+        lucros_acumulados = []
+        fluxo_caixa = []
+        
+        # Valores iniciais
+        horas_mes_atual = horas_mes_proj
+        preco_hora_atual = float(params['preco_mercado_hora'][modelo_proj])
+        resultado_hora_base = calcula_custo_trecho(modelo_proj, 1.0, params)
+        custo_hora_atual = float(resultado_hora_base['total'])
+        
+        # Considerar investimento inicial
+        saldo_acumulado = -investimento_inicial if investimento_inicial > 0 else 0
+        
+        # Calcular mês a mês
+        for mes in meses:
+            # Aplicar crescimento anual
+            if mes % 12 == 0:
+                horas_mes_atual *= (1 + taxa_crescimento / 100)
+                preco_hora_atual *= (1 + reajuste_charter / 100)
+                custo_hora_atual *= (1 + inflacao_custos / 100)
+            
+            # Receita mensal
+            horas_charter = horas_mes_atual * 0.5  # 50% para charter
+            horas_efetivas = horas_charter * (taxa_ocupacao_proj / 100)
+            receita_mensal = preco_hora_atual * horas_efetivas * 0.9  # 90% para proprietário
+            
+            # Custo mensal total
+            custo_mensal = custo_hora_atual * horas_mes_atual
+            
+            # Lucro mensal
+            lucro_mensal = receita_mensal - custo_mensal
+            
+            # Acumulados
+            saldo_acumulado += lucro_mensal
+            
+            receitas_acumuladas.append(receita_mensal)
+            custos_acumulados.append(custo_mensal)
+            lucros_acumulados.append(lucro_mensal)
+            fluxo_caixa.append(saldo_acumulado)
+        
+        # Encontrar breakeven
+        breakeven_mes = None
+        for i, valor in enumerate(fluxo_caixa):
+            if valor > 0:
+                breakeven_mes = i + 1
+                break
+        
+        # Display de resultados
+        st.markdown("---")
+        st.markdown("### 📊 Análise de Projeção")
+        
+        # Métricas resumidas
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            receita_total = sum(receitas_acumuladas)
+            st.markdown(create_metric_card("Receita Total Projetada", receita_total), unsafe_allow_html=True)
+        
+        with col2:
+            custo_total = sum(custos_acumulados)
+            st.markdown(create_metric_card("Custo Total Projetado", custo_total), unsafe_allow_html=True)
+        
+        with col3:
+            lucro_total = sum(lucros_acumulados)
+            roi_total = (lucro_total / (investimento_inicial if investimento_inicial > 0 else custo_total)) * 100
+            st.markdown(create_metric_card("Lucro Total Projetado", lucro_total, delta=roi_total), unsafe_allow_html=True)
+        
+        with col4:
+            if breakeven_mes:
+                st.markdown(f"""
+                <div class="highlight-metric" style="background: #10B981;">
+                    <h3>Breakeven</h3>
+                    <div class="value">{breakeven_mes} meses</div>
+                    <div>Retorno do investimento</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="highlight-metric" style="background: #EF4444;">
+                    <h3>Breakeven</h3>
+                    <div class="value">> {horizonte_meses} meses</div>
+                    <div>Fora do horizonte</div>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        # Gráfico de projeção
+        fig_projecao = go.Figure()
+        
+        # Receitas acumuladas
+        receitas_acc = [sum(receitas_acumuladas[:i+1]) for i in range(len(receitas_acumuladas))]
+        fig_projecao.add_trace(go.Scatter(
+            x=meses,
+            y=receitas_acc,
+            name='Receita Acumulada',
+            mode='lines',
+            line=dict(color='#10B981', width=3),
+            fill='tonexty',
+            fillcolor='rgba(16, 185, 129, 0.1)'
+        ))
+        
+        # Custos acumulados
+        custos_acc = [sum(custos_acumulados[:i+1]) for i in range(len(custos_acumulados))]
+        fig_projecao.add_trace(go.Scatter(
+            x=meses,
+            y=custos_acc,
+            name='Custo Acumulado',
+            mode='lines',
+            line=dict(color='#EF4444', width=3)
+        ))
+        
+        # Fluxo de caixa
+        fig_projecao.add_trace(go.Scatter(
+            x=meses,
+            y=fluxo_caixa,
+            name='Fluxo de Caixa',
+            mode='lines',
+            line=dict(color='#8C1D40', width=4),
+            fill='tozeroy',
+            fillcolor='rgba(140, 29, 64, 0.1)'
+        ))
+        
+        # Linha de breakeven
+        if breakeven_mes:
+            fig_projecao.add_vline(
+                x=breakeven_mes,
+                line_dash="dash",
+                line_color="#F59E0B",
+                annotation_text=f"Breakeven: {breakeven_mes} meses",
+                annotation_position="top"
+            )
+        
+        # Linha zero
+        fig_projecao.add_hline(
+            y=0,
+            line_dash="solid",
+            line_color="#6B7280",
+            line_width=1
+        )
+        
+        fig_projecao.update_layout(
+            title="Projeção Financeira de Longo Prazo",
+            xaxis_title="Meses",
+            yaxis_title="Valor (R$)",
+            height=500,
+            hovermode='x unified',
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+        
+        st.plotly_chart(fig_projecao, use_container_width=True)
+        
+        # Tabela de marcos
+        st.markdown("#### 📊 Marcos Importantes da Projeção")
+        
+        marcos_df = pd.DataFrame({
+            'Marco': ['6 meses', '12 meses', '24 meses', '36 meses', str(horizonte_meses) + ' meses'],
+            'Receita Acumulada': [
+                format_currency(sum(receitas_acumuladas[:6])) if len(receitas_acumuladas) >= 6 else 'N/A',
+                format_currency(sum(receitas_acumuladas[:12])) if len(receitas_acumuladas) >= 12 else 'N/A',
+                format_currency(sum(receitas_acumuladas[:24])) if len(receitas_acumuladas) >= 24 else 'N/A',
+                format_currency(sum(receitas_acumuladas[:36])) if len(receitas_acumuladas) >= 36 else 'N/A',
+                format_currency(sum(receitas_acumuladas))
+            ],
+            'Lucro Acumulado': [
+                format_currency(sum(lucros_acumulados[:6])) if len(lucros_acumulados) >= 6 else 'N/A',
+                format_currency(sum(lucros_acumulados[:12])) if len(lucros_acumulados) >= 12 else 'N/A',
+                format_currency(sum(lucros_acumulados[:24])) if len(lucros_acumulados) >= 24 else 'N/A',
+                format_currency(sum(lucros_acumulados[:36])) if len(lucros_acumulados) >= 36 else 'N/A',
+                format_currency(sum(lucros_acumulados))
+            ],
+            'Fluxo de Caixa': [
+                format_currency(fluxo_caixa[5]) if len(fluxo_caixa) > 5 else 'N/A',
+                format_currency(fluxo_caixa[11]) if len(fluxo_caixa) > 11 else 'N/A',
+                format_currency(fluxo_caixa[23]) if len(fluxo_caixa) > 23 else 'N/A',
+                format_currency(fluxo_caixa[35]) if len(fluxo_caixa) > 35 else 'N/A',
+                format_currency(fluxo_caixa[-1])
+            ]
+        })
+        
+        st.dataframe(marcos_df, use_container_width=True, hide_index=True)
+
+# ========================================================================
+# TAB 5: CONFIGURAÇÕES
+# ========================================================================
+with tab5:
+    st.markdown("### ⚙️ Configurações e Parâmetros do Sistema")
+    
+    st.info("""
+    💡 **Dica**: Ajuste os parâmetros abaixo para personalizar as simulações de acordo com a realidade 
+    do seu mercado e operação. As alterações serão aplicadas em todos os cálculos.
     """)
     
-    st.markdown("#### ORIENTAÇÕES DE USO")
-    if lang == 'pt':
-        st.markdown("""
-        • Use ocupação de 70-80% para projeções realistas
-        • Considere custos fixos reais (hangar, seguro, etc.)
-        • Revise parâmetros periodicamente
-        • Exporte relatórios para apresentações
-        """)
-    else:
-        st.markdown("""
-        • Use 70-80% occupancy for realistic projections
-        • Consider real fixed costs (hangar, insurance, etc.)
-        • Review parameters periodically
-        • Export reports for presentations
-        """)
+    # Organizar em abas para melhor organização
+    config_tab1, config_tab2, config_tab3 = st.tabs([
+        "💰 Parâmetros Financeiros",
+        "✈️ Modelos de Aeronaves",
+        "🗺️ Rotas Disponíveis"
+    ])
     
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown(f"""
-    <div style="text-align: center; color: #6B7280; font-size: 0.8rem;">
-        <p><strong>Amaro Aviation Calculator</strong></p>
-        <p>Sistema Corporativo v3.0</p>
-        <p>{t('developed_with_love', lang)}</p>
-    </div>
-    """, unsafe_allow_html=True)
+    with config_tab1:
+        st.markdown("#### 💰 Parâmetros Financeiros e Operacionais")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("##### Custos Operacionais")
+            
+            preco_combustivel = st.number_input(
+                "Preço do Combustível (R$/litro)",
+                value=float(params['preco_combustivel']),
+                min_value=1.0,
+                max_value=20.0,
+                step=0.1,
+                format="%.2f",
+                help="Preço médio do QAV-1 (querosene de aviação)"
+            )
+            
+            custo_piloto = st.number_input(
+                "Custo Hora Piloto (R$)",
+                value=float(params['custo_piloto_hora']),
+                min_value=500.0,
+                max_value=5000.0,
+                step=100.0,
+                help="Custo médio por hora de voo do piloto"
+            )
+            
+            depreciacao = st.number_input(
+                "Depreciação Anual (%)",
+                value=float(params['depreciacao_anual_pct']),
+                min_value=1.0,
+                max_value=20.0,
+                step=0.5,
+                help="Taxa de depreciação anual da aeronave"
+            )
+        
+        with col2:
+            st.markdown("##### Custos de Manutenção por Tipo")
+            
+            manut_turboprop = st.number_input(
+                "Manutenção Turboprop (R$/hora)",
+                value=float(params['custo_manutencao_hora']['turboprop']),
+                min_value=500.0,
+                max_value=5000.0,
+                step=100.0,
+                help="Custo médio de manutenção para turboprops"
+            )
+            
+            manut_jato = st.number_input(
+                "Manutenção Jato (R$/hora)",
+                value=float(params['custo_manutencao_hora']['jato']),
+                min_value=1000.0,
+                max_value=10000.0,
+                step=200.0,
+                help="Custo médio de manutenção para jatos"
+            )
+        
+        st.markdown("##### Preços de Mercado (Charter)")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            mercado_turboprop = st.number_input(
+                "Preço Charter Turboprop (R$/hora)",
+                value=float(params['preco_mercado']['turboprop']),
+                min_value=3000.0,
+                max_value=15000.0,
+                step=500.0,
+                help="Preço médio de mercado para charter de turboprops"
+            )
+        
+        with col2:
+            mercado_jato = st.number_input(
+                "Preço Charter Jato (R$/hora)",
+                value=float(params['preco_mercado']['jato']),
+                min_value=8000.0,
+                max_value=30000.0,
+                step=1000.0,
+                help="Preço médio de mercado para charter de jatos"
+            )
+        
+        if st.button("💾 Salvar Configurações Financeiras", type="primary"):
+            novos_params = {
+                'preco_combustivel': preco_combustivel,
+                'custo_piloto_hora': custo_piloto,
+                'depreciacao_anual_pct': depreciacao,
+                'custo_manutencao_hora': {
+                    'turboprop': manut_turboprop,
+                    'jato': manut_jato
+                },
+                'percentual_proprietario': 0.9,
+                'preco_mercado': {
+                    'turboprop': mercado_turboprop,
+                    'jato': mercado_jato
+                }
+            }
+            
+            if save_params(novos_params):
+                st.success("✅ Configurações salvas com sucesso!")
+                st.rerun()
+            else:
+                st.error("❌ Erro ao salvar configurações")
+    
+    with config_tab2:
+        st.markdown("#### ✈️ Gerenciamento de Modelos de Aeronaves")
+        
+        # Carregar modelos atuais
+        try:
+            df_modelos = pd.read_csv('data/modelos.csv')
+        except:
+            df_modelos = pd.DataFrame({
+                'modelo': ['Pilatus PC-12'],
+                'consumo_l_por_h': [260],
+                'manut_tipo': ['turboprop'],
+                'tipo': ['turboprop']
+            })
+        
+        # Editor de dados
+        st.markdown("##### Editar Modelos Existentes")
+        df_editado = st.data_editor(
+            df_modelos,
+            num_rows="dynamic",
+            use_container_width=True,
+            column_config={
+                "modelo": st.column_config.TextColumn("Modelo", help="Nome do modelo da aeronave"),
+                "consumo_l_por_h": st.column_config.NumberColumn("Consumo (L/h)", help="Consumo de combustível em litros por hora"),
+                "manut_tipo": st.column_config.SelectboxColumn("Tipo Manutenção", options=["turboprop", "jato"]),
+                "tipo": st.column_config.SelectboxColumn("Tipo Aeronave", options=["turboprop", "jato"])
+            }
+        )
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("💾 Salvar Alterações nos Modelos", type="primary"):
+                try:
+                    df_editado.to_csv('data/modelos.csv', index=False)
+                    st.success("✅ Modelos atualizados com sucesso!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Erro ao salvar modelos: {e}")
+        
+        with col2:
+            # Download do template
+            csv = df_modelos.to_csv(index=False)
+            st.download_button(
+                "📥 Baixar Template CSV",
+                csv,
+                "modelos_template.csv",
+                "text/csv",
+                help="Baixe o template para editar externamente"
+            )
+    
+    with config_tab3:
+        st.markdown("#### 🗺️ Gerenciamento de Rotas")
+        
+        # Carregar rotas atuais
+        try:
+            df_rotas = pd.read_csv('data/rotas.csv')
+        except:
+            df_rotas = pd.DataFrame({
+                'origem': ['GRU'],
+                'destino': ['SDU'],
+                'duracao_h': [1.0]
+            })
+        
+        # Editor de dados
+        st.markdown("##### Editar Rotas Disponíveis")
+        df_rotas_editado = st.data_editor(
+            df_rotas,
+            num_rows="dynamic",
+            use_container_width=True,
+            column_config={
+                "origem": st.column_config.TextColumn("Origem", help="Código IATA do aeroporto de origem"),
+                "destino": st.column_config.TextColumn("Destino", help="Código IATA do aeroporto de destino"),
+                "duracao_h": st.column_config.NumberColumn("Duração (h)", help="Duração do voo em horas", format="%.1f")
+            }
+        )
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("💾 Salvar Alterações nas Rotas", type="primary"):
+                try:
+                    df_rotas_editado.to_csv('data/rotas.csv', index=False)
+                    st.success("✅ Rotas atualizadas com sucesso!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Erro ao salvar rotas: {e}")
+        
+        with col2:
+            # Download do template
+            csv_rotas = df_rotas.to_csv(index=False)
+            st.download_button(
+                "📥 Baixar Template CSV",
+                csv_rotas,
+                "rotas_template.csv",
+                "text/csv",
+                help="Baixe o template para editar externamente"
+            )
+
+# ========================================================================
+# FOOTER
+# ========================================================================
+st.markdown("---")
+st.markdown("""
+<div style="text-align: center; color: #6B7280; padding: 2rem;">
+    <p>✈️ <strong>Amaro Aviation</strong> - Excelência em Gestão de Aviação Executiva</p>
+    <p style="font-size: 0.875rem;">Simulador desenvolvido para demonstrar o valor agregado da gestão profissional Amaro</p>
+</div>
+""", unsafe_allow_html=True)
