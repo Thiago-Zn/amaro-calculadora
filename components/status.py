@@ -177,21 +177,18 @@ def render_calculation_status(is_profitable, profit_value, message, lang='pt'):
 
 def render_system_status(params, lang='pt'):
     """
-    Renderiza status do sistema
-    
-    Args:
-        params: Parâmetros carregados
-        lang: Idioma
+    Mostra apenas UM box de status – sem <div>.
+    Retorna True se estiver tudo ok.
     """
-    
-    if not params:
-        render_status_box(
-            'error',
-            'Sistema Não Configurado' if lang == 'pt' else 'System Not Configured',
-            'Execute o setup inicial para configurar o sistema.' if lang == 'pt' 
-            else 'Run initial setup to configure the system.'
-        )
+    if not params or not params.get("modelos_disponiveis"):
+        st.warning("⚠️ Sistema não configurado")
         return False
+
+    modelos = len(params["modelos_disponiveis"])
+    msg = f"✅ Sistema Operacional — {modelos} modelos configurados"
+    st.success(msg)
+    return True
+
     
     modelos = params.get('modelos_disponiveis', [])
     if not modelos:

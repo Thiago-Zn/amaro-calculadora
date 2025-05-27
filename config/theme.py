@@ -1,105 +1,108 @@
 """
 config/theme.py
-
-Tema Claro Amaro Aviation – Compatível com Streamlit ≥ 1.30
+Tema Amaro Aviation ― inspirado no site oficial
 """
 
 import streamlit as st
 
 def load_theme() -> None:
-    """Injeta o CSS corporativo enxuto e definitivo."""
     st.markdown(
         """
 <style>
-  /* === Variáveis de cor === */
-  :root {
-    --amaro-bordo: #8C1D40;
-    --amaro-bordo-escuro: #A02050;
-    --amaro-branco: #FFFFFF;
-    --amaro-cinza-texto: #1F2937;
-    --amaro-cinza-fundo: #F8F9FA;
-    --amaro-cinza-borda: #E5E7EB;
-  }
+/* === Paleta === */
+:root{
+  --bordo:#8C1D40;
+  --bordo-light:#A02050;
+  --bordo-dark:#731734;
+  --grafite:#424242;
+  --white:#FFFFFF;
+  --gray-text:#1F2937;
+  --gray-bg:#F4F4F4;
+  --gray-border:#D6D6D6;
+}
 
-  /* 1) Corpo e fonte globais */
-  html, body, [data-testid="stAppViewContainer"] {
-    background: var(--amaro-branco) !important;
-    color:      var(--amaro-cinza-texto) !important;
-    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
-  }
+/* === Corpo === */
+html,body,[data-testid="stAppViewContainer"]{
+  background:var(--white)!important;
+  color:var(--gray-text)!important;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+}
 
-  /* 2) Sidebar – fundo bordô, texto branco */
-  section[data-testid="stSidebar"] {
-    background: var(--amaro-bordo) !important;
-    color: var(--amaro-branco)   !important;
-  }
-  /* Links (páginas) na sidebar */
-  section[data-testid="stSidebar"] a {
-    color: var(--amaro-branco) !important;
-    padding: 0.5rem;
-    border-radius: 6px;
-    transition: background 0.2s, box-shadow 0.2s;
-  }
-  section[data-testid="stSidebar"] a:hover {
-    background: var(--amaro-bordo-escuro) !important;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-  /* Item ativo */
-  section[data-testid="stSidebar"] a[aria-current="page"] {
-    background: var(--amaro-bordo-escuro) !important;
-    font-weight: 600;
-  }
+/* === Sidebar === */
+section[data-testid="stSidebar"]{
+  background:var(--bordo)!important;
+  color:var(--white)!important;
+}
+section[data-testid="stSidebar"] *{
+  color:var(--white)!important;
+}
+section[data-testid="stSidebar"] a{
+  padding:.5rem .9rem;
+  border-radius:6px;
+  transition:background .2s,box-shadow .2s;
+}
+section[data-testid="stSidebar"] a:hover{
+  background:var(--bordo-light)!important;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+section[data-testid="stSidebar"] a[aria-current="page"]{
+  background:var(--bordo-dark)!important;
+  font-weight:600;
+}
 
-  /* 3) Header principal – gradiente bordô + texto branco */
-  .main-header {
-    background:    linear-gradient(135deg, var(--amaro-bordo), var(--amaro-bordo-escuro)) !important;
-    color:         var(--amaro-branco) !important;
-    padding:       2rem !important;
-    margin:        -1rem -1rem 2rem -1rem !important;
-    text-align:    center !important;
-    border-radius: 0 0 12px 12px !important;
-  }
-  .main-header h1, .main-header p {
-    color: var(--amaro-branco) !important;
-  }
+/* === Header (barra preta do site) === */
+[data-testid="stHeader"]{
+  background:var(--grafite)!important;
+  color:var(--white)!important;
+}
 
-  /* 4) Botões bordô */
-  .stButton>button {
-    background: var(--amaro-bordo) !important;
-    color:      var(--amaro-branco) !important;
-    border-radius: 6px !important;
-    padding: 0.5rem 1rem !important;
-    text-transform: uppercase !important;
-  }
-  .stButton>button:hover {
-    background: var(--amaro-bordo-escuro) !important;
-  }
+/* === Botões === */
+.stButton>button{
+  background:var(--bordo)!important;
+  color:var(--white)!important;
+  border:1px solid var(--bordo);
+  border-radius:6px!important;
+  padding:.45rem 1.2rem!important;
+  text-transform:uppercase;
+  font-weight:600;
+}
+.stButton>button:hover{
+  background:var(--bordo-light)!important;
+}
 
-  /* 5) Tabs */
-  [data-testid="stTabs"] [role="tablist"] {
-    background: var(--amaro-cinza-fundo) !important;
-    border-radius: 8px !important;
-    padding: 0.2rem !important;
-  }
-  [data-testid="stTabs"] [aria-selected="true"] {
-    background: var(--amaro-bordo) !important;
-    color: var(--amaro-branco) !important;
-  }
+/* === Tabs === */
+[data-testid="stTabs"] [role="tablist"]{
+  background:var(--gray-bg);
+  border-radius:8px;
+  padding:.2rem;
+}
+[data-testid="stTabs"] [data-baseweb="tab"]{
+  background:transparent;
+  color:var(--gray-text);
+  padding:.55rem 1rem;
+  border-radius:6px;
+  transition:background .2s;
+}
+[data-testid="stTabs"] [data-baseweb="tab"]:hover{
+  background:var(--gray-bg);
+}
+[data-testid="stTabs"] [aria-selected="true"]{
+  background:var(--bordo);
+  color:var(--white);
+  font-weight:600;
+}
 
-  /* 6) Cards e containers */
-  .card-style {
-    background: var(--amaro-branco) !important;
-    border: 1px solid var(--amaro-cinza-borda) !important;
-    border-radius: 8px !important;
-    padding: 1rem !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
-    margin-bottom: 1rem !important;
-  }
+/* === Card utilitário (classe opcional `card-style`) === */
+.card-style{
+  background:var(--white);
+  border:1px solid var(--gray-border);
+  border-radius:8px;
+  padding:1rem;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
 
-  /* 7) Esconder menu e rodapé padrão */
-  #MainMenu, header, footer {
-    visibility: hidden !important;
-  }
+/* ==== Esconder menu/rodapé === */
+header,footer,#MainMenu{visibility:hidden}
 </style>
         """,
         unsafe_allow_html=True
