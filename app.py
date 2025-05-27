@@ -20,17 +20,17 @@ from utils.exportador_pdf import gerar_pdf
 # ========================================================================
 st.set_page_config(
     page_title="Amaro Aviation - Calculadora de Custos",
-    page_icon="✈",
+    page_icon="🛩",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ========================================================================
-# SISTEMA DE IDIOMAS SIMPLIFICADO
+# SISTEMA DE IDIOMAS CORPORATIVO
 # ========================================================================
 @st.cache_data
 def get_translations():
-    """Sistema de traduções corporativo"""
+    """Sistema de traduções corporativo - sem emojis"""
     return {
         'pt': {
             'app_title': 'AMARO AVIATION',
@@ -66,8 +66,8 @@ def get_translations():
             'save_settings': 'SALVAR CONFIGURAÇÕES',
             'system_operational': 'Sistema Operacional',
             'models_configured': 'modelos configurados',
-            'profitable_operation': 'Operação Rentável',
-            'operation_at_loss': 'Operação com Prejuízo',
+            'profitable_operation': 'OPERAÇÃO RENTÁVEL',
+            'operation_at_loss': 'OPERAÇÃO COM PREJUÍZO',
             'settings_saved': 'Configurações salvas com sucesso',
             'calculation_error': 'Erro no cálculo',
             'export_excel': 'EXPORTAR EXCEL',
@@ -108,8 +108,8 @@ def get_translations():
             'save_settings': 'SAVE SETTINGS',
             'system_operational': 'System Operational',
             'models_configured': 'models configured',
-            'profitable_operation': 'Profitable Operation',
-            'operation_at_loss': 'Operation at Loss',
+            'profitable_operation': 'PROFITABLE OPERATION',
+            'operation_at_loss': 'OPERATION AT LOSS',
             'settings_saved': 'Settings saved successfully',
             'calculation_error': 'Calculation error',
             'export_excel': 'EXPORT EXCEL',
@@ -159,70 +159,82 @@ def load_corporate_css():
     
     .corporate-header {
         background-color: #FFFFFF;
-        border-bottom: 2px solid #8C1D40;
-        padding: 2rem 0;
+        border-bottom: 3px solid #8C1D40;
+        padding: 3rem 0;
         margin-bottom: 2rem;
         text-align: center;
     }
     
     .corporate-header h1 {
         color: #8C1D40;
-        font-size: 2.5rem;
+        font-size: 3rem;
         font-weight: 700;
-        letter-spacing: 2px;
+        letter-spacing: 3px;
         margin: 0;
         text-transform: uppercase;
     }
     
     .corporate-header p {
         color: #333333;
-        font-size: 1.1rem;
-        font-weight: 400;
-        margin: 0.5rem 0 0 0;
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin: 1rem 0 0 0;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 2px;
     }
     
     .corporate-card {
         background-color: #FFFFFF;
         border: 1px solid #E0E0E0;
-        border-radius: 4px;
+        border-radius: 0;
         padding: 2rem;
-        margin: 1.5rem 0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin: 2rem 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
     
     .corporate-card h3 {
         color: #8C1D40;
-        font-size: 1.4rem;
-        font-weight: 600;
+        font-size: 1.5rem;
+        font-weight: 700;
         margin: 0 0 1rem 0;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 2px;
+        border-bottom: 2px solid #8C1D40;
+        padding-bottom: 0.5rem;
+    }
+    
+    .corporate-card p {
+        color: #333333;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin: 0;
+        font-weight: 400;
     }
     
     .metric-card {
         background-color: #FFFFFF;
-        border: 1px solid #E0E0E0;
-        border-left: 4px solid #8C1D40;
-        padding: 1.5rem;
+        border: 2px solid #E0E0E0;
+        border-left: 6px solid #8C1D40;
+        padding: 2rem;
         margin: 1rem 0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        text-align: center;
     }
     
     .metric-value {
-        font-size: 2rem;
+        font-size: 2.5rem;
         font-weight: 700;
         color: #8C1D40;
-        margin: 0.5rem 0;
+        margin: 1rem 0;
+        font-family: 'Inter', sans-serif;
     }
     
     .metric-label {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         color: #333333;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 500;
+        letter-spacing: 1px;
+        font-weight: 600;
         margin: 0;
     }
     
@@ -230,106 +242,178 @@ def load_corporate_css():
         background-color: #8C1D40;
         color: white;
         border: none;
-        border-radius: 4px;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        font-size: 0.95rem;
+        border-radius: 0;
+        padding: 1rem 3rem;
+        font-weight: 700;
+        font-size: 1rem;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: background-color 0.3s ease;
+        letter-spacing: 2px;
+        transition: all 0.3s ease;
         width: 100%;
+        box-shadow: 0 4px 12px rgba(140,29,64,0.3);
     }
     
     .stButton > button:hover {
         background-color: #6D1530;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(140,29,64,0.4);
     }
     
     .stTabs [data-baseweb="tab-list"] {
-        background-color: #FFFFFF;
-        border-bottom: 1px solid #E0E0E0;
+        background-color: #F8F9FA;
+        border-bottom: 2px solid #E0E0E0;
         padding: 0;
+        margin-bottom: 2rem;
     }
     
     .stTabs [data-baseweb="tab"] {
         background-color: transparent;
         color: #333333;
-        font-weight: 500;
-        font-size: 0.9rem;
+        font-weight: 600;
+        font-size: 1rem;
         text-transform: uppercase;
         letter-spacing: 1px;
-        padding: 1rem 2rem;
+        padding: 1.5rem 2rem;
         border: none;
-        border-bottom: 3px solid transparent;
+        border-bottom: 4px solid transparent;
+        margin: 0;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: transparent;
+        background-color: #FFFFFF;
         color: #8C1D40;
-        border-bottom: 3px solid #8C1D40;
-        font-weight: 600;
+        border-bottom: 4px solid #8C1D40;
+        font-weight: 700;
     }
     
     .sidebar-header {
         background-color: #8C1D40;
         color: white;
-        padding: 1.5rem;
+        padding: 2rem;
         margin: -1rem -1rem 2rem -1rem;
         text-align: center;
     }
     
     .sidebar-header h2 {
-        font-size: 1.2rem;
-        font-weight: 600;
+        font-size: 1.3rem;
+        font-weight: 700;
         margin: 0;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 2px;
     }
     
     .stSelectbox > div > div,
     .stNumberInput > div > div > input,
     .stSlider > div > div > div {
-        border: 1px solid #E0E0E0;
-        border-radius: 4px;
+        border: 2px solid #E0E0E0;
+        border-radius: 0;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .stSelectbox > div > div:focus-within,
+    .stNumberInput > div > div:focus-within {
+        border-color: #8C1D40;
+        box-shadow: 0 0 0 2px rgba(140,29,64,0.2);
     }
     
     .stSelectbox > label,
     .stNumberInput > label,
-    .stSlider > label {
-        font-weight: 500;
+    .stSlider > label,
+    .stCheckbox > label {
+        font-weight: 600;
         color: #333333;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
     }
     
     .success-highlight {
-        background-color: rgba(76, 175, 80, 0.1);
-        border: 1px solid #4CAF50;
-        border-left: 4px solid #4CAF50;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        border-radius: 4px;
+        background-color: #E8F5E8;
+        border: 2px solid #4CAF50;
+        border-left: 6px solid #4CAF50;
+        padding: 2rem;
+        margin: 2rem 0;
+        border-radius: 0;
     }
     
     .warning-highlight {
-        background-color: rgba(255, 193, 7, 0.1);
-        border: 1px solid #FFC107;
-        border-left: 4px solid #FFC107;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        border-radius: 4px;
+        background-color: #FFF3E0;
+        border: 2px solid #FF9800;
+        border-left: 6px solid #FF9800;
+        padding: 2rem;
+        margin: 2rem 0;
+        border-radius: 0;
     }
     
     .success-highlight h4,
     .warning-highlight h4 {
-        margin: 0 0 0.5rem 0;
-        font-weight: 600;
+        margin: 0 0 1rem 0;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 2px;
+        font-size: 1.2rem;
     }
     
+    .success-highlight p,
+    .warning-highlight p {
+        margin: 0.5rem 0;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+    
+    /* Remover elementos desnecessários */
     .stDeployButton {
         display: none;
+    }
+    
+    /* Estilo para informações */
+    .stSuccess, .stInfo, .stWarning, .stError {
+        border-radius: 0;
+        border-left: 6px solid;
+        font-weight: 500;
+    }
+    
+    .stSuccess {
+        border-left-color: #4CAF50;
+        background-color: #E8F5E8;
+    }
+    
+    .stWarning {
+        border-left-color: #FF9800;
+        background-color: #FFF3E0;
+    }
+    
+    .stError {
+        border-left-color: #F44336;
+        background-color: #FFEBEE;
+    }
+    
+    .stInfo {
+        border-left-color: #2196F3;
+        background-color: #E3F2FD;
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .corporate-header h1 {
+            font-size: 2rem;
+            letter-spacing: 2px;
+        }
+        
+        .corporate-header p {
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -369,11 +453,11 @@ try:
     modelos = params.get('modelos_disponiveis', [])
     
     if not modelos:
-        st.error("Nenhum modelo configurado. Verifique os dados em data/modelos.csv")
+        st.error("ERRO: Nenhum modelo configurado. Verifique os dados em data/modelos.csv")
         st.stop()
         
 except Exception as e:
-    st.error(f"Erro ao carregar parâmetros: {e}")
+    st.error(f"ERRO ao carregar parâmetros: {e}")
     st.stop()
 
 # ========================================================================
@@ -479,11 +563,12 @@ with tab1:
                 </div>
                 """, unsafe_allow_html=True)
             
+            # Gráfico de breakdown
             fig_breakdown = go.Figure(data=[go.Pie(
                 labels=[
-                    t('owner_revenue', lang),
-                    t('amaro_fee', lang),
-                    t('operational_costs', lang)
+                    'Lucro Proprietário',
+                    'Taxa Amaro Aviation',
+                    'Custos Operacionais'
                 ],
                 values=[
                     receita_proprietario - custo_operacional,
@@ -494,7 +579,7 @@ with tab1:
                 marker=dict(colors=['#4CAF50', '#8C1D40', '#F44336']),
                 textinfo='label+percent+value',
                 texttemplate='<b>%{label}</b><br>%{percent}<br>%{value:,.0f}',
-                textfont=dict(size=12)
+                textfont=dict(size=12, family='Inter')
             )])
             
             fig_breakdown.update_layout(
@@ -502,11 +587,20 @@ with tab1:
                 font=dict(family='Inter, sans-serif', size=12),
                 height=500,
                 template='plotly_white',
-                title_font=dict(size=16, color='#333333')
+                title_font=dict(size=18, color='#333333', family='Inter'),
+                showlegend=True,
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=-0.2,
+                    xanchor="center",
+                    x=0.5
+                )
             )
             
             st.plotly_chart(fig_breakdown, use_container_width=True)
             
+            # Status da operação
             if lucro_liquido > 0:
                 st.markdown(f"""
                 <div class="success-highlight">
@@ -519,10 +613,13 @@ with tab1:
                 st.markdown(f"""
                 <div class="warning-highlight">
                     <h4>{t('operation_at_loss', lang)}</h4>
-                    <p>Prejuízo mensal: {format_currency(abs(lucro_liquido), lang)}</p>
+                    <p><strong>Prejuízo Mensal:</strong> {format_currency(abs(lucro_liquido), lang)}</p>
+                    <p><strong>Recomendação:</strong> Revisar parâmetros operacionais</p>
                 </div>
                 """, unsafe_allow_html=True)
             
+            # Exportação
+            st.markdown("### EXPORTAR RELATÓRIO")
             col1, col2 = st.columns(2)
             
             dados_lucro = {
@@ -645,11 +742,11 @@ with tab2:
             
             with col1:
                 st.markdown(f"""
-                <div class="corporate-card" style="background: #FFF8E1; border-left: 4px solid #FFC107;">
-                    <h4 style="color: #FF8F00; margin: 0 0 1rem 0;">{t('own_management', lang)}</h4>
-                    <div class="metric-value" style="color: #FF8F00;">{format_currency(custo_liquido_proprio, lang)}</div>
-                    <hr style="border-color: #E0E0E0;">
-                    <p><strong>{t('operational_costs', lang)}:</strong> {format_currency(custo_operacional_ano, lang)}</p>
+                <div class="corporate-card" style="background: #FFF8E1; border-left: 6px solid #FF9800;">
+                    <h4 style="color: #E65100; margin: 0 0 1rem 0; font-size: 1.2rem; font-weight: 700;">{t('own_management', lang)}</h4>
+                    <div class="metric-value" style="color: #E65100; font-size: 2rem;">{format_currency(custo_liquido_proprio, lang)}</div>
+                    <hr style="border-color: #E0E0E0; margin: 1rem 0;">
+                    <p><strong>Custos Operacionais:</strong> {format_currency(custo_operacional_ano, lang)}</p>
                     <p><strong>Custos Fixos:</strong> {format_currency(custos_fixos_anuais, lang)}</p>
                     {f"<p><strong>Receita Charter:</strong> -{format_currency(receita_charter, lang)}</p>" if include_charter else ""}
                 </div>
@@ -657,11 +754,11 @@ with tab2:
             
             with col2:
                 st.markdown(f"""
-                <div class="corporate-card" style="background: #E8F5E8; border-left: 4px solid #4CAF50;">
-                    <h4 style="color: #2E7D32; margin: 0 0 1rem 0;">{t('amaro_management', lang)}</h4>
-                    <div class="metric-value" style="color: #2E7D32;">{format_currency(custo_liquido_amaro, lang)}</div>
-                    <hr style="border-color: #E0E0E0;">
-                    <p><strong>{t('operational_costs', lang)}:</strong> {format_currency(custo_amaro_ano, lang)}</p>
+                <div class="corporate-card" style="background: #E8F5E8; border-left: 6px solid #4CAF50;">
+                    <h4 style="color: #2E7D32; margin: 0 0 1rem 0; font-size: 1.2rem; font-weight: 700;">{t('amaro_management', lang)}</h4>
+                    <div class="metric-value" style="color: #2E7D32; font-size: 2rem;">{format_currency(custo_liquido_amaro, lang)}</div>
+                    <hr style="border-color: #E0E0E0; margin: 1rem 0;">
+                    <p><strong>Custos Operacionais:</strong> {format_currency(custo_amaro_ano, lang)}</p>
                     <p><strong>Custos Fixos:</strong> {format_currency(0, lang)}</p>
                     {f"<p><strong>Receita Charter:</strong> -{format_currency(receita_charter, lang)}</p>" if include_charter else ""}
                 </div>
@@ -669,21 +766,23 @@ with tab2:
             
             with col3:
                 cor_economia = '#4CAF50' if economia_anual > 0 else '#F44336'
+                bg_economia = '#E8F5E8' if economia_anual > 0 else '#FFEBEE'
                 st.markdown(f"""
-                <div class="corporate-card" style="background: {'#E8F5E8' if economia_anual > 0 else '#FFEBEE'}; border-left: 4px solid {cor_economia};">
-                    <h4 style="color: {cor_economia}; margin: 0 0 1rem 0;">{t('annual_savings', lang)}</h4>
-                    <div class="metric-value" style="color: {cor_economia};">{format_currency(abs(economia_anual), lang)}</div>
-                    <hr style="border-color: #E0E0E0;">
+                <div class="corporate-card" style="background: {bg_economia}; border-left: 6px solid {cor_economia};">
+                    <h4 style="color: {cor_economia}; margin: 0 0 1rem 0; font-size: 1.2rem; font-weight: 700;">{t('annual_savings', lang)}</h4>
+                    <div class="metric-value" style="color: {cor_economia}; font-size: 2rem;">{format_currency(abs(economia_anual), lang)}</div>
+                    <hr style="border-color: #E0E0E0; margin: 1rem 0;">
                     <p><strong>{t('savings_percentage', lang)}:</strong> {format_percentage(percentual_economia, lang)}</p>
                     <p><strong>Economia Mensal:</strong> {format_currency(economia_anual/12, lang)}</p>
                 </div>
                 """, unsafe_allow_html=True)
             
+            # Gráfico comparativo
             fig_comp = go.Figure()
             
             categorias = [t('own_management', lang), t('amaro_management', lang)]
             valores = [custo_liquido_proprio, custo_liquido_amaro]
-            cores = ['#FFC107', '#8C1D40']
+            cores = ['#FF9800', '#8C1D40']
             
             fig_comp.add_trace(go.Bar(
                 x=categorias,
@@ -691,7 +790,7 @@ with tab2:
                 marker_color=cores,
                 text=[format_currency(v, lang) for v in valores],
                 textposition='outside',
-                textfont=dict(size=14, color='#333333')
+                textfont=dict(size=14, color='#333333', family='Inter')
             ))
             
             if economia_anual > 0:
@@ -701,7 +800,7 @@ with tab2:
                     showarrow=True,
                     arrowhead=2,
                     arrowcolor='#4CAF50',
-                    font=dict(size=14, color='#4CAF50')
+                    font=dict(size=16, color='#4CAF50', family='Inter')
                 )
             
             fig_comp.update_layout(
@@ -710,11 +809,13 @@ with tab2:
                 template='plotly_white',
                 height=500,
                 font=dict(family='Inter, sans-serif', size=12),
-                title_font=dict(size=16, color='#333333')
+                title_font=dict(size=18, color='#333333', family='Inter')
             )
             
             st.plotly_chart(fig_comp, use_container_width=True)
             
+            # Exportação
+            st.markdown("### EXPORTAR RELATÓRIO")
             col1, col2 = st.columns(2)
             
             dados_comp = {
@@ -773,7 +874,7 @@ with tab3:
     st.markdown(f"""
     <div class="corporate-card">
         <h3>{t('tab_settings', lang)}</h3>
-        <p>Ajuste os parâmetros de cálculo e salve as configurações</p>
+        <p>Ajuste os parâmetros de cálculo e visualize as fórmulas utilizadas</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -788,13 +889,15 @@ with tab3:
         col1, col2 = st.columns(2)
         
         with col1:
+            # CORREÇÃO CRÍTICA: Todos os valores devem ser float
             preco_combustivel = st.number_input(
                 t('fuel_price', lang),
                 min_value=1.0,
                 max_value=50.0,
                 value=float(params['preco_combustivel']),
                 step=0.1,
-                format="%.2f"
+                format="%.2f",
+                key="config_combustivel"
             )
             
             custo_piloto = st.number_input(
@@ -803,7 +906,8 @@ with tab3:
                 max_value=5000.0,
                 value=float(params['custo_piloto_hora']),
                 step=50.0,
-                format="%.0f"
+                format="%.0f",
+                key="config_piloto"
             )
             
             depreciacao = st.number_input(
@@ -812,7 +916,8 @@ with tab3:
                 max_value=20.0,
                 value=float(params['depreciacao_anual_pct']),
                 step=0.5,
-                format="%.1f"
+                format="%.1f",
+                key="config_depreciacao"
             )
         
         with col2:
@@ -822,7 +927,8 @@ with tab3:
                 max_value=5000.0,
                 value=float(params['custo_manutencao_hora']['turboprop']),
                 step=100.0,
-                format="%.0f"
+                format="%.0f",
+                key="config_manut_turbo"
             )
             
             manut_jato = st.number_input(
@@ -831,7 +937,8 @@ with tab3:
                 max_value=10000.0,
                 value=float(params['custo_manutencao_hora']['jato']),
                 step=200.0,
-                format="%.0f"
+                format="%.0f",
+                key="config_manut_jato"
             )
             
             mercado_turboprop = st.number_input(
@@ -840,7 +947,8 @@ with tab3:
                 max_value=15000.0,
                 value=float(params['preco_mercado']['turboprop']),
                 step=500.0,
-                format="%.0f"
+                format="%.0f",
+                key="config_mercado_turbo"
             )
             
             mercado_jato = st.number_input(
@@ -849,25 +957,28 @@ with tab3:
                 max_value=30000.0,
                 value=float(params['preco_mercado']['jato']),
                 step=1000.0,
-                format="%.0f"
+                format="%.0f",
+                key="config_mercado_jato"
             )
         
+        # Botão de salvar
+        st.markdown("---")
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            if st.button(t('save_settings', lang), type="primary", use_container_width=True):
+            if st.button(t('save_settings', lang), type="primary", use_container_width=True, key="save_config"):
                 try:
                     novos_params = {
-                        'preco_combustivel': preco_combustivel,
-                        'custo_piloto_hora': custo_piloto,
-                        'depreciacao_anual_pct': depreciacao,
+                        'preco_combustivel': float(preco_combustivel),
+                        'custo_piloto_hora': float(custo_piloto),
+                        'depreciacao_anual_pct': float(depreciacao),
                         'custo_manutencao_hora': {
-                            'turboprop': manut_turboprop,
-                            'jato': manut_jato
+                            'turboprop': float(manut_turboprop),
+                            'jato': float(manut_jato)
                         },
-                        'percentual_proprietario': params.get('percentual_proprietario', 0.9),
+                        'percentual_proprietario': float(params.get('percentual_proprietario', 0.9)),
                         'preco_mercado': {
-                            'turboprop': mercado_turboprop,
-                            'jato': mercado_jato
+                            'turboprop': float(mercado_turboprop),
+                            'jato': float(mercado_jato)
                         }
                     }
                     
@@ -875,10 +986,10 @@ with tab3:
                         st.success(t('settings_saved', lang))
                         st.rerun()
                     else:
-                        st.error("Erro ao salvar configurações")
+                        st.error("ERRO ao salvar configurações")
                         
                 except Exception as e:
-                    st.error(f"Erro ao processar dados: {e}")
+                    st.error(f"ERRO ao processar dados: {e}")
     
     with config_tab2:
         st.markdown("### FÓRMULAS UTILIZADAS" if lang == 'pt' else "### FORMULAS USED")
@@ -886,11 +997,11 @@ with tab3:
         st.markdown(f"""
         <div class="corporate-card">
             <h4>CÁLCULO DE CUSTO POR HORA</h4>
-            <div style="background: #F5F5F5; padding: 1rem; border-radius: 4px; margin: 1rem 0; border-left: 4px solid #8C1D40;">
-                <code style="font-family: 'Courier New', monospace; color: #333333;">
+            <div style="background: #F5F5F5; padding: 2rem; border-radius: 0; margin: 1rem 0; border-left: 6px solid #8C1D40;">
+                <code style="font-family: 'Courier New', monospace; color: #333333; font-size: 0.95rem; line-height: 1.6;">
                 {'Custo Total/Hora = Combustível + Piloto + Manutenção + Depreciação' if lang == 'pt' else 'Total Cost/Hour = Fuel + Pilot + Maintenance + Depreciation'}
                 <br><br>
-                {'Onde:' if lang == 'pt' else 'Where:'}<br>
+                <strong>{'Onde:' if lang == 'pt' else 'Where:'}</strong><br>
                 • {'Combustível = Consumo (L/h) × Preço Combustível (R$/L)' if lang == 'pt' else 'Fuel = Consumption (L/h) × Fuel Price (R$/L)'}<br>
                 • {'Piloto = Custo Piloto (R$/h)' if lang == 'pt' else 'Pilot = Pilot Cost (R$/h)'}<br>
                 • {'Manutenção = Custo Manutenção por tipo (R$/h)' if lang == 'pt' else 'Maintenance = Maintenance Cost per type (R$/h)'}<br>
@@ -901,8 +1012,8 @@ with tab3:
         
         <div class="corporate-card">
             <h4>CÁLCULO DE ECONOMIA</h4>
-            <div style="background: #F5F5F5; padding: 1rem; border-radius: 4px; margin: 1rem 0; border-left: 4px solid #8C1D40;">
-                <code style="font-family: 'Courier New', monospace; color: #333333;">
+            <div style="background: #F5F5F5; padding: 2rem; border-radius: 0; margin: 1rem 0; border-left: 6px solid #8C1D40;">
+                <code style="font-family: 'Courier New', monospace; color: #333333; font-size: 0.95rem; line-height: 1.6;">
                 {'Economia = Preço Mercado - Custo Amaro' if lang == 'pt' else 'Savings = Market Price - Amaro Cost'}
                 <br><br>
                 {'Percentual Economia = (Economia ÷ Preço Mercado) × 100' if lang == 'pt' else 'Savings Percentage = (Savings ÷ Market Price) × 100'}
@@ -912,8 +1023,8 @@ with tab3:
         
         <div class="corporate-card">
             <h4>MODELO DE RECEITA AMARO AVIATION</h4>
-            <div style="background: #F5F5F5; padding: 1rem; border-radius: 4px; margin: 1rem 0; border-left: 4px solid #8C1D40;">
-                <code style="font-family: 'Courier New', monospace; color: #333333;">
+            <div style="background: #F5F5F5; padding: 2rem; border-radius: 0; margin: 1rem 0; border-left: 6px solid #8C1D40;">
+                <code style="font-family: 'Courier New', monospace; color: #333333; font-size: 0.95rem; line-height: 1.6;">
                 {'Receita do Proprietário = Receita Bruta × 90%' if lang == 'pt' else 'Owner Revenue = Gross Revenue × 90%'}<br>
                 {'Taxa Amaro Aviation = Receita Bruta × 10%' if lang == 'pt' else 'Amaro Aviation Fee = Gross Revenue × 10%'}<br>
                 {'Lucro Líquido = Receita do Proprietário - Custos Operacionais' if lang == 'pt' else 'Net Profit = Owner Revenue - Operational Costs'}
@@ -937,15 +1048,15 @@ with st.sidebar:
     """)
     
     st.markdown("### FUNCIONALIDADES" if lang == 'pt' else "### FEATURES")
-    st.info(f"""
-    **LUCRO MENSAL:**
-    {'Simula receitas e custos mensais' if lang == 'pt' else 'Simulates monthly revenues and costs'}
+    st.info("""
+    **ESTIMATIVA DE LUCRO:**
+    Simula receitas e custos mensais
     
-    **COMPARATIVO:**
-    {'Compara gestão própria vs. Amaro' if lang == 'pt' else 'Compares own management vs. Amaro'}
+    **COMPARATIVO DE CUSTOS:**
+    Compara gestão própria vs. Amaro
     
     **CONFIGURAÇÕES:**
-    {'Ajusta parâmetros e visualiza fórmulas' if lang == 'pt' else 'Adjusts parameters and shows formulas'}
+    Ajusta parâmetros e visualiza fórmulas
     """)
     
     st.markdown("### INSTRUÇÕES DE USO" if lang == 'pt' else "### USAGE INSTRUCTIONS")
@@ -966,9 +1077,9 @@ with st.sidebar:
     
     st.markdown("---")
     st.markdown(f"""
-    <div style="text-align: center; color: #333333; font-size: 0.8rem; font-weight: 400;">
+    <div style="text-align: center; color: #333333; font-size: 0.85rem; font-weight: 500; font-family: 'Inter', sans-serif;">
         <p><strong>AMARO AVIATION CALCULATOR</strong></p>
-        <p>VERSÃO 3.0</p>
+        <p>VERSÃO 3.0 CORPORATIVA</p>
         <p>{t('developed_with_love', lang)}</p>
     </div>
     """, unsafe_allow_html=True)
