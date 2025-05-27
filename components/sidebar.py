@@ -25,23 +25,35 @@ def render_sidebar(lang: str = 'pt') -> str:
 
 def _inject_sidebar_css() -> None:
     """
-    Injeta CSS para estilizar e melhorar usabilidade do select na sidebar.
+    Injeta CSS para estilizar e melhorar usabilidade do select de idioma na sidebar:
+      - Label com fundo bordô e texto branco
+      - Campo de seleção com fundo branco e texto escuro
+      - Placeholder cinza médio
+      - Seta escura
+      - Dropdown de opções com scroll
+      - Feedback visual em hover/focus
+      - Oculta header/footer nativos
     """
     st.markdown(
         """
         <style>
-        /* Fundo da sidebar */
-        section[data-testid="stSidebar"]>div { background-color: #8C1D40 !important; }
-
-        /* Label do select */
-        section[data-testid="stSidebar"] label[for="language_selector"] {
-            color: #FFFFFF !important;
-            font-size: 0.875rem !important;
-            margin-bottom: 0.25rem !important;
-            display: block;
+        /* 1. Sidebar: fundo bordô */
+        section[data-testid="stSidebar"] > div {
+            background-color: #8C1D40 !important;
         }
 
-        /* Container do select (campo) */
+        /* 2. Label do select: fundo bordô, texto branco */
+        section[data-testid="stSidebar"] label[for="language_selector"] {
+            background-color: #731734 !important;
+            color: #FFFFFF !important;
+            padding: 0.25rem 0.5rem !important;
+            border-radius: 4px !important;
+            font-size: 0.875rem !important;
+            margin-bottom: 0.5rem !important;
+            display: block !important;
+        }
+
+        /* 3. Container do select (campo): fundo branco, texto escuro */
         section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
             background-color: #FFFFFF !important;
             color: #1F2937 !important;
@@ -49,27 +61,28 @@ def _inject_sidebar_css() -> None:
             border-radius: 6px !important;
             padding: 0.35rem 0.75rem !important;
             line-height: 1.5 !important;
-            position: relative;
+            position: relative !important;
         }
 
-        /* Placeholder mais escuro */
+        /* 4. Placeholder: cinza médio */
         section[data-testid="stSidebar"] div[data-baseweb="select"] input::placeholder {
-            color: #9CA3AF !important;
+            color: #6B7280 !important;
         }
 
-        /* Hover e focus no campo */
-        section[data-testid="stSidebar"] div[data-baseweb="select"] > div:hover,
-        section[data-testid="stSidebar"] div[data-baseweb="select"] > div:focus-within {
-            border-color: #8C1D40 !important;
-            box-shadow: 0 0 0 2px rgba(140, 29, 64, 0.2) !important;
-        }
-
-        /* Seta do select em cor escura */
+        /* 5. Seta do select em cor escura */
         section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
             fill: #1F2937 !important;
         }
 
-        /* Dropdown de opções */
+        /* 6. Hover/Focus no campo selecionável */
+        section[data-testid="stSidebar"] div[data-baseweb="select"] > div:hover,
+        section[data-testid="stSidebar"] div[data-baseweb="select"] > div:focus-within {
+            border-color: #731734 !important;
+            box-shadow: 0 0 0 2px rgba(140, 29, 64, 0.2) !important;
+            outline: none !important;
+        }
+
+        /* 7. Dropdown de opções: fundo branco, scroll e hover */
         section[data-testid="stSidebar"] div[data-baseweb="popover"] {
             background-color: #FFFFFF !important;
             border: 1px solid #DADDE1 !important;
@@ -77,20 +90,23 @@ def _inject_sidebar_css() -> None:
             max-height: 200px !important;
             overflow-y: auto !important;
         }
-        section[data-testid="stSidebar"] div[data-baseweb="popover"] div[role="option"] {
+        section[data-testid="stSidebar"] div[data-baseweb="popover"] li[role="option"] {
             padding: 0.5rem 0.75rem !important;
             color: #1F2937 !important;
         }
-        section[data-testid="stSidebar"] div[data-baseweb="popover"] div[role="option"]:hover {
+        section[data-testid="stSidebar"] div[data-baseweb="popover"] li[role="option"]:hover {
             background-color: #F6F7FA !important;
         }
 
-        /* Oculta header/footer padrão */
-        #MainMenu, header, footer { visibility: hidden; }
+        /* 8. Oculta header/footer padrão do Streamlit */
+        #MainMenu, header, footer {
+            visibility: hidden !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
     )
+
 
 
 def _render_header() -> None:
