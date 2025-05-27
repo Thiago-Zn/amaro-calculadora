@@ -1,127 +1,587 @@
-/* Amaro Aviation - Estilos Corporativos */
+/* Amaro Aviation - CSS Corporativo Profissional */
 
+/* ====================================================================== */
+/* IMPORTAÇÃO DE FONTES PROFISSIONAIS */
+/* ====================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ====================================================================== */
+/* VARIÁVEIS CSS CORPORATIVAS */
+/* ====================================================================== */
 :root {
-  --amaro-primary: #8c1d40;
-  --amaro-secondary: #a02050;
-  --amaro-success: #27AE60;
-  --amaro-warning: #F39C12;
-  --amaro-danger: #E74C3C;
-  --amaro-info: #3498DB;
-  --amaro-dark: #2C3E50;
+  /* Cores Primárias Amaro Aviation */
+  --amaro-primary: #8C1D40;
+  --amaro-secondary: #A02050;
+  --amaro-dark: #1F2937;
   --amaro-light: #F8F9FA;
+  
+  /* Cores de Status */
+  --success-color: #10B981;
+  --warning-color: #F59E0B;
+  --error-color: #DC2626;
+  --info-color: #0EA5E9;
+  
+  /* Cores de Texto */
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  
+  /* Cores de Fundo */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F9FAFB;
+  --bg-accent: #F3F4F6;
+  
+  /* Bordas */
+  --border-color: #E5E7EB;
+  --border-radius: 8px;
+  --border-radius-sm: 6px;
+  --border-radius-lg: 12px;
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.12);
+  
+  /* Espaçamentos */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Tipografia */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
 }
 
-/* Reset de margens do Streamlit */
+/* ====================================================================== */
+/* RESET E CONFIGURAÇÕES GLOBAIS */
+/* ====================================================================== */
+.stApp {
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* Remove padding padrão do Streamlit */
 .block-container {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  padding-top: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  max-width: 1200px;
 }
 
-/* Métricas personalizadas */
-div[data-testid="stMetric"] {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+/* ====================================================================== */
+/* CABEÇALHO CORPORATIVO */
+/* ====================================================================== */
+.corporate-header {
+  background: linear-gradient(135deg, var(--amaro-primary) 0%, var(--amaro-secondary) 100%);
+  color: white;
+  padding: var(--spacing-2xl);
+  margin: calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md)) var(--spacing-xl) calc(-1 * var(--spacing-md));
+  text-align: center;
+  border-bottom: 3px solid var(--amaro-primary);
+  position: relative;
+}
+
+.corporate-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  pointer-events: none;
+}
+
+.corporate-header h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.025em;
+  position: relative;
+  z-index: 1;
+}
+
+.corporate-header p {
+  font-size: var(--font-size-lg);
+  font-weight: 400;
+  margin: var(--spacing-sm) 0 0 0;
+  opacity: 0.95;
+  letter-spacing: 0.01em;
+  position: relative;
+  z-index: 1;
+}
+
+/* ====================================================================== */
+/* CARDS PROFISSIONAIS */
+/* ====================================================================== */
+.professional-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-md) 0;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.professional-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--amaro-primary);
+  transform: translateY(-1px);
+}
+
+.professional-card h3,
+.professional-card h4 {
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 0;
+}
+
+.professional-card p {
+  color: var(--text-secondary);
+  margin-bottom: 0;
+}
+
+/* ====================================================================== */
+/* MÉTRICAS CORPORATIVAS */
+/* ====================================================================== */
+.metric-container {
+  background: var(--bg-secondary);
   border-left: 4px solid var(--amaro-primary);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-md) 0;
+  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+  transition: all 0.2s ease;
 }
 
-/* Botões corporativos */
+.metric-container:hover {
+  background: var(--bg-accent);
+  border-left-width: 6px;
+}
+
+.metric-value {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--amaro-primary);
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.metric-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-top: var(--spacing-sm);
+}
+
+/* ====================================================================== */
+/* BOTÕES CORPORATIVOS */
+/* ====================================================================== */
 .stButton > button {
   background-color: var(--amaro-primary);
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-sm) var(--spacing-xl);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.025em;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  min-height: 48px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.stButton > button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.stButton > button:hover::before {
+  left: 100%;
 }
 
 .stButton > button:hover {
   background-color: var(--amaro-secondary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(140, 29, 64, 0.3);
+  box-shadow: 0 4px 12px rgba(140, 29, 64, 0.3);
 }
 
-/* Sidebar profissional */
-.css-1d391kg {
-  background-color: var(--amaro-light);
+.stButton > button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.2);
 }
 
-/* Headers */
-h1, h2, h3 {
-  color: var(--amaro-dark);
-  font-weight: 600;
+.stButton > button:active {
+  transform: translateY(0);
 }
 
-/* Tabs */
+/* ====================================================================== */
+/* TABS CORPORATIVAS */
+/* ====================================================================== */
 .stTabs [data-baseweb="tab-list"] {
-  background-color: var(--amaro-light);
-  border-radius: 10px;
-  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-xs);
+  margin-bottom: var(--spacing-xl);
+  border: 1px solid var(--border-color);
+  gap: var(--spacing-xs);
 }
 
 .stTabs [data-baseweb="tab"] {
-  border-radius: 8px;
-  color: var(--amaro-dark);
+  background: transparent;
+  border-radius: var(--border-radius-sm);
+  color: var(--text-secondary);
   font-weight: 500;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+  background-color: var(--bg-accent);
+  color: var(--text-primary);
 }
 
 .stTabs [aria-selected="true"] {
   background-color: var(--amaro-primary);
   color: white;
+  box-shadow: var(--shadow-sm);
 }
 
-/* Forms */
+/* ====================================================================== */
+/* INPUTS PROFISSIONAIS */
+/* ====================================================================== */
 .stSelectbox > div > div,
 .stNumberInput > div > div > input,
 .stTextInput > div > div > input {
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  transition: all 0.2s ease;
 }
 
-/* Success/Warning/Error boxes */
-.stSuccess {
-  background-color: rgba(39, 174, 96, 0.1);
-  border-left: 4px solid var(--amaro-success);
+.stSelectbox > div > div:focus-within,
+.stNumberInput > div > div:focus-within,
+.stTextInput > div > div:focus-within {
+  border-color: var(--amaro-primary);
+  box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.1);
 }
 
-.stWarning {
-  background-color: rgba(243, 156, 18, 0.1);
-  border-left: 4px solid var(--amaro-warning);
+/* Labels dos inputs */
+.stSelectbox label,
+.stNumberInput label,
+.stSlider label,
+.stTextInput label,
+.stCheckbox label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: var(--spacing-xs);
 }
 
-.stError {
-  background-color: rgba(231, 76, 60, 0.1);
-  border-left: 4px solid var(--amaro-danger);
-}
-
-/* Info boxes */
-.stInfo {
-  background-color: rgba(52, 152, 219, 0.1);
-  border-left: 4px solid var(--amaro-info);
-}
-
-/* Download buttons */
-.stDownloadButton > button {
-  background-color: var(--amaro-success);
-  color: white;
-}
-
-.stDownloadButton > button:hover {
-  background-color: #229954;
-}
-
-/* Expanders */
-.streamlit-expanderHeader {
-  background-color: var(--amaro-light);
-  border-radius: 8px;
-  font-weight: 500;
-}
-
-/* Progress bars */
-.stProgress > div > div > div {
+/* Slider personalizado */
+.stSlider > div > div > div > div {
   background-color: var(--amaro-primary);
 }
 
-/*
+.stSlider > div > div > div > div > div {
+  background-color: var(--amaro-primary);
+  border: 2px solid white;
+  box-shadow: var(--shadow-md);
+}
+
+/* ====================================================================== */
+/* SIDEBAR PROFISSIONAL */
+/* ====================================================================== */
+.css-1d391kg {
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+}
+
+.sidebar-header {
+  background: linear-gradient(135deg, var(--amaro-primary) 0%, var(--amaro-secondary) 100%);
+  color: white;
+  padding: var(--spacing-lg);
+  margin: calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md)) var(--spacing-lg) calc(-1 * var(--spacing-md));
+  text-align: center;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+}
+
+.sidebar-header p {
+  margin: var(--spacing-xs) 0 0 0;
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+}
+
+/* ====================================================================== */
+/* STATUS BOXES */
+/* ====================================================================== */
+.status-success {
+  background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+  color: white;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  text-align: center;
+  margin: var(--spacing-md) 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.status-warning {
+  background: linear-gradient(135deg, var(--warning-color) 0%, #D97706 100%);
+  color: white;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  text-align: center;
+  margin: var(--spacing-md) 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.status-error {
+  background: linear-gradient(135deg, var(--error-color) 0%, #B91C1C 100%);
+  color: white;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  text-align: center;
+  margin: var(--spacing-md) 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.status-info {
+  background: #F0F9FF;
+  color: #0C4A6E;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  border-left: 4px solid var(--info-color);
+  margin: var(--spacing-md) 0;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ====================================================================== */
+/* DOWNLOAD BUTTONS */
+/* ====================================================================== */
+.stDownloadButton > button {
+  background-color: var(--success-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  font-size: var(--font-size-sm);
+  transition: all 0.2s ease;
+  min-height: 44px;
+}
+
+.stDownloadButton > button:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* ====================================================================== */
+/* TABELAS E DATAFRAMES */
+/* ====================================================================== */
+.dataframe {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.dataframe thead th {
+  background-color: var(--amaro-primary);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-md);
+  border: none;
+}
+
+.dataframe tbody td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+}
+
+.dataframe tbody tr:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* ====================================================================== */
+/* PLOTLY CUSTOMIZATION */
+/* ====================================================================== */
+.js-plotly-plot {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  background: white;
+}
+
+/* ====================================================================== */
+/* OCULTAR ELEMENTOS STREAMLIT */
+/* ====================================================================== */
+#MainMenu {
+  visibility: hidden;
+}
+
+footer {
+  visibility: hidden;
+}
+
+header {
+  visibility: hidden;
+}
+
+.stDeployButton {
+  display: none;
+}
+
+/* ====================================================================== */
+/* RESPONSIVIDADE */
+/* ====================================================================== */
+@media (max-width: 768px) {
+  .corporate-header {
+    padding: var(--spacing-lg);
+  }
+  
+  .corporate-header h1 {
+    font-size: var(--font-size-xl);
+  }
+  
+  .professional-card {
+    padding: var(--spacing-md);
+  }
+  
+  .metric-value {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* ====================================================================== */
+/* REFINAMENTOS TIPOGRÁFICOS */
+/* ====================================================================== */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+strong, b {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ====================================================================== */
+/* DIVIDERS */
+/* ====================================================================== */
+hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+  margin: var(--spacing-xl) 0;
+}
+
+/* ====================================================================== */
+/* LOADING STATES */
+/* ====================================================================== */
+.stSpinner > div {
+  border-color: var(--amaro-primary) transparent transparent transparent;
+}
+
+/* ====================================================================== */
+/* ANIMATIONS */
+/* ====================================================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.professional-card,
+.metric-container,
+.status-success,
+.status-warning,
+.status-error,
+.status-info {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ====================================================================== */
+/* ACCESSIBILITY */
+/* ====================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ====================================================================== */
+/* PRINT STYLES */
+/* ====================================================================== */
+@media print {
+  .corporate-header {
+    background: var(--amaro-primary) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .professional-card {
+    border: 1px solid var(--border-color) !important;
+    box-shadow: none !important;
+  }
+
+  .stButton,
+  .stDownloadButton {
+    display: none !important;
+  }
+}

@@ -1,7 +1,156 @@
+# Configuração Profissional para Amaro Aviation Calculator
+# Arquivo: .streamlit/config.toml
+
 [theme]
-base="light"
-primaryColor="#8c1d40"
-backgroundColor="#ffffff"
-secondaryBackgroundColor="#f0f2f6"
-textColor="#000000"
-font="sans serif"
+# Tema corporativo Amaro Aviation
+base = "light"
+primaryColor = "#8C1D40"        # Bordô institucional Amaro Aviation
+backgroundColor = "#FFFFFF"      # Fundo branco limpo
+secondaryBackgroundColor = "#F8F9FA"  # Cinza claro para elementos secundários
+textColor = "#1F2937"           # Texto principal em cinza escuro
+font = "sans serif"             # Fonte limpa e corporativa
+
+[browser]
+# Configurações do navegador
+gatherUsageStats = false        # Não coletar estatísticas de uso
+serverAddress = "0.0.0.0"      # Permitir acesso de qualquer IP (para deploy)
+
+[server]
+# Configurações do servidor
+port = 8501                     # Porta padrão
+headless = true                 # Modo headless para produção
+enableCORS = false              # Desabilitar CORS para simplicidade
+enableXsrfProtection = false    # Desabilitar XSRF para desenvolvimento
+maxUploadSize = 200             # Limite de upload em MB
+maxMessageSize = 200            # Limite de mensagem em MB
+enableWebsocketCompression = false  # Desabilitar compressão WebSocket
+
+[runner]
+# Configurações de execução
+magicEnabled = false            # Desabilitar magic commands
+installTracer = false           # Não instalar tracer
+fixMatplotlib = true            # Corrigir matplotlib se necessário
+postScriptGC = true            # Garbage collection após scripts
+
+[client]
+# Configurações do cliente
+caching = true                  # Habilitar cache
+displayEnabled = true           # Habilitar display
+showErrorDetails = false        # Não mostrar detalhes de erro em produção
+toolbarMode = "minimal"         # Toolbar minimalista
+
+[global]
+# Configurações globais
+developmentMode = false         # Modo produção
+logLevel = "info"              # Level de log
+unitTest = false               # Não é teste unitário
+suppressDeprecationWarnings = true  # Suprimir warnings de depreciação
+
+[logger]
+# Configurações de logging
+level = "info"                 # Level de log
+messageFormat = "%(asctime)s %(message)s"  # Formato das mensagens
+
+# Configurações específicas para performance
+[server.fileWatcherType]
+# Tipo de observador de arquivos (para desenvolvimento)
+# "auto", "poll", "watchdog"
+type = "auto"
+
+[server.enableStaticServing]
+# Habilitar servir arquivos estáticos
+enabled = true
+
+# Configurações de cache específicas
+[runner.fastReruns]
+# Reexecuções rápidas
+enabled = true
+
+[runner.enforceSerializableSessionState]
+# Forçar estado de sessão serializável
+enabled = false
+
+# Configurações específicas para widgets
+[ui.hideTopBar]
+# Ocultar barra superior do Streamlit
+enabled = false
+
+[ui.hideSidebarNav]
+# Ocultar navegação da sidebar
+enabled = false
+
+# Configurações experimentais para melhor performance
+[runner.magicEnabled]
+# Magic commands (desabilitado para performance)
+enabled = false
+
+# Configurações de métricas (desabilitadas para privacidade)
+[browser.gatherUsageStats]
+enabled = false
+
+# Configurações para deployment profissional
+[global.suppressDeprecationWarnings]
+enabled = true
+
+[global.showWarningOnDirectExecution]
+enabled = false
+
+# Configurações de segurança
+[server.enableStaticServing]
+enabled = true
+
+[server.enableWebsocketCompression]
+enabled = false
+
+# Configurações específicas para a aplicação Amaro Aviation
+[mapbox]
+# Token do Mapbox (se necessário para mapas futuros)
+token = ""
+
+[deprecation]
+# Configurações de depreciação
+showfileUploaderEncoding = false
+showPyplotGlobalUse = false
+
+# Configurações de performance para aplicações corporativas
+[client.showSidebarNavigation]
+enabled = true
+
+[client.toolbarMode]
+mode = "minimal"
+
+# Configurações específicas para charts e gráficos
+[theme.plotly]
+# Configurações para plots Plotly
+backgroundColor = "#FFFFFF"
+gridColor = "#E5E7EB"
+textColor = "#1F2937"
+
+# Configurações de acessibilidade
+[accessibility]
+# Melhorar acessibilidade
+enableKeyboardNavigation = true
+enableScreenReader = true
+
+# Configurações de internacionalização
+[i18n]
+# Configurações de idioma
+defaultLocale = "pt-BR"
+supportedLocales = ["pt-BR", "en-US"]
+
+# Configurações específicas para dados
+[data]
+# Configurações de dados
+maxRows = 50000              # Máximo de linhas para DataFrames
+maxCols = 1000              # Máximo de colunas para DataFrames
+
+# Configurações de componentes customizados
+[components]
+# Configurações para componentes
+v1 = true                   # Habilitar componentes v1
+
+# Configurações de desenvolvimento (apenas para dev)
+[development]
+# Configurações específicas para desenvolvimento
+watchForChanges = true      # Observar mudanças em arquivos
+hotReload = true           # Hot reload para desenvolvimento
