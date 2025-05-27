@@ -22,12 +22,20 @@ st.set_page_config(
     page_icon="✈️",
     layout="wide",
     initial_sidebar_state="expanded",
+    theme={               # ← NOVO  (força modo claro)
+        "primaryColor": "#8C1D40",
+        "backgroundColor": "#FFFFFF",
+        "secondaryBackgroundColor": "#F8F9FA",
+        "textColor": "#1F2937",
+        "font": "sans serif"
+    },
     menu_items={
         'Get Help': None,
         'Report a bug': None,
         'About': "Amaro Aviation Calculator v3.0 - Sistema profissional de análise de custos operacionais"
     }
 )
+
 
 # ========================================================================
 # CARREGAMENTO DO TEMA E CONFIGURAÇÕES
@@ -48,17 +56,24 @@ render_header(lang)
 # VERIFICAÇÃO DO SISTEMA
 # ========================================================================
 try:
+    # Carrega todos os parâmetros gravados em disco
     params = load_params()
+
+    # Mostra a caixa verde "Sistema Operacional"
+    # (a função já formata o HTML internamente; não enviamos tags aqui)
     system_ok = render_system_status(params, lang)
-    
+
+    # Se ainda não existem modelos ou parâmetros, interrompe o fluxo
     if not system_ok:
         st.markdown("### ⚠️ Sistema Requer Configuração")
-        st.markdown("""
-        Para começar a usar o simulador:
-        
-        1. **Execute o setup inicial:**
-           ```bash
-           python setup_initial.py
+
+        st.markdown(
+            """
+Para começar a usar o simulador:
+
+1. **Execute o setup inicial**
+   ```bash
+   python setup_initial.py
            ```
         
         2. **Ou configure manualmente:**
