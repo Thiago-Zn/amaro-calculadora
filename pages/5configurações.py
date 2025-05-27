@@ -25,8 +25,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# Carregar tema
+from config.theme import load_theme
 load_theme()
+
 
 # Sidebar e idioma
 lang = render_sidebar()
