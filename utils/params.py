@@ -151,3 +151,23 @@ def validate_params(params):
         return False, "preco_mercado deve ser um dicionário"
         
     return True, "Parâmetros válidos"
+# Adicionar ao final do arquivo utils/params.py
+def format_currency(value, lang='pt'):
+    """Formata valores monetários"""
+    try:
+        if lang == 'pt':
+            return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        else:
+            return f"R$ {value:,.2f}"
+    except:
+        return str(value)
+
+def format_percentage(value, lang='pt'):
+    """Formata percentuais"""
+    try:
+        if lang == 'pt':
+            return f"{value:.1f}%".replace(".", ",")
+        else:
+            return f"{value:.1f}%"
+    except:
+        return str(value)

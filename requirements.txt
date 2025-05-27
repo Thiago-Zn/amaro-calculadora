@@ -1,40 +1,69 @@
-# Streamlit Framework
-streamlit>=1.28.0
+# ===================================================================
+# Amaro Aviation Calculator v3.0 - Dependências Refatoradas
+# Sistema simplificado e robusto com fallbacks automáticos
+# ===================================================================
 
-# Data Processing
-pandas>=2.0.0
-numpy>=1.24.0
+# === CORE FRAMEWORK ===
+streamlit>=1.28.0,<2.0.0
+# Framework principal da aplicação web
 
-# Visualization
-plotly>=5.15.0
+# === DATA PROCESSING ===
+pandas>=2.0.0,<3.0.0
+# Processamento de dados e CSVs
 
-# Excel Processing
-openpyxl>=3.1.0
-xlsxwriter>=3.1.0
+numpy>=1.24.0,<2.0.0
+# Computação numérica e arrays
 
-# PDF Generation
-reportlab>=4.0.0
+# === VISUALIZATION ===
+plotly>=5.15.0,<6.0.0
+# Gráficos interativos premium
 
-# Image Processing
-Pillow>=10.0.0
+# === EXCEL EXPORT (Primary) ===
+openpyxl>=3.1.0,<4.0.0
+# Manipulação de arquivos Excel (xlsx)
 
-# Date and Time
-python-dateutil>=2.8.0
+xlsxwriter>=3.1.0,<4.0.0
+# Criação de arquivos Excel com formatação
 
-# JSON Processing (built-in, but for compatibility)
-# json is built-in
+# === PDF EXPORT ===
+reportlab>=4.0.0,<5.0.0
+# Geração de PDFs profissionais
 
-# File Path Management (built-in)
-# pathlib is built-in
+# === IMAGE PROCESSING ===
+Pillow>=10.0.0,<11.0.0
+# Processamento de imagens e logos
 
-# IO Operations (built-in)
-# io is built-in
+# === DATE/TIME ===
+python-dateutil>=2.8.0,<3.0.0
+# Manipulação de datas e horários
 
-# Optional: Enhanced styling and components
-streamlit-extras>=0.3.0
+# === OPTIONAL ENHANCEMENTS ===
+# Essas dependências são opcionais e têm fallbacks no código
 
-# Optional: Enhanced charts
-plotly-express>=0.4.0
+# streamlit-extras>=0.3.0
+# Componentes extras do Streamlit (opcional)
 
-# Optional: Data validation
-pydantic>=2.0.0
+# plotly-express>=0.4.0  
+# Já incluído no plotly principal
+
+# pydantic>=2.0.0
+# Validação de dados (opcional, tem fallback manual)
+
+# ===================================================================
+# NOTAS IMPORTANTES:
+# 
+# 1. FALLBACKS AUTOMÁTICOS:
+#    - Se openpyxl falhar, usa xlsxwriter
+#    - Se xlsxwriter falhar, exporta CSV
+#    - Se reportlab falhar, exporta TXT
+#
+# 2. VERSÕES FIXAS PARA PRODUÇÃO:
+#    - Para ambiente de produção, considere fixar versões exatas
+#    - Exemplo: streamlit==1.29.0 ao invés de >=1.28.0
+#
+# 3. INSTALAÇÃO ALTERNATIVA:
+#    pip install -r requirements_refatorado.txt
+#
+# 4. VERIFICAÇÃO DE INSTALAÇÃO:
+#    python setup_refatorado.py
+# ===================================================================
