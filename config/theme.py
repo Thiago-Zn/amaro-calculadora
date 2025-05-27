@@ -1,7 +1,3 @@
-"""
-Tema corporativo Amaro Aviation – 100 % estável
-Compatível com Streamlit ≥ 1.30
-"""
 
 import streamlit as st
 
