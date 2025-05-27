@@ -88,9 +88,6 @@ div[data-testid="stMetric"] span  { color:#8C1D40!important; font-weight:600!imp
   box-shadow:0 4px 12px rgba(0,0,0,0.1)!important;
 }
 
-/* 8. ESCONDER MENU PADRÃO */
-#MainMenu, header, footer { visibility:hidden!important; }
-</style>
         """,
         unsafe_allow_html=True,
     )
