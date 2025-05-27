@@ -22,6 +22,9 @@ from utils.params import load_params, format_currency
 from utils.calculations import calcular_custo_rota
 from utils.export_manager import botao_download_inteligente, criar_relatorio_dados
 
+
+lang = render_sidebar(current_lang="pt")
+
 # Configuração da página
 st.set_page_config(
     page_title="Simulador de Rotas | Amaro Aviation",

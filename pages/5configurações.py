@@ -18,6 +18,7 @@ from components.sidebar import render_sidebar
 from components.status import render_status_box
 from utils.params import load_params, save_params
 
+lang = render_sidebar(current_lang="pt")
 # Configuração da página
 st.set_page_config(
     page_title="Configurações | Amaro Aviation",
