@@ -20,7 +20,7 @@ def render_sidebar(lang: str = 'pt', current_page: str = "") -> str:
     with st.sidebar:
         # Cabeçalho da sidebar
         st.markdown(
-            f"""
+            """
             <div style="text-align: center; padding: 1rem; margin-bottom: 1rem;">
                 <h3 style="color: #8C1D40; margin: 0;">✈️ Amaro Aviation</h3>
                 <p style="color: #6B7280; font-size: 0.875rem; margin-top: 0.5rem;">
@@ -42,7 +42,7 @@ def render_sidebar(lang: str = 'pt', current_page: str = "") -> str:
         lang = detect_language_from_selection(idioma_selecionado)
         st.markdown("---")
 
-        # Navegação entre páginas
+        # Navegação entre páginas (sem título para evitar texto escuro)
         render_navigation_help(current_page, lang)
 
     return lang
@@ -74,16 +74,16 @@ def render_navigation_help(current_page: str = "", lang: str = 'pt') -> None:
         }
     }
 
-    # Título da seção de navegação
-    title = "📚 Páginas Disponíveis" if lang == 'pt' else "📚 Available Pages"
-    st.markdown(f"### {title}")
+    # Apenas um divisor visual antes da lista
+    # st.markdown("---")  # opcional
 
-    # Listagem de páginas
+    # Listagem de páginas sem título
     for page_key, description in pages_info[lang].items():
         is_current = current_page.endswith(page_key)
         icon = "👉" if is_current else "📄"
+        # Texto claro (#FFFFFF) para máxima legibilidade sobre o fundo bordo
         style = (
-            "font-weight: 600; color: #8C1D40;" if is_current else "color: #6B7280;"
+            "font-weight: 600; color: #8C1D40;" if is_current else "color: #FFFFFF;"
         )
         st.markdown(
             f"{icon} <span style='{style}'>{description}</span>",
