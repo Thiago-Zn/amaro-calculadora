@@ -18,23 +18,22 @@ from utils.params import load_params
 # CONFIGURAÇÃO DA PÁGINA PRINCIPAL
 # ========================================================================
 st.set_page_config(
-    page_title="Amaro Aviation - Simulador Estratégico",
+    page_title="Amaro Aviation – Simulador Estratégico",
     page_icon="✈️",
     layout="wide",
     initial_sidebar_state="expanded",
-    theme={               # ← NOVO  (força modo claro)
-        "primaryColor": "#8C1D40",
-        "backgroundColor": "#FFFFFF",
-        "secondaryBackgroundColor": "#F8F9FA",
-        "textColor": "#1F2937",
-        "font": "sans serif"
-    },
+    # -------------  SEU STREAMLIT NÃO SUPORTA "theme=" -------------
+    # As cores serão aplicadas somente pelo CSS do load_theme()
     menu_items={
-        'Get Help': None,
-        'Report a bug': None,
-        'About': "Amaro Aviation Calculator v3.0 - Sistema profissional de análise de custos operacionais"
-    }
+        "Get Help": None,
+        "Report a bug": None,
+        "About": (
+            "Amaro Aviation Calculator v3.0 – "
+            "Sistema profissional de análise de custos operacionais"
+        ),
+    },
 )
+
 
 
 # ========================================================================
