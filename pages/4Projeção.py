@@ -38,8 +38,9 @@ lang = render_sidebar()
 # Header da página
 render_page_header(
     'page_projection',
-    'Análise temporal e determinação do ponto de equilíbrio financeiro' if lang == 'pt' 
-    else 'Time analysis and financial breakeven point determination',
+    'Análise temporal e determinação do ponto de equilíbrio financeiro'
+        if lang == 'pt'
+        else 'Time analysis and financial breakeven point determination',
     lang
 )
 

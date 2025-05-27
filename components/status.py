@@ -96,20 +96,35 @@ def render_calculation_status(is_profitable, profit_value, message, lang='pt'):
         lang: Idioma
     """
     
-    from utils.params import format_currency
-    
+from utils.params import format_currency
+
+def render_calculation_status(is_profitable, profit_value, message, lang='pt'):
+    """
+    Exibe um box de status baseado no resultado financeiro.
+
+    Args:
+        is_profitable (bool): True se houver lucro.
+        profit_value (float): Valor de lucro ou prejuízo.
+        message (str): Texto explicativo que antecede o valor.
+        lang (str): 'pt' ou 'en'.
+    """
+    # Monta texto puro, sem tags HTML
+    valor_formatado = format_currency(abs(profit_value), lang)
+    texto = f"{message} {valor_formatado}"
+
     if is_profitable:
         render_status_box(
-            'success',
-            'Operação Lucrativa' if lang == 'pt' else 'Profitable Operation',
-            f"{message} {format_currency(profit_value, lang)}"
+            "success",
+            "Operação Lucrativa" if lang == "pt" else "Profitable Operation",
+            texto
         )
     else:
         render_status_box(
-            'warning',
-            'Operação com Prejuízo' if lang == 'pt' else 'Operation at Loss',
-            f"{message} {format_currency(abs(profit_value), lang)}"
+            "warning",
+            "Operação com Prejuízo" if lang == "pt" else "Operation at Loss",
+            texto
         )
+
 
 def render_system_status(params, lang='pt'):
     """
