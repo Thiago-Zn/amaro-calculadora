@@ -1,69 +1,67 @@
-# ===================================================================
-# Amaro Aviation Calculator v3.0 - Dependências Refatoradas
-# Sistema simplificado e robusto com fallbacks automáticos
-# ===================================================================
+# ====================================================================
+# Amaro Aviation Calculator v3.0 REFATORADO - Dependências Simplificadas
+# Sistema consolidado com fallbacks automáticos e foco na UX
+# ====================================================================
 
-# === CORE FRAMEWORK ===
+# === FRAMEWORK PRINCIPAL ===
 streamlit>=1.28.0,<2.0.0
-# Framework principal da aplicação web
+# Framework web principal - interface moderna e responsiva
 
-# === DATA PROCESSING ===
+# === PROCESSAMENTO DE DADOS ===
 pandas>=2.0.0,<3.0.0
-# Processamento de dados e CSVs
+# Manipulação de dados, CSVs e DataFrames
 
 numpy>=1.24.0,<2.0.0
-# Computação numérica e arrays
+# Computação numérica essencial
 
-# === VISUALIZATION ===
+# === VISUALIZAÇÃO PREMIUM ===
 plotly>=5.15.0,<6.0.0
-# Gráficos interativos premium
+# Gráficos interativos de alta qualidade
 
-# === EXCEL EXPORT (Primary) ===
+# === EXPORTAÇÃO ROBUSTA ===
 openpyxl>=3.1.0,<4.0.0
-# Manipulação de arquivos Excel (xlsx)
+# Exportação Excel (formato xlsx) - principal
 
 xlsxwriter>=3.1.0,<4.0.0
-# Criação de arquivos Excel com formatação
+# Exportação Excel com formatação avançada - fallback
 
-# === PDF EXPORT ===
 reportlab>=4.0.0,<5.0.0
 # Geração de PDFs profissionais
 
-# === IMAGE PROCESSING ===
+# === UTILITÁRIOS ===
 Pillow>=10.0.0,<11.0.0
-# Processamento de imagens e logos
+# Processamento de imagens (logos, gráficos)
 
-# === DATE/TIME ===
 python-dateutil>=2.8.0,<3.0.0
-# Manipulação de datas e horários
+# Manipulação de datas e timestamps
 
-# === OPTIONAL ENHANCEMENTS ===
-# Essas dependências são opcionais e têm fallbacks no código
-
-# streamlit-extras>=0.3.0
-# Componentes extras do Streamlit (opcional)
-
-# plotly-express>=0.4.0  
-# Já incluído no plotly principal
-
-# pydantic>=2.0.0
-# Validação de dados (opcional, tem fallback manual)
-
-# ===================================================================
-# NOTAS IMPORTANTES:
-# 
-# 1. FALLBACKS AUTOMÁTICOS:
-#    - Se openpyxl falhar, usa xlsxwriter
-#    - Se xlsxwriter falhar, exporta CSV
-#    - Se reportlab falhar, exporta TXT
+# ====================================================================
+# OBSERVAÇÕES IMPORTANTES PARA A VERSÃO REFATORADA:
 #
-# 2. VERSÕES FIXAS PARA PRODUÇÃO:
-#    - Para ambiente de produção, considere fixar versões exatas
-#    - Exemplo: streamlit==1.29.0 ao invés de >=1.28.0
+# 1. ARQUITETURA SIMPLIFICADA:
+#    - App.py consolidado com 3 abas principais
+#    - Removidas dependências desnecessárias
+#    - Foco em performance e estabilidade
 #
-# 3. INSTALAÇÃO ALTERNATIVA:
-#    pip install -r requirements_refatorado.txt
+# 2. FALLBACKS AUTOMÁTICOS:
+#    - Excel (openpyxl) → Excel (xlsxwriter) → CSV → JSON
+#    - PDF (reportlab) → TXT → HTML
+#    - Sistema robusto que sempre funciona
 #
-# 4. VERIFICAÇÃO DE INSTALAÇÃO:
-#    python setup_refatorado.py
-# ===================================================================
+# 3. COMPATIBILIDADE:
+#    - Python 3.8+ (testado até 3.11)
+#    - Streamlit Cloud ready
+#    - Deploy local e cloud
+#
+# 4. INSTALAÇÃO SIMPLIFICADA:
+#    pip install -r requirements.txt
+#    python setup_initial.py
+#    streamlit run app.py
+#
+# 5. VERSÕES TESTADAS (Outubro 2024):
+#    - streamlit==1.29.0
+#    - pandas==2.1.3
+#    - plotly==5.17.0
+#    - openpyxl==3.1.2
+#
+# ====================================================================

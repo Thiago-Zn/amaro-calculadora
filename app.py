@@ -1,206 +1,167 @@
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
+from plotly.subplots import make_subplots
 import pandas as pd
-import json
-from pathlib import Path
+import numpy as np
 from datetime import datetime
-from utils.params import load_params
-from utils.calculations import calcula_custo_trecho
+from pathlib import Path
+import json
+from io import BytesIO
 
-# Configuração da página
+# Imports locais
+from utils.params import load_params, save_params, format_currency, format_percentage
+from utils.calculations import calcula_custo_trecho, calcular_projecao_mensal
+from utils.exportador_excel import criar_relatorio_dados, gerar_excel_simples
+from utils.exportador_pdf import gerar_pdf
+
+# ========================================================================
+# CONFIGURAÇÃO DA PÁGINA
+# ========================================================================
 st.set_page_config(
-    page_title="Amaro Aviation - Calculadora de Custos",
+    page_title="Amaro Aviation - Calculadora Premium",
     page_icon="✈️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Sistema de idiomas simplificado (fallback interno)
+# ========================================================================
+# SISTEMA DE IDIOMAS SIMPLIFICADO
+# ========================================================================
+@st.cache_data
 def get_translations():
-    """Traduções básicas integradas"""
+    """Sistema de traduções integrado"""
     return {
         'pt': {
-            'title': 'Amaro Aviation',
-            'subtitle': 'Calculadora Inteligente de Custos Operacionais',
+            # Interface Principal
+            'app_title': 'Amaro Aviation',
+            'app_subtitle': 'Calculadora Inteligente de Custos Operacionais',
             'language': 'Idioma',
-            'monthly_profit': 'Estimativa de Lucro Mensal',
-            'cost_comparison': 'Comparativo de Custos',
-            'settings': 'Configurações e Fórmulas',
+            
+            # Abas
+            'tab_profit': '📈 Estimativa de Lucro Mensal',
+            'tab_comparison': '⚖️ Comparativo de Custos',
+            'tab_settings': '⚙️ Configurações e Fórmulas',
+            
+            # Campos
             'aircraft_model': 'Modelo da Aeronave',
-            'flight_hours_month': 'Horas de Voo por Mês',
+            'monthly_hours': 'Horas de Voo por Mês',
             'occupancy_rate': 'Taxa de Ocupação (%)',
             'annual_hours': 'Horas de Voo por Ano',
-            'fixed_costs_annual': 'Custos Fixos Anuais (R$)',
-            'include_charter_revenue': 'Incluir Receita de Charter',
-            'calculate': 'Calcular',
+            'fixed_costs': 'Custos Fixos Anuais (R$)',
+            'include_charter': 'Incluir Receita de Charter',
+            'calculate': '🚀 Calcular',
+            
+            # Resultados
             'gross_revenue': 'Receita Bruta',
-            'owner_share': 'Receita do Proprietário',
+            'owner_revenue': 'Receita do Proprietário (90%)',
+            'amaro_fee': 'Taxa Amaro (10%)',
             'operational_costs': 'Custos Operacionais',
             'net_profit': 'Lucro Líquido',
+            'monthly_roi': 'ROI Mensal',
             'own_management': 'Gestão Própria',
             'amaro_management': 'Gestão Amaro Aviation',
             'annual_savings': 'Economia Anual',
-            'monthly_savings': 'Economia Mensal',
             'savings_percentage': 'Percentual de Economia',
-            'fixed_costs': 'Custos Fixos',
-            'charter_revenue': 'Receita Charter',
+            
+            # Configurações
             'fuel_price': 'Preço do Combustível (R$/L)',
-            'pilot_cost_hour': 'Custo Piloto (R$/h)',
-            'annual_depreciation': 'Depreciação Anual (%)',
-            'maintenance_costs': 'Custos de Manutenção',
+            'pilot_cost': 'Custo Piloto (R$/h)',
+            'depreciation': 'Depreciação Anual (%)',
             'maintenance_turboprop': 'Manutenção Turboprop (R$/h)',
             'maintenance_jet': 'Manutenção Jato (R$/h)',
             'market_price_turboprop': 'Preço Mercado Turboprop (R$/h)',
             'market_price_jet': 'Preço Mercado Jato (R$/h)',
-            'save_settings': 'Salvar Configurações',
-            'system_status': 'Status do Sistema',
+            'save_settings': '💾 Salvar Configurações',
+            
+            # Status
             'system_operational': 'Sistema Operacional',
             'models_configured': 'modelos configurados',
-            'parameters_loaded': 'Parâmetros carregados',
-            'features': 'Funcionalidades',
-            'usage_tips': 'Dicas de Uso',
-            'quick_actions': 'Ações Rápidas',
-            'reload_data': 'Recarregar Dados',
-            'presentation_mode': 'Modo Apresentação',
             'profitable_operation': 'Operação Rentável',
             'operation_at_loss': 'Atenção: Operação no Prejuízo',
-            'monthly_deficit': 'Déficit mensal',
-            'recommend_increase_occupancy': 'Recomenda-se aumentar ocupação ou revisar custos',
-            'monthly_roi': 'ROI Mensal',
-            'projected_annual_revenue': 'Receita Anual Projetada',
-            'annual_cost_comparison': 'Comparativo Anual: Gestão Própria vs. Amaro Aviation',
-            'calculation_error': 'Erro no cálculo',
             'settings_saved': 'Configurações salvas com sucesso!',
-            'settings_save_error': 'Erro ao salvar configurações',
-            'operational_costs_params': 'Parâmetros de Custos Operacionais',
-            'market_reference_prices': 'Preços de Referência do Mercado',
-            'formulas_used': 'Fórmulas Utilizadas',
-            'impact_preview': 'Preview do Impacto',
-            'current_parameters': 'Parâmetros Atuais',
-            'cost_calculation_formula': 'Cálculo de Custo por Hora',
-            'savings_calculation_formula': 'Cálculo de Economia',
-            'roi_calculation_formula': 'Cálculo de ROI',
-            'formula_where': 'Onde:',
-            'formula_fuel': 'Combustível = Consumo (L/h) × Preço Combustível (R$/L)',
-            'formula_pilot': 'Piloto = Custo Piloto (R$/h)',
-            'formula_maintenance': 'Manutenção = Custo Manutenção por tipo (R$/h)',
-            'formula_depreciation': 'Depreciação = (Valor Aeronave × % Depreciação Anual) ÷ Horas Anuais',
-            'developed_with_love': 'Desenvolvido com ❤️ para excelência comercial',
-            'version': 'v3.0',
-            'refactored_system': 'Sistema Refatorado'
+            'calculation_error': 'Erro no cálculo',
+            
+            # Exportação
+            'export_excel': '📊 Baixar Excel',
+            'export_pdf': '📄 Baixar PDF',
+            'developed_with_love': 'Desenvolvido com ❤️ para excelência comercial'
         },
         'en': {
-            'title': 'Amaro Aviation',
-            'subtitle': 'Smart Operating Cost Calculator',
+            # Main Interface
+            'app_title': 'Amaro Aviation',
+            'app_subtitle': 'Smart Operating Cost Calculator',
             'language': 'Language',
-            'monthly_profit': 'Monthly Profit Estimation',
-            'cost_comparison': 'Cost Comparison',
-            'settings': 'Settings & Formulas',
+            
+            # Tabs
+            'tab_profit': '📈 Monthly Profit Estimation',
+            'tab_comparison': '⚖️ Cost Comparison',
+            'tab_settings': '⚙️ Settings & Formulas',
+            
+            # Fields
             'aircraft_model': 'Aircraft Model',
-            'flight_hours_month': 'Flight Hours per Month',
+            'monthly_hours': 'Flight Hours per Month',
             'occupancy_rate': 'Occupancy Rate (%)',
             'annual_hours': 'Annual Flight Hours',
-            'fixed_costs_annual': 'Annual Fixed Costs (R$)',
-            'include_charter_revenue': 'Include Charter Revenue',
-            'calculate': 'Calculate',
+            'fixed_costs': 'Annual Fixed Costs (R$)',
+            'include_charter': 'Include Charter Revenue',
+            'calculate': '🚀 Calculate',
+            
+            # Results
             'gross_revenue': 'Gross Revenue',
-            'owner_share': 'Owner Revenue',
+            'owner_revenue': 'Owner Revenue (90%)',
+            'amaro_fee': 'Amaro Fee (10%)',
             'operational_costs': 'Operational Costs',
             'net_profit': 'Net Profit',
+            'monthly_roi': 'Monthly ROI',
             'own_management': 'Own Management',
             'amaro_management': 'Amaro Aviation Management',
             'annual_savings': 'Annual Savings',
-            'monthly_savings': 'Monthly Savings',
             'savings_percentage': 'Savings Percentage',
-            'fixed_costs': 'Fixed Costs',
-            'charter_revenue': 'Charter Revenue',
+            
+            # Settings  
             'fuel_price': 'Fuel Price (R$/L)',
-            'pilot_cost_hour': 'Pilot Cost (R$/h)',
-            'annual_depreciation': 'Annual Depreciation (%)',
-            'maintenance_costs': 'Maintenance Costs',
+            'pilot_cost': 'Pilot Cost (R$/h)',
+            'depreciation': 'Annual Depreciation (%)',
             'maintenance_turboprop': 'Turboprop Maintenance (R$/h)',
             'maintenance_jet': 'Jet Maintenance (R$/h)',
             'market_price_turboprop': 'Turboprop Market Price (R$/h)',
             'market_price_jet': 'Jet Market Price (R$/h)',
-            'save_settings': 'Save Settings',
-            'system_status': 'System Status',
+            'save_settings': '💾 Save Settings',
+            
+            # Status
             'system_operational': 'System Operational',
             'models_configured': 'models configured',
-            'parameters_loaded': 'Parameters loaded',
-            'features': 'Features',
-            'usage_tips': 'Usage Tips',
-            'quick_actions': 'Quick Actions',
-            'reload_data': 'Reload Data',
-            'presentation_mode': 'Presentation Mode',
             'profitable_operation': 'Profitable Operation',
             'operation_at_loss': 'Warning: Operation at Loss',
-            'monthly_deficit': 'Monthly deficit',
-            'recommend_increase_occupancy': 'Recommend increasing occupancy or reviewing costs',
-            'monthly_roi': 'Monthly ROI',
-            'projected_annual_revenue': 'Projected Annual Revenue',
-            'annual_cost_comparison': 'Annual Comparison: Own Management vs. Amaro Aviation',
-            'calculation_error': 'Calculation error',
             'settings_saved': 'Settings saved successfully!',
-            'settings_save_error': 'Error saving settings',
-            'operational_costs_params': 'Operational Cost Parameters',
-            'market_reference_prices': 'Market Reference Prices',
-            'formulas_used': 'Formulas Used',
-            'impact_preview': 'Impact Preview',
-            'current_parameters': 'Current Parameters',
-            'cost_calculation_formula': 'Cost per Hour Calculation',
-            'savings_calculation_formula': 'Savings Calculation',
-            'roi_calculation_formula': 'ROI Calculation',
-            'formula_where': 'Where:',
-            'formula_fuel': 'Fuel = Consumption (L/h) × Fuel Price (R$/L)',
-            'formula_pilot': 'Pilot = Pilot Cost (R$/h)',
-            'formula_maintenance': 'Maintenance = Maintenance Cost per type (R$/h)',
-            'formula_depreciation': 'Depreciation = (Aircraft Value × Annual Depreciation %) ÷ Annual Hours',
-            'developed_with_love': 'Developed with ❤️ for commercial excellence',
-            'version': 'v3.0',
-            'refactored_system': 'Refactored System'
+            'calculation_error': 'Calculation error',
+            
+            # Export
+            'export_excel': '📊 Download Excel',
+            'export_pdf': '📄 Download PDF', 
+            'developed_with_love': 'Developed with ❤️ for commercial excellence'
         }
     }
 
 def t(key, lang='pt'):
-    """Função para obter textos traduzidos"""
+    """Função de tradução"""
     translations = get_translations()
     return translations.get(lang, translations['pt']).get(key, key)
 
-def format_currency(value, lang='pt'):
-    """Formata valores monetários de acordo com o idioma"""
-    try:
-        if lang == 'pt':
-            return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        else:
-            return f"R$ {value:,.2f}"
-    except:
-        return str(value)
-
-def format_percentage(value, lang='pt'):
-    """Formata percentuais de acordo com o idioma"""
-    try:
-        if lang == 'pt':
-            return f"{value:.1f}%".replace(".", ",")
-        else:
-            return f"{value:.1f}%"
-    except:
-        return str(value)
-
-# CSS Moderno e Elegante
-def load_modern_css():
+# ========================================================================
+# CSS MODERNO E ELEGANTE
+# ========================================================================
+def load_premium_css():
     st.markdown("""
     <style>
-    /* Importar fonte moderna */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    /* Reset e configurações base */
     .stApp {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
     
-    /* Header principal */
     .main-header {
         background: linear-gradient(135deg, #8c1d40 0%, #a02050 100%);
         color: white;
@@ -225,8 +186,7 @@ def load_modern_css():
         opacity: 0.9;
     }
     
-    /* Cards modernos */
-    .modern-card {
+    .premium-card {
         background: white;
         border-radius: 16px;
         padding: 2rem;
@@ -237,12 +197,11 @@ def load_modern_css():
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    .modern-card:hover {
+    .premium-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 16px 48px rgba(0,0,0,0.12);
     }
     
-    /* Métricas elegantes */
     .metric-card {
         background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
         border-radius: 12px;
@@ -273,7 +232,6 @@ def load_modern_css():
         font-weight: 500;
     }
     
-    /* Botões modernos */
     .stButton > button {
         background: linear-gradient(135deg, #8c1d40 0%, #a02050 100%);
         color: white;
@@ -293,7 +251,6 @@ def load_modern_css():
         background: linear-gradient(135deg, #9e2148 0%, #b02356 100%);
     }
     
-    /* Tabs modernos */
     .stTabs [data-baseweb="tab-list"] {
         background: rgba(255,255,255,0.9);
         border-radius: 12px;
@@ -316,53 +273,62 @@ def load_modern_css():
         box-shadow: 0 4px 12px rgba(140, 29, 64, 0.3);
     }
     
-    /* Sidebar elegante */
-    .css-1d391kg {
-        background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-        border-right: 1px solid rgba(140, 29, 64, 0.1);
+    .sidebar-header {
+        background: linear-gradient(135deg, #8c1d40 0%, #a02050 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 2rem;
     }
     
-    /* Inputs modernos */
-    .stSelectbox > div > div,
-    .stNumberInput > div > div > input {
-        border-radius: 8px;
-        border: 2px solid #e9ecef;
-        transition: all 0.3s ease;
+    .success-highlight {
+        background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        margin: 1rem 0;
     }
     
-    .stSelectbox > div > div:focus-within,
-    .stNumberInput > div > div:focus-within {
-        border-color: #8c1d40;
-        box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.1);
+    .warning-highlight {
+        background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        margin: 1rem 0;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# Inicialização
-load_modern_css()
+# ========================================================================
+# CARREGAMENTO DE DADOS E INICIALIZAÇÃO
+# ========================================================================
+load_premium_css()
 
 # Sidebar - Seleção de idioma
 with st.sidebar:
     st.markdown("""
-    <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #8c1d40 0%, #a02050 100%); border-radius: 12px; margin-bottom: 2rem;">
-        <h2 style="margin: 0; color: white; font-size: 1.5rem;">✈️</h2>
-        <p style="margin: 0.5rem 0 0 0; color: white; font-weight: 600;">Amaro Aviation</p>
+    <div class="sidebar-header">
+        <h2 style="margin: 0;">✈️</h2>
+        <p style="margin: 0.5rem 0 0 0; font-weight: 600;">Amaro Aviation</p>
     </div>
     """, unsafe_allow_html=True)
     
-    language = st.selectbox(
+    language_option = st.selectbox(
         "🌐 Language / Idioma",
         ["🇧🇷 Português", "🇺🇸 English"],
         key="language_selector"
     )
     
-    lang = 'pt' if '🇧🇷' in language else 'en'
+    lang = 'pt' if '🇧🇷' in language_option else 'en'
 
-# Header principal
+# Header Principal
 st.markdown(f"""
 <div class="main-header">
-    <h1>{t('title', lang)}</h1>
-    <p>{t('subtitle', lang)}</p>
+    <h1>{t('app_title', lang)}</h1>
+    <p>{t('app_subtitle', lang)}</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -379,18 +345,22 @@ except Exception as e:
     st.error(f"❌ Erro ao carregar parâmetros: {e}")
     st.stop()
 
-# Tabs principais - Interface simplificada
+# ========================================================================
+# TABS PRINCIPAIS
+# ========================================================================
 tab1, tab2, tab3 = st.tabs([
-    f"📈 {t('monthly_profit', lang)}", 
-    f"⚖️ {t('cost_comparison', lang)}", 
-    f"⚙️ {t('settings', lang)}"
+    t('tab_profit', lang),
+    t('tab_comparison', lang), 
+    t('tab_settings', lang)
 ])
 
-# TAB 1: Estimativa de Lucro Mensal
+# ========================================================================
+# TAB 1: ESTIMATIVA DE LUCRO MENSAL
+# ========================================================================
 with tab1:
     st.markdown(f"""
-    <div class="modern-card">
-        <h3>📊 {t('monthly_profit', lang)}</h3>
+    <div class="premium-card">
+        <h3>📊 {t('tab_profit', lang)}</h3>
         <p>Simule os lucros mensais estimados com a aeronave em voos fretados via Amaro Aviation</p>
     </div>
     """, unsafe_allow_html=True)
@@ -406,7 +376,7 @@ with tab1:
     
     with col2:
         horas_mes = st.number_input(
-            f"⏰ {t('flight_hours_month', lang)}",
+            f"⏰ {t('monthly_hours', lang)}",
             min_value=10,
             max_value=200,
             value=80,
@@ -423,7 +393,7 @@ with tab1:
             key="ocupacao"
         )
     
-    if st.button(f"🚀 {t('calculate', lang)}", key="calc_lucro", type="primary"):
+    if st.button(f"{t('calculate', lang)}", key="calc_lucro", type="primary"):
         try:
             # Cálculos base
             resultado_hora = calcula_custo_trecho(modelo_lucro, 1.0, params)
@@ -434,13 +404,16 @@ with tab1:
             receita_bruta = preco_hora_mercado * horas_efetivas
             custo_operacional = resultado_hora['total'] * horas_efetivas
             
-            # Percentuais
-            percentual_amaro = 0.1  # 10% para Amaro
+            # Percentuais Amaro Aviation
             percentual_proprietario = 0.9  # 90% para proprietário
+            percentual_amaro = 0.1  # 10% para Amaro
             
             receita_proprietario = receita_bruta * percentual_proprietario
             receita_amaro = receita_bruta * percentual_amaro
             lucro_liquido = receita_proprietario - custo_operacional
+            
+            # Métricas avançadas
+            roi_mensal = (lucro_liquido / custo_operacional * 100) if custo_operacional > 0 else 0
             
             # Exibição dos resultados
             st.markdown("### 💰 Resultados da Simulação")
@@ -458,7 +431,7 @@ with tab1:
             with col2:
                 st.markdown(f"""
                 <div class="metric-card">
-                    <div class="metric-label">{t('owner_share', lang)}</div>
+                    <div class="metric-label">{t('owner_revenue', lang)}</div>
                     <div class="metric-value">{format_currency(receita_proprietario, lang)}</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -480,10 +453,18 @@ with tab1:
                 </div>
                 """, unsafe_allow_html=True)
             
-            # Gráfico de pizza - Breakdown
+            # Gráfico de breakdown
             fig_breakdown = go.Figure(data=[go.Pie(
-                labels=['Receita Proprietário', 'Taxa Amaro', 'Custos Operacionais'],
-                values=[receita_proprietario - custo_operacional, receita_amaro, custo_operacional],
+                labels=[
+                    t('owner_revenue', lang),
+                    t('amaro_fee', lang), 
+                    t('operational_costs', lang)
+                ],
+                values=[
+                    receita_proprietario - custo_operacional,
+                    receita_amaro,
+                    custo_operacional
+                ],
                 hole=0.4,
                 marker=dict(colors=['#27AE60', '#8c1d40', '#E74C3C']),
                 textinfo='label+percent+value',
@@ -493,35 +474,89 @@ with tab1:
             fig_breakdown.update_layout(
                 title='📊 Breakdown Financeiro Mensal',
                 font=dict(size=12),
-                height=500
+                height=500,
+                template='plotly_white'
             )
             
             st.plotly_chart(fig_breakdown, use_container_width=True)
             
             # Insights
             if lucro_liquido > 0:
-                roi_mensal = (lucro_liquido / custo_operacional * 100) if custo_operacional > 0 else 0
-                st.success(f"""
-                ✅ **{t('profitable_operation', lang)}**
-                - {t('net_profit', lang)}: {format_currency(lucro_liquido, lang)}
-                - {t('monthly_roi', lang)}: {format_percentage(roi_mensal, lang)}
-                - {t('projected_annual_revenue', lang)}: {format_currency(receita_bruta * 12, lang)}
-                """)
+                st.markdown(f"""
+                <div class="success-highlight">
+                    <h4>✅ {t('profitable_operation', lang)}</h4>
+                    <p><strong>{t('net_profit', lang)}:</strong> {format_currency(lucro_liquido, lang)}</p>
+                    <p><strong>{t('monthly_roi', lang)}:</strong> {format_percentage(roi_mensal, lang)}</p>
+                </div>
+                """, unsafe_allow_html=True)
             else:
-                st.warning(f"""
-                ⚠️ **{t('operation_at_loss', lang)}**
-                - {t('monthly_deficit', lang)}: {format_currency(abs(lucro_liquido), lang)}
-                - {t('recommend_increase_occupancy', lang)}
-                """)
-                
+                st.markdown(f"""
+                <div class="warning-highlight">
+                    <h4>⚠️ {t('operation_at_loss', lang)}</h4>
+                    <p>Prejuízo mensal: {format_currency(abs(lucro_liquido), lang)}</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Exportação
+            col1, col2 = st.columns(2)
+            
+            dados_lucro = {
+                "Análise": "Estimativa de Lucro Mensal",
+                "Modelo": modelo_lucro,
+                "Horas Mensais": horas_mes,
+                "Taxa Ocupação": f"{ocupacao}%",
+                "Receita Bruta": receita_bruta,
+                "Receita Proprietário": receita_proprietario,
+                "Custos Operacionais": custo_operacional,
+                "Lucro Líquido": lucro_liquido,
+                "ROI Mensal": f"{roi_mensal:.1f}%"
+            }
+            
+            relatorio_lucro = criar_relatorio_dados(
+                "Estimativa de Lucro Mensal",
+                {"modelo": modelo_lucro, "horas": horas_mes, "ocupacao": ocupacao},
+                dados_lucro
+            )
+            
+            with col1:
+                try:
+                    excel_buffer = gerar_excel_simples(relatorio_lucro)
+                    if excel_buffer:
+                        st.download_button(
+                            t('export_excel', lang),
+                            data=excel_buffer.getvalue(),
+                            file_name=f"amaro_lucro_mensal_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True
+                        )
+                except Exception as e:
+                    st.error(f"Erro ao gerar Excel: {e}")
+            
+            with col2:
+                try:
+                    pdf_buffer = BytesIO()
+                    if gerar_pdf(pdf_buffer, dados_lucro):
+                        pdf_buffer.seek(0)
+                        st.download_button(
+                            t('export_pdf', lang),
+                            data=pdf_buffer.getvalue(),
+                            file_name=f"amaro_lucro_mensal_{datetime.now().strftime('%Y%m%d')}.pdf",
+                            mime="application/pdf",
+                            use_container_width=True
+                        )
+                except Exception as e:
+                    st.error(f"Erro ao gerar PDF: {e}")
+                    
         except Exception as e:
             st.error(f"{t('calculation_error', lang)}: {e}")
 
-# TAB 2: Comparativo de Custos
+# ========================================================================
+# TAB 2: COMPARATIVO DE CUSTOS
+# ========================================================================
 with tab2:
     st.markdown(f"""
-    <div class="modern-card">
-        <h3>⚖️ {t('cost_comparison', lang)}</h3>
+    <div class="premium-card">
+        <h3>⚖️ {t('tab_comparison', lang)}</h3>
         <p>Compare os custos totais de gestão própria versus gestão com a Amaro Aviation</p>
     </div>
     """, unsafe_allow_html=True)
@@ -546,7 +581,7 @@ with tab2:
     
     with col2:
         custos_fixos_anuais = st.number_input(
-            f"💰 {t('fixed_costs_annual', lang)}",
+            f"💰 {t('fixed_costs', lang)}",
             min_value=50000,
             max_value=2000000,
             value=500000,
@@ -555,32 +590,33 @@ with tab2:
         )
         
         include_charter = st.checkbox(
-            f"📈 {t('include_charter_revenue', lang)}",
+            f"📈 {t('include_charter', lang)}",
             value=True,
             key="include_charter"
         )
     
-    if st.button(f"🚀 {t('calculate', lang)}", key="calc_comp", type="primary"):
+    if st.button(f"{t('calculate', lang)}", key="calc_comp", type="primary"):
         try:
             # Cálculos para gestão própria
             resultado_ano = calcula_custo_trecho(modelo_comp, horas_anuais, params)
             custo_operacional_ano = resultado_ano['total']
             custo_total_proprio = custo_operacional_ano + custos_fixos_anuais
             
-            # Cálculos para gestão Amaro
+            # Cálculos para gestão Amaro (sem custos fixos)
             custo_amaro_ano = custo_operacional_ano
             
             # Receita de charter (se incluída)
             receita_charter = 0
             if include_charter:
                 preco_hora = params['preco_mercado_hora'][modelo_comp]
-                receita_charter = preco_hora * horas_anuais * 0.6  # 60% de ocupação estimada
+                receita_charter = preco_hora * horas_anuais * 0.6  # 60% ocupação estimada
             
             # Custos líquidos
             custo_liquido_proprio = custo_total_proprio - receita_charter
             custo_liquido_amaro = custo_amaro_ano - receita_charter
             
             economia_anual = custo_liquido_proprio - custo_liquido_amaro
+            percentual_economia = (economia_anual / custo_liquido_proprio * 100) if custo_liquido_proprio > 0 else 0
             
             # Exibição comparativa
             st.markdown("### 📊 Comparativo Anual de Custos")
@@ -589,37 +625,37 @@ with tab2:
             
             with col1:
                 st.markdown(f"""
-                <div class="modern-card" style="background: linear-gradient(135deg, #fff3cd 0%, #fce8b2 100%);">
+                <div class="premium-card" style="background: linear-gradient(135deg, #fff3cd 0%, #fce8b2 100%);">
                     <h4>🏠 {t('own_management', lang)}</h4>
                     <div class="metric-value" style="color: #856404;">{format_currency(custo_liquido_proprio, lang)}</div>
                     <hr>
                     <p><strong>{t('operational_costs', lang)}:</strong> {format_currency(custo_operacional_ano, lang)}</p>
-                    <p><strong>{t('fixed_costs', lang)}:</strong> {format_currency(custos_fixos_anuais, lang)}</p>
-                    {f"<p><strong>{t('charter_revenue', lang)}:</strong> -{format_currency(receita_charter, lang)}</p>" if include_charter else ""}
+                    <p><strong>Custos Fixos:</strong> {format_currency(custos_fixos_anuais, lang)}</p>
+                    {f"<p><strong>Receita Charter:</strong> -{format_currency(receita_charter, lang)}</p>" if include_charter else ""}
                 </div>
                 """, unsafe_allow_html=True)
             
             with col2:
                 st.markdown(f"""
-                <div class="modern-card" style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);">
+                <div class="premium-card" style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);">
                     <h4>✈️ {t('amaro_management', lang)}</h4>
                     <div class="metric-value" style="color: #155724;">{format_currency(custo_liquido_amaro, lang)}</div>
                     <hr>
                     <p><strong>{t('operational_costs', lang)}:</strong> {format_currency(custo_amaro_ano, lang)}</p>
-                    <p><strong>{t('fixed_costs', lang)}:</strong> {format_currency(0, lang)}</p>
-                    {f"<p><strong>{t('charter_revenue', lang)}:</strong> -{format_currency(receita_charter, lang)}</p>" if include_charter else ""}
+                    <p><strong>Custos Fixos:</strong> {format_currency(0, lang)}</p>
+                    {f"<p><strong>Receita Charter:</strong> -{format_currency(receita_charter, lang)}</p>" if include_charter else ""}
                 </div>
                 """, unsafe_allow_html=True)
             
             with col3:
                 cor_economia = '#27AE60' if economia_anual > 0 else '#E74C3C'
                 st.markdown(f"""
-                <div class="modern-card" style="background: linear-gradient(135deg, {'#d4edda' if economia_anual > 0 else '#f8d7da'} 0%, {'#c3e6cb' if economia_anual > 0 else '#f5c6cb'} 100%);">
+                <div class="premium-card" style="background: linear-gradient(135deg, {'#d4edda' if economia_anual > 0 else '#f8d7da'} 0%, {'#c3e6cb' if economia_anual > 0 else '#f5c6cb'} 100%);">
                     <h4>💎 {t('annual_savings', lang)}</h4>
                     <div class="metric-value" style="color: {cor_economia};">{format_currency(abs(economia_anual), lang)}</div>
                     <hr>
-                    <p><strong>{t('savings_percentage', lang)}:</strong> {format_percentage(economia_anual/custo_liquido_proprio*100 if custo_liquido_proprio > 0 else 0, lang)}</p>
-                    <p><strong>{t('monthly_savings', lang)}:</strong> {format_currency(economia_anual/12, lang)}</p>
+                    <p><strong>{t('savings_percentage', lang)}:</strong> {format_percentage(percentual_economia, lang)}</p>
+                    <p><strong>Economia Mensal:</strong> {format_currency(economia_anual/12, lang)}</p>
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -638,7 +674,7 @@ with tab2:
                 textposition='outside'
             ))
             
-            # Adicionar linha de economia
+            # Adicionar anotação de economia
             if economia_anual > 0:
                 fig_comp.add_annotation(
                     x=0.5, y=max(valores) * 0.8,
@@ -650,7 +686,7 @@ with tab2:
                 )
             
             fig_comp.update_layout(
-                title=t('annual_cost_comparison', lang),
+                title='⚖️ Comparativo Anual de Custos',
                 yaxis_title='Custo Anual (R$)' if lang == 'pt' else 'Annual Cost (R$)',
                 template='plotly_white',
                 height=500
@@ -658,27 +694,77 @@ with tab2:
             
             st.plotly_chart(fig_comp, use_container_width=True)
             
+            # Exportação
+            col1, col2 = st.columns(2)
+            
+            dados_comp = {
+                "Análise": "Comparativo de Custos",
+                "Modelo": modelo_comp,
+                "Horas Anuais": horas_anuais,
+                "Custos Fixos": custos_fixos_anuais,
+                "Custo Gestão Própria": custo_liquido_proprio,
+                "Custo Gestão Amaro": custo_liquido_amaro,
+                "Economia Anual": economia_anual,
+                "Percentual Economia": f"{percentual_economia:.1f}%"
+            }
+            
+            relatorio_comp = criar_relatorio_dados(
+                "Comparativo de Custos",
+                {"modelo": modelo_comp, "horas": horas_anuais, "fixos": custos_fixos_anuais},
+                dados_comp
+            )
+            
+            with col1:
+                try:
+                    excel_buffer = gerar_excel_simples(relatorio_comp)
+                    if excel_buffer:
+                        st.download_button(
+                            t('export_excel', lang),
+                            data=excel_buffer.getvalue(),
+                            file_name=f"amaro_comparativo_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True
+                        )
+                except Exception as e:
+                    st.error(f"Erro ao gerar Excel: {e}")
+            
+            with col2:
+                try:
+                    pdf_buffer = BytesIO()
+                    if gerar_pdf(pdf_buffer, dados_comp):
+                        pdf_buffer.seek(0)
+                        st.download_button(
+                            t('export_pdf', lang),
+                            data=pdf_buffer.getvalue(),
+                            file_name=f"amaro_comparativo_{datetime.now().strftime('%Y%m%d')}.pdf",
+                            mime="application/pdf",
+                            use_container_width=True
+                        )
+                except Exception as e:
+                    st.error(f"Erro ao gerar PDF: {e}")
+                    
         except Exception as e:
             st.error(f"{t('calculation_error', lang)}: {e}")
 
-# TAB 3: Configurações e Fórmulas
+# ========================================================================
+# TAB 3: CONFIGURAÇÕES E FÓRMULAS
+# ========================================================================
 with tab3:
     st.markdown(f"""
-    <div class="modern-card">
-        <h3>⚙️ {t('settings', lang)}</h3>
+    <div class="premium-card">
+        <h3>⚙️ {t('tab_settings', lang)}</h3>
         <p>Ajuste os parâmetros de cálculo e visualize as fórmulas utilizadas</p>
     </div>
     """, unsafe_allow_html=True)
     
     # Sub-tabs para organizar configurações
-    config_tab1, config_tab2, config_tab3 = st.tabs([
-        f"💰 Custos", 
-        f"📊 Mercado", 
-        f"📐 Fórmulas"
+    config_tab1, config_tab2 = st.tabs([
+        f"💰 {'Parâmetros' if lang == 'pt' else 'Parameters'}", 
+        f"📐 {'Fórmulas' if lang == 'pt' else 'Formulas'}"
     ])
     
     with config_tab1:
-        st.markdown(f"### {t('operational_costs_params', lang)}")
+        st.markdown(f"### {'Parâmetros Operacionais' if lang == 'pt' else 'Operational Parameters'}")
         
         col1, col2 = st.columns(2)
         
@@ -693,25 +779,23 @@ with tab3:
             )
             
             custo_piloto = st.number_input(
-                f"👨‍✈️ {t('pilot_cost_hour', lang)}",
+                f"👨‍✈️ {t('pilot_cost', lang)}",
                 value=float(params['custo_piloto_hora']),
                 min_value=500,
                 max_value=5000,
                 step=50
             )
-        
-        with col2:
+            
             depreciacao = st.number_input(
-                f"📉 {t('annual_depreciation', lang)}",
+                f"📉 {t('depreciation', lang)}",
                 value=float(params['depreciacao_anual_pct']),
                 min_value=1.0,
                 max_value=20.0,
                 step=0.5,
                 format="%.1f"
             )
-            
-            st.markdown(f"**{t('maintenance_costs', lang)}:**")
-            
+        
+        with col2:
             manut_turboprop = st.number_input(
                 f"🛩️ {t('maintenance_turboprop', lang)}",
                 value=float(params['custo_manutencao_hora']['turboprop']),
@@ -727,13 +811,7 @@ with tab3:
                 max_value=10000,
                 step=200
             )
-    
-    with config_tab2:
-        st.markdown(f"### {t('market_reference_prices', lang)}")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
+            
             mercado_turboprop = st.number_input(
                 f"🛩️ {t('market_price_turboprop', lang)}",
                 value=float(params['preco_mercado']['turboprop']),
@@ -741,8 +819,7 @@ with tab3:
                 max_value=15000,
                 step=500
             )
-        
-        with col2:
+            
             mercado_jato = st.number_input(
                 f"✈️ {t('market_price_jet', lang)}",
                 value=float(params['preco_mercado']['jato']),
@@ -751,169 +828,105 @@ with tab3:
                 step=1000
             )
         
-        # Preview do impacto das mudanças
-        st.markdown(f"### 📊 {t('impact_preview', lang)}")
-        
-        if modelos:
-            preview_data = []
-            for modelo in modelos[:3]:  # Mostrar apenas os 3 primeiros
-                # Calcular com parâmetros atuais
-                resultado_atual = calcula_custo_trecho(modelo, 1.0, params)
-                
-                # Simular com novos parâmetros
-                tipo_modelo = 'turboprop' if params['preco_mercado_hora'][modelo] < 12000 else 'jato'
-                novo_custo_manut = manut_turboprop if tipo_modelo == 'turboprop' else manut_jato
-                novo_preco_mercado = mercado_turboprop if tipo_modelo == 'turboprop' else mercado_jato
-                
-                # Calcular novo custo
-                novo_custo = (
-                    params['consumo_modelos'][modelo] * preco_combustivel +
-                    custo_piloto +
-                    novo_custo_manut +
-                    params['depreciacao_hora'][modelo]  # Manter depreciação atual por simplicidade
-                )
-                
-                nova_economia = novo_preco_mercado - novo_custo
-                
-                preview_data.append({
-                    'Modelo' if lang == 'pt' else 'Model': modelo,
-                    'Custo Atual' if lang == 'pt' else 'Current Cost': format_currency(resultado_atual['total'], lang),
-                    'Novo Custo' if lang == 'pt' else 'New Cost': format_currency(novo_custo, lang),
-                    'Economia' if lang == 'pt' else 'Savings': format_currency(nova_economia, lang),
-                    'Variação' if lang == 'pt' else 'Change': f"{((novo_custo - resultado_atual['total'])/resultado_atual['total']*100):+.1f}%"
-                })
-            
-            df_preview = pd.DataFrame(preview_data)
-            st.dataframe(df_preview, use_container_width=True, hide_index=True)
+        # Botão de salvar
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button(f"{t('save_settings', lang)}", type="primary", use_container_width=True):
+                try:
+                    # Atualizar parâmetros
+                    novos_params = {
+                        'preco_combustivel': preco_combustivel,
+                        'custo_piloto_hora': custo_piloto,
+                        'depreciacao_anual_pct': depreciacao,
+                        'custo_manutencao_hora': {
+                            'turboprop': manut_turboprop,
+                            'jato': manut_jato
+                        },
+                        'percentual_proprietario': params.get('percentual_proprietario', 0.9),
+                        'preco_mercado': {
+                            'turboprop': mercado_turboprop,
+                            'jato': mercado_jato
+                        }
+                    }
+                    
+                    if save_params(novos_params):
+                        st.success(f"✅ {t('settings_saved', lang)}")
+                        st.rerun()
+                    else:
+                        st.error("❌ Erro ao salvar configurações")
+                        
+                except Exception as e:
+                    st.error(f"❌ Erro ao processar dados: {e}")
     
-    with config_tab3:
-        st.markdown(f"### 📐 {t('formulas_used', lang)}")
+    with config_tab2:
+        st.markdown(f"### {'Fórmulas Utilizadas' if lang == 'pt' else 'Formulas Used'}")
         
         st.markdown(f"""
-        <div class="modern-card">
-            <h4>🔧 {t('cost_calculation_formula', lang)}</h4>
+        <div class="premium-card">
+            <h4>🔧 {'Cálculo de Custo por Hora' if lang == 'pt' else 'Cost per Hour Calculation'}</h4>
             <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
                 <code>
-                {"Custo Total/Hora = Combustível + Piloto + Manutenção + Depreciação" if lang == 'pt' else "Total Cost/Hour = Fuel + Pilot + Maintenance + Depreciation"}
+                {'Custo Total/Hora = Combustível + Piloto + Manutenção + Depreciação' if lang == 'pt' else 'Total Cost/Hour = Fuel + Pilot + Maintenance + Depreciation'}
                 <br><br>
-                {t('formula_where', lang)}<br>
-                • {t('formula_fuel', lang)}<br>
-                • {t('formula_pilot', lang)}<br>
-                • {t('formula_maintenance', lang)}<br>
-                • {t('formula_depreciation', lang)}
+                {'Onde:' if lang == 'pt' else 'Where:'}<br>
+                • {'Combustível = Consumo (L/h) × Preço Combustível (R$/L)' if lang == 'pt' else 'Fuel = Consumption (L/h) × Fuel Price (R$/L)'}<br>
+                • {'Piloto = Custo Piloto (R$/h)' if lang == 'pt' else 'Pilot = Pilot Cost (R$/h)'}<br>
+                • {'Manutenção = Custo Manutenção por tipo (R$/h)' if lang == 'pt' else 'Maintenance = Maintenance Cost per type (R$/h)'}<br>
+                • {'Depreciação = (Valor Aeronave × % Depreciação Anual) ÷ Horas Anuais' if lang == 'pt' else 'Depreciation = (Aircraft Value × Annual Depreciation %) ÷ Annual Hours'}
                 </code>
             </div>
         </div>
         
-        <div class="modern-card">
-            <h4>💰 {t('savings_calculation_formula', lang)}</h4>
+        <div class="premium-card">
+            <h4>💰 {'Cálculo de Economia' if lang == 'pt' else 'Savings Calculation'}</h4>
             <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
                 <code>
-                {"Economia = Preço Mercado - Custo Amaro" if lang == 'pt' else "Savings = Market Price - Amaro Cost"}
+                {'Economia = Preço Mercado - Custo Amaro' if lang == 'pt' else 'Savings = Market Price - Amaro Cost'}
                 <br><br>
-                {"Percentual Economia = (Economia ÷ Preço Mercado) × 100" if lang == 'pt' else "Savings Percentage = (Savings ÷ Market Price) × 100"}
+                {'Percentual Economia = (Economia ÷ Preço Mercado) × 100' if lang == 'pt' else 'Savings Percentage = (Savings ÷ Market Price) × 100'}
                 </code>
             </div>
         </div>
         
-        <div class="modern-card">
-            <h4>📊 {t('roi_calculation_formula', lang)}</h4>
+        <div class="premium-card">
+            <h4>📊 {'Modelo de Receita Amaro Aviation' if lang == 'pt' else 'Amaro Aviation Revenue Model'}</h4>
             <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
                 <code>
-                {"ROI Mensal = (Lucro Líquido ÷ Investimento) × 100" if lang == 'pt' else "Monthly ROI = (Net Profit ÷ Investment) × 100"}
-                <br><br>
-                {t('formula_where', lang)}<br>
-                • {"Lucro Líquido = Receita Proprietário - Custos Operacionais" if lang == 'pt' else "Net Profit = Owner Revenue - Operational Costs"}<br>
-                • {"Receita Proprietário = Receita Bruta × 90%" if lang == 'pt' else "Owner Revenue = Gross Revenue × 90%"}<br>
-                • {"Receita Bruta = Preço Mercado × Horas Efetivas" if lang == 'pt' else "Gross Revenue = Market Price × Effective Hours"}
+                {'Receita do Proprietário = Receita Bruta × 90%' if lang == 'pt' else 'Owner Revenue = Gross Revenue × 90%'}<br>
+                {'Taxa Amaro Aviation = Receita Bruta × 10%' if lang == 'pt' else 'Amaro Aviation Fee = Gross Revenue × 10%'}<br>
+                {'Lucro Líquido = Receita do Proprietário - Custos Operacionais' if lang == 'pt' else 'Net Profit = Owner Revenue - Operational Costs'}
                 </code>
             </div>
         </div>
         """, unsafe_allow_html=True)
-        
-        # Mostrar parâmetros atuais
-        st.markdown(f"### 📋 {t('current_parameters', lang)}")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.info(f"""
-            **💰 {"Custos Operacionais" if lang == 'pt' else "Operational Costs"}:**
-            - {"Combustível" if lang == 'pt' else "Fuel"}: {format_currency(params['preco_combustivel'], lang)}/L
-            - {"Piloto" if lang == 'pt' else "Pilot"}: {format_currency(params['custo_piloto_hora'], lang)}/h
-            - {"Depreciação" if lang == 'pt' else "Depreciation"}: {format_percentage(params['depreciacao_anual_pct'], lang)} {"ao ano" if lang == 'pt' else "per year"}
-            """)
-        
-        with col2:
-            st.info(f"""
-            **🔧 {"Manutenção" if lang == 'pt' else "Maintenance"}:**
-            - Turboprop: {format_currency(params['custo_manutencao_hora']['turboprop'], lang)}/h
-            - {"Jato" if lang == 'pt' else "Jet"}: {format_currency(params['custo_manutencao_hora']['jato'], lang)}/h
-            
-            **📊 {"Preços de Mercado" if lang == 'pt' else "Market Prices"}:**
-            - Turboprop: {format_currency(params['preco_mercado']['turboprop'], lang)}/h
-            - {"Jato" if lang == 'pt' else "Jet"}: {format_currency(params['preco_mercado']['jato'], lang)}/h
-            """)
-    
-    # Botão para salvar configurações
-    st.markdown("---")
-    col1, col2, col3 = st.columns([1, 2, 1])
-    
-    with col2:
-        if st.button(f"💾 {t('save_settings', lang)}", type="primary", use_container_width=True):
-            try:
-                from utils.params import save_params
-                
-                # Preparar novos parâmetros
-                novos_params = {
-                    'preco_combustivel': preco_combustivel,
-                    'custo_piloto_hora': custo_piloto,
-                    'depreciacao_anual_pct': depreciacao,
-                    'custo_manutencao_hora': {
-                        'turboprop': manut_turboprop,
-                        'jato': manut_jato
-                    },
-                    'percentual_proprietario': params.get('percentual_proprietario', 0.9),
-                    'preco_mercado': {
-                        'turboprop': mercado_turboprop,
-                        'jato': mercado_jato
-                    }
-                }
-                
-                if save_params(novos_params):
-                    st.success(f"✅ {t('settings_saved', lang)}")
-                    st.rerun()
-                else:
-                    st.error(f"❌ {t('settings_save_error', lang)}")
-                    
-            except Exception as e:
-                st.error(f"❌ {t('settings_save_error', lang)}: {e}")
 
-# Informações na sidebar
+# ========================================================================
+# SIDEBAR - INFORMAÇÕES E STATUS
+# ========================================================================
 with st.sidebar:
     st.markdown("---")
-    st.markdown(f"### 📊 {t('system_status', lang)}")
+    st.markdown(f"### 📊 {'Status do Sistema' if lang == 'pt' else 'System Status'}")
     
     st.success(f"""
     **✅ {t('system_operational', lang)}**
-    - {"Modelos" if lang == 'pt' else "Models"}: {len(modelos)} {t('models_configured', lang)}
-    - {"Parâmetros" if lang == 'pt' else "Parameters"}: {t('parameters_loaded', lang)}
-    - {"Idioma" if lang == 'pt' else "Language"}: {language}
+    - {'Modelos' if lang == 'pt' else 'Models'}: {len(modelos)} {t('models_configured', lang)}
+    - {'Parâmetros' if lang == 'pt' else 'Parameters'}: {'Carregados' if lang == 'pt' else 'Loaded'}
+    - {'Idioma' if lang == 'pt' else 'Language'}: {language_option}
     """)
     
-    st.markdown(f"### 🎯 {t('features', lang)}")
+    st.markdown(f"### 🎯 {'Funcionalidades' if lang == 'pt' else 'Features'}")
     st.info(f"""
-    **📈 {t('monthly_profit', lang).replace('📈 ', '')}:**
-    {"Simula receitas e custos mensais" if lang == 'pt' else "Simulates monthly revenues and costs"}
+    **📈 {'Lucro Mensal' if lang == 'pt' else 'Monthly Profit'}:**
+    {'Simula receitas e custos mensais' if lang == 'pt' else 'Simulates monthly revenues and costs'}
     
-    **⚖️ {t('cost_comparison', lang).replace('⚖️ ', '')}:**
-    {"Compara gestão própria vs. Amaro" if lang == 'pt' else "Compares own management vs. Amaro"}
+    **⚖️ {'Comparativo' if lang == 'pt' else 'Comparison'}:**
+    {'Compara gestão própria vs. Amaro' if lang == 'pt' else 'Compares own management vs. Amaro'}
     
-    **⚙️ {t('settings', lang).replace('⚙️ ', '')}:**
-    {"Ajusta parâmetros e visualiza fórmulas" if lang == 'pt' else "Adjusts parameters and shows formulas"}
+    **⚙️ {'Configurações' if lang == 'pt' else 'Settings'}:**
+    {'Ajusta parâmetros e visualiza fórmulas' if lang == 'pt' else 'Adjusts parameters and shows formulas'}
     """)
     
-    st.markdown(f"### 💡 {t('usage_tips', lang)}")
+    st.markdown(f"### 💡 {'Dicas de Uso' if lang == 'pt' else 'Usage Tips'}")
     if lang == 'pt':
         st.markdown("""
         - Use ocupação de 70-80% para projeções realistas
@@ -930,23 +943,10 @@ with st.sidebar:
         """)
     
     st.markdown("---")
-    st.markdown(f"### 🔄 {t('quick_actions', lang)}")
-    
-    if st.button(f"🔄 {t('reload_data', lang)}", use_container_width=True):
-        st.cache_data.clear()
-        st.rerun()
-    
-    if st.button(f"📱 {t('presentation_mode', lang)}", use_container_width=True):
-        if lang == 'pt':
-            st.info("💡 Use F11 para tela cheia durante apresentações")
-        else:
-            st.info("💡 Use F11 for fullscreen during presentations")
-    
-    st.markdown("---")
     st.markdown(f"""
     <div style="text-align: center; color: #6c757d; font-size: 0.8rem;">
         <p><strong>Amaro Aviation Calculator</strong></p>
-        <p>{t('version', lang)} - {t('refactored_system', lang)}</p>
+        <p>v3.0 - {'Sistema Refatorado' if lang == 'pt' else 'Refactored System'}</p>
         <p>{t('developed_with_love', lang)}</p>
     </div>
     """, unsafe_allow_html=True)
