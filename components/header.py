@@ -1,5 +1,5 @@
 """
-Componente de cabeçalho reutilizável para todas as páginas
+Componente de cabeçalho corrigido e simplificado
 """
 
 import streamlit as st
@@ -7,12 +7,8 @@ from config.idiomas import get_text
 
 def render_header(lang='pt'):
     """
-    Renderiza o cabeçalho principal da aplicação
-    
-    Args:
-        lang: Idioma ('pt' ou 'en')
+    Renderiza o cabeçalho principal - versão corrigida
     """
-    
     st.markdown(f"""
     <div class="main-header">
         <h1>✈️ {get_text('app_title', lang)}</h1>
@@ -22,40 +18,34 @@ def render_header(lang='pt'):
 
 def render_page_header(title, subtitle=None, lang='pt'):
     """
-    Renderiza cabeçalho específico da página
-    
-    Args:
-        title: Título da página
-        subtitle: Subtítulo opcional
-        lang: Idioma
+    Renderiza cabeçalho da página - versão simplificada
     """
+    # Traduzir título se necessário
+    if isinstance(title, str) and not title.startswith('<'):
+        title_text = get_text(title, lang)
+    else:
+        title_text = title
     
-    title_text = get_text(title, lang) if isinstance(title, str) and not title.startswith('<') else title
-    
+    # HTML simplificado e bem formado
     header_html = f"""
     <div style="
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 2rem;
+        background: #F8F9FA;
+        padding: 1.5rem;
         margin: -1rem -1rem 2rem -1rem;
         border-left: 4px solid #8C1D40;
         border-radius: 0 8px 8px 0;
     ">
-        <h2 style="
-            color: #8C1D40;
-            margin: 0;
-            font-size: 1.8rem;
-            font-weight: 600;
-        ">{title_text}</h2>
+        <h2 style="color: #8C1D40; margin: 0; font-size: 1.5rem;">{title_text}</h2>
     """
     
     if subtitle:
-        subtitle_text = get_text(subtitle, lang) if isinstance(subtitle, str) else subtitle
+        if isinstance(subtitle, str):
+            subtitle_text = get_text(subtitle, lang) if not subtitle.startswith('<') else subtitle
+        else:
+            subtitle_text = str(subtitle)
+        
         header_html += f"""
-        <p style="
-            color: #6B7280;
-            margin: 0.5rem 0 0 0;
-            font-size: 1.1rem;
-        ">{subtitle_text}</p>
+        <p style="color: #6B7280; margin: 0.5rem 0 0 0; font-size: 1rem;">{subtitle_text}</p>
         """
     
     header_html += "</div>"

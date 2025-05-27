@@ -154,3 +154,9 @@ v1 = true                   # Habilitar componentes v1
 # Configurações específicas para desenvolvimento
 watchForChanges = true      # Observar mudanças em arquivos
 hotReload = true           # Hot reload para desenvolvimento
+[theme]
+base = "light"
+primaryColor = "#8C1D40"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F8F9FA"
+textColor = "#1F2937"
