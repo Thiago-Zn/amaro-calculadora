@@ -26,44 +26,6 @@ def render_status_box(status_type: str,
     details     : texto adicional opcional (também texto puro)
     """
 
-    # mapa de estilos
-    _cfg = {
-        "success": dict(color="#10B981", bg="#F0FDF4", border="#10B981", icon="✅"),
-        "warning": dict(color="#F59E0B", bg="#FFFBEB", border="#F59E0B", icon="⚠️"),
-        "error"  : dict(color="#DC2626", bg="#FEF2F2", border="#DC2626", icon="❌"),
-        "info"   : dict(color="#0EA5E9", bg="#F0F9FF", border="#0EA5E9", icon="ℹ️"),
-    }
-
-    # garante fallback seguro
-    style = _cfg.get(status_type.lower(), _cfg["info"])
-
-    # limpa quebras de linha/recuo
-    message = message.strip()
-    details_html = f"""
-<p style="font-size:0.875rem;margin-top:0.5rem;opacity:0.8">{details.strip()}</p>
-""" if details else ""
-
-    html = f"""
-<div style="
-    background:{style['bg']};
-    border:1px solid {style['border']};
-    border-left:4px solid {style['border']};
-    border-radius:8px;
-    padding:1rem 1.5rem;
-    margin:1rem 0;">
-   <p style="margin:0;color:{style['color']};font-weight:600">
-      {style['icon']} {title}
-   </p>
-   <p style="margin:.25rem 0 0 0;color:#374151;font-size:0.875rem">
-      {message}
-   </p>
-   {details_html}
-</div>
-"""
-
-    st.markdown(textwrap.dedent(html), unsafe_allow_html=True)
-
-    
     # Configurações por tipo
     config = {
         'success': {
@@ -92,7 +54,7 @@ def render_status_box(status_type: str,
         }
     }
     
-    style_config = config.get(status_type, config['info'])
+    style_config = config.get(status_type.lower(), config['info'])
     
     details_html = ""
     if details:
@@ -102,7 +64,7 @@ def render_status_box(status_type: str,
             margin-top: 0.5rem;
             opacity: 0.8;
         ">
-            {details}
+            {details.strip()}
         </div>
         """
     

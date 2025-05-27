@@ -94,44 +94,44 @@ def _inject_css() -> None:
         }}
 
         /* ===== 3. SELECTBOX FECHADO ===== */
-        section[data-testid="stSidebar"] div[data-testid="stSelectbox"] {{
-            background: {AMARO_BORDO} !important;
+        section[data-testid="stSidebar"] div[data-testid="stSelectbox"] {
+            background: transparent !important;
             padding: 0 !important;
-        }}
-        section[data-testid="stSidebar"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:first-child {{
-            background: {AMARO_BRANCO} !important;
-            color: {AMARO_PRETO} !important;
-            border: 1px solid {AMARO_BORDO} !important;
+        }
+        section[data-testid="stSidebar"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:first-child {
+            background: rgba(255, 255, 255, 0.9) !important;
+            color: #333333 !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
             border-radius: 6px !important;
             padding: 0.4rem 0.75rem !important;
             font-size: 0.875rem !important;
-        }}
-        section[data-testid="stSidebar"] div[data-testid="stSelectbox"] svg {{
-            fill: {AMARO_PRETO} !important;
-        }}
+        }
+        section[data-testid="stSidebar"] div[data-testid="stSelectbox"] svg {
+            fill: #333333 !important;
+        }
 
         /* ===== 4. DROPDOWN / POPOVER ===== */
         /* regra no elemento-raiz e em *todos* os descendentes p/ anular tema escuro */
         div[data-baseweb="popover"][role="listbox"],
-        div[data-baseweb="popover"][role="listbox"] * {{
-            background: {AMARO_BRANCO} !important;   /* BRANCO */
-            color: {AMARO_PRETO} !important;         /* PRETO */
-        }}
+        div[data-baseweb="popover"][role="listbox"] * {
+            background: rgba(255, 255, 255, 0.95) !important;
+            color: #333333 !important;
+        }
 
         /* itens individuais: mantêm padding e fonte */
-        div[data-baseweb="popover"][role="listbox"] [role="option"] {{
+        div[data-baseweb="popover"][role="listbox"] [role="option"] {
             padding: 0.5rem 0.85rem !important;
             font-size: 0.875rem !important;
-        }}
+        }
 
         /* hover ou item selecionado */
         div[data-baseweb="popover"][role="listbox"] [role="option"]:hover,
         div[data-baseweb="popover"][role="listbox"] [role="option"][aria-selected="true"],
         div[data-baseweb="popover"][role="listbox"] [role="option"]:hover *,
-        div[data-baseweb="popover"][role="listbox"] [role="option"][aria-selected="true"] * {{
-            background: {AMARO_BORDO} !important;    /* BORDÔ */
-            color: {AMARO_BRANCO} !important;        /* BRANCO */
-        }}
+        div[data-baseweb="popover"][role="listbox"] [role="option"][aria-selected="true"] * {
+            background: #8C1D40 !important;
+            color: #FFFFFF !important;
+        }
 
         /* ===== 5. ESCONDE HEADER/FOOTER PADRÕES ===== */
         #MainMenu, header, footer {{ visibility: hidden !important; }}
