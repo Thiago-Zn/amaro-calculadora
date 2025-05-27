@@ -1,18 +1,18 @@
 """
-Componente de sidebar reutilizável para Amaro Aviation – corrigido para legibilidade e funcionamento.
+Componente de sidebar sem seletor de idioma para Amaro Aviation
+O dropdown de idioma foi removido e substituído por um texto estático legível.
 """
 import streamlit as st
-from config.idiomas import get_text, detect_language_from_selection
+from config.idiomas import detect_language_from_selection
 
 
 def render_sidebar(lang: str = 'pt', current_page: str = '') -> str:
     """
-    Renderiza a sidebar principal com cabeçalho, seleção de idioma e navegação.
-    Aplica CSS para garantir legibilidade dos elementos em fundo bordô.
+    Renderiza a sidebar principal com cabeçalho, idioma estático e navegação.
 
     Args:
-        lang: Código do idioma inicial ('pt' ou 'en').
-        current_page: Identificador da página atual (nome do arquivo ou chave).
+        lang: Código do idioma atual ('pt' ou 'en').
+        current_page: Identificador da página ativa.
 
     Returns:
         O código do idioma selecionado ('pt' ou 'en').
@@ -20,42 +20,21 @@ def render_sidebar(lang: str = 'pt', current_page: str = '') -> str:
     _inject_sidebar_css()
     with st.sidebar:
         _render_header()
-        lang = _render_language_selector(lang)
+        _render_language_display(lang)
         _render_navigation(current_page, lang)
     return lang
 
 
 def _inject_sidebar_css() -> None:
     """
-    Injeta CSS personalizado na sidebar para corrigir cores do seletor,
-    fundo do dropdown e estilo de navegação.
+    Injeta CSS para estilizar sidebar e itens de navegação.
     """
     st.markdown(
         """
         <style>
         /* Fundo geral da sidebar */
-        section[data-testid="stSidebar"]>div>div {
+        section[data-testid="stSidebar"] > div {
             background-color: #8C1D40 !important;
-        }
-        /* Label do seletor de idioma */
-        section[data-testid="stSidebar"] label[for="language_selector"] {
-            color: #FFFFFF !important;
-            font-size: 0.875rem !important;
-            margin-bottom: 0.25rem !important;
-        }
-        /* Campo de seleção (input) */
-        section[data-testid="stSidebar"] div[data-baseweb="select"]>div {
-            background-color: #FFFFFF !important;
-            color: #1F2937 !important;
-        }
-        /* Dropdown de opções */
-        section[data-testid="stSidebar"] div[data-baseweb="popover"] {
-            background-color: #FFFFFF !important;
-            border: 1px solid #DADDE1 !important;
-        }
-        section[data-testid="stSidebar"] div[role="option"] {
-            background-color: #FFFFFF !important;
-            color: #1F2937 !important;
         }
         /* Itens de navegação */
         .nav-item {
@@ -78,7 +57,7 @@ def _inject_sidebar_css() -> None:
             color: #8C1D40 !important;
             font-weight: 600;
         }
-        /* Oculta header/rodapé padrão */
+        /* Oculta cabeçalho/rodapé padrão */
         #MainMenu, header, footer {
             visibility: hidden;
         }
@@ -90,7 +69,7 @@ def _inject_sidebar_css() -> None:
 
 def _render_header() -> None:
     """
-    Renderiza o cabeçalho fixo da sidebar.
+    Renderiza o cabeçalho da sidebar.
     """
     st.markdown(
         """
@@ -105,22 +84,20 @@ def _render_header() -> None:
     )
 
 
-def _render_language_selector(lang: str) -> str:
+def _render_language_display(lang: str) -> None:
     """
-    Renderiza o selectbox de idioma e retorna o idioma escolhido.
+    Exibe o idioma atual como texto estático.
     """
-    idioma_selecionado = st.selectbox(
-        get_text('language', lang),
-        ["🇧🇷 Português", "🇺🇸 English"],
-        index=0 if lang == 'pt' else 1,
-        key="language_selector"
+    label = "🇧🇷 Português" if lang == 'pt' else "🇺🇸 English"
+    st.markdown(
+        f"<div style='text-align:center; color:#FFFFFF; font-size:0.875rem; margin-bottom:1rem;'>{label}</div>",
+        unsafe_allow_html=True,
     )
-    return detect_language_from_selection(idioma_selecionado)
 
 
 def _render_navigation(current_page: str, lang: str) -> None:
     """
-    Renderiza a lista de navegação sem título, destacando a página ativa.
+    Renderiza a navegação, destacando a página ativa.
     """
     pages_info = {
         'pt': {
@@ -138,13 +115,12 @@ def _render_navigation(current_page: str, lang: str) -> None:
             'Configuracoes': 'Parameters and settings'
         }
     }
-    # Espaçamento antes da navegação
     st.markdown('---')
     for key, desc in pages_info[lang].items():
         is_active = current_page.endswith(key)
-        css_class = 'nav-item-active' if is_active else 'nav-item'
+        css = 'nav-item-active' if is_active else 'nav-item'
         icon = '👉' if is_active else '📄'
         st.markdown(
-            f"<div class=\"{css_class}\">{icon}&nbsp;{desc}</div>",
-            unsafe_allow_html=True
+            f"<div class='{css}'>{icon}&nbsp;{desc}</div>",
+            unsafe_allow_html=True,
         )
