@@ -3,17 +3,37 @@ Componente para renderização de boxes de status e alertas
 """
 
 import streamlit as st
+import textwrap
 
 def render_status_box(status_type, title, message, details=None):
-    """
-    Renderiza box de status customizado
-    
-    Args:
-        status_type: Tipo do status ('success', 'warning', 'error', 'info')
-        title: Título do status
-        message: Mensagem principal
-        details: Detalhes adicionais (opcional)
-    """
+    # ... (mesmo dicionário `config`)
+
+    message = message.strip()          # ➋  remove quebras/recuos
+    details_html = ""
+    if details:
+        details_html = f"""
+<div style="font-size:0.875rem;margin-top:0.5rem;opacity:0.8;">
+    {details.strip()}
+</div>"""
+
+    box_html = f"""
+<div style="
+    background:{style_config['bg_color']};
+    border:1px solid {style_config['border_color']};
+    border-left:4px solid {style_config['border_color']};
+    border-radius:8px;
+    padding:1rem 1.5rem;
+    margin:1rem 0;">
+    <div style="color:{style_config['color']};font-weight:600;font-size:1rem;margin-bottom:0.25rem;">
+        {style_config['icon']} {title}
+    </div>
+    <div style="color:#374151;font-size:0.875rem;line-height:1.5;">
+        {message}
+        {details_html}
+    </div>
+</div>"""
+
+    st.markdown(textwrap.dedent(box_html), unsafe_allow_html=True)   # ➌
     
     # Configurações por tipo
     config = {
