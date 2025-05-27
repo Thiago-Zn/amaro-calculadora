@@ -1,187 +1,327 @@
-"""calculations.py - Sistema de cálculos premium com validação e flexibilidade"""
+"""
+Sistema de cálculos refatorado para estrutura multipage
+Função principal calcula_custo_trecho() atualizada conforme especificação
+"""
 
-def calcular_combustivel(duracao, consumo_lh, preco_litro):
-    """Calcula o custo de combustível para um voo"""
-    if duracao <= 0 or consumo_lh <= 0 or preco_litro <= 0:
-        return 0.0
-    return float(duracao * consumo_lh * preco_litro)
-
-def calcular_piloto(duracao, custo_piloto_hora):
-    """Calcula o custo do piloto para um voo"""
-    if duracao <= 0 or custo_piloto_hora <= 0:
-        return 0.0
-    return float(duracao * custo_piloto_hora)
-
-def calcular_manutencao(duracao, custo_manutencao_hora):
-    """Calcula o custo de manutenção para um voo"""
-    if duracao <= 0 or custo_manutencao_hora <= 0:
-        return 0.0
-    return float(duracao * custo_manutencao_hora)
-
-def calcular_depreciacao(duracao, depreciacao_por_hora):
-    """Calcula a depreciação para um voo baseada no valor por hora"""
-    if duracao <= 0 or depreciacao_por_hora <= 0:
-        return 0.0
-    return float(duracao * depreciacao_por_hora)
-
-def calcular_depreciacao_detalhada(duracao, depreciacao_anual_pct, valor_aeronave, horas_anuais=400):
+def calcula_custo_trecho(modelo, horas, params):
     """
-    Calcula depreciação detalhada baseada no valor da aeronave
-    """
-    if any(val <= 0 for val in [duracao, depreciacao_anual_pct, valor_aeronave, horas_anuais]):
-        return 0.0
-    
-    depreciacao_anual = valor_aeronave * (depreciacao_anual_pct / 100)
-    depreciacao_por_hora = depreciacao_anual / horas_anuais
-    return float(duracao * depreciacao_por_hora)
-
-def calcular_total(custos_dict):
-    """Soma todos os custos de um dicionário"""
-    if not isinstance(custos_dict, dict):
-        return 0.0
-    return float(sum(valor for valor in custos_dict.values() if isinstance(valor, (int, float))))
-
-def calcular_economia(custo_total, preco_mercado):
-    """Calcula a economia em relação ao preço de mercado"""
-    if preco_mercado <= 0:
-        return 0.0
-    return float(preco_mercado - custo_total)
-
-def calcular_percentual_economia(custo_total, preco_mercado):
-    """Calcula o percentual de economia"""
-    if preco_mercado <= 0:
-        return 0.0
-    economia = calcular_economia(custo_total, preco_mercado)
-    return float((economia / preco_mercado) * 100)
-
-def calcular_lucro_operacao(receita, custos_dict, percentual_margem=0.0):
-    """
-    Calcula o lucro da operação considerando margem de lucro
-    """
-    custo_total = calcular_total(custos_dict)
-    lucro_bruto = receita - custo_total
-    margem_adicional = receita * (percentual_margem / 100)
-    return float(lucro_bruto - margem_adicional)
-
-def calcula_custo_trecho(modelo, duracao, params):
-    """
-    Calcula todos os custos para um trecho específico
+    Calcula todos os custos para um trecho/período específico
     
     Args:
         modelo: Nome do modelo da aeronave
-        duracao: Duração do voo em horas
-        params: Dicionário com todos os parâmetros carregados
+        horas: Número de horas de voo
+        params: Dicionário com parâmetros carregados
     
     Returns:
-        Dict com breakdown detalhado dos custos
+        Dict com breakdown detalhado conforme especificação:
+        {
+            "combustivel": ...,
+            "manutencao": ...,
+            "tripulacao": ...,
+            "seguro": ...,
+            "hangar": ...,
+            "ferry": ...,
+            "planejamento": ...,
+            "depreciacao": ...,
+            "total": soma
+        }
     """
     if modelo not in params.get('consumo_modelos', {}):
-        raise ValueError(f"Modelo '{modelo}' não encontrado nos parâmetros")
+        raise ValueError(f"Modelo '{modelo}' não encontrado")
     
-    if duracao <= 0:
-        raise ValueError("Duração deve ser maior que zero")
+    if horas <= 0:
+        raise ValueError("Número de horas deve ser maior que zero")
     
-    # Cálculo de cada componente
-    custo_combustivel = calcular_combustivel(
-        duracao, 
-        params['consumo_modelos'][modelo], 
-        params['preco_combustivel']
-    )
+    # Cálculo do combustível
+    consumo_lh = params['consumo_modelos'][modelo]
+    preco_combustivel = params['preco_combustivel']
+    custo_combustivel = horas * consumo_lh * preco_combustivel
     
-    custo_piloto = calcular_piloto(
-        duracao, 
-        params['custo_piloto_hora_modelo'][modelo]
-    )
+    # Cálculo da manutenção
+    custo_manutencao_hora = params['custo_manutencao'][modelo]
+    custo_manutencao = horas * custo_manutencao_hora
     
-    custo_manutencao = calcular_manutencao(
-        duracao, 
-        params['custo_manutencao'][modelo]
-    )
+    # Cálculo da tripulação (piloto)
+    custo_piloto_hora = params['custo_piloto_hora_modelo'][modelo]
+    custo_tripulacao = horas * custo_piloto_hora
     
-    custo_depreciacao = calcular_depreciacao(
-        duracao, 
-        params['depreciacao_hora'][modelo]
-    )
+    # Cálculo da depreciação
+    depreciacao_hora = params['depreciacao_hora'][modelo]
+    custo_depreciacao = horas * depreciacao_hora
+    
+    # Custos fixos proporcionais (estimativa para o período)
+    # Baseado em horas anuais típicas de 400h
+    horas_anuais_ref = 400
+    fator_proporcional = horas / horas_anuais_ref
+    
+    # Estimativas de custos fixos anuais
+    custo_seguro = 200000 * fator_proporcional  # Seguro anual proporcional
+    custo_hangar = 120000 * fator_proporcional  # Hangar anual proporcional
+    custo_ferry = horas * 200  # Ferry/posicionamento estimado por hora
+    custo_planejamento = horas * 150  # Planejamento/administração por hora
     
     # Total
-    custos = {
-        'combustivel': custo_combustivel,
-        'piloto': custo_piloto,
-        'manutencao': custo_manutencao,
-        'depreciacao': custo_depreciacao
-    }
-    
-    total = calcular_total(custos)
-    preco_mercado_total = params['preco_mercado_hora'][modelo] * duracao
-    economia = calcular_economia(total, preco_mercado_total)
-    percentual_economia = calcular_percentual_economia(total, preco_mercado_total)
+    total = (custo_combustivel + custo_manutencao + custo_tripulacao + 
+             custo_seguro + custo_hangar + custo_ferry + 
+             custo_planejamento + custo_depreciacao)
     
     return {
-        'preco_comb': custo_combustivel,
-        'piloto': custo_piloto,
-        'manut': custo_manutencao,
-        'depr': custo_depreciacao,
-        'total': total,
+        "combustivel": custo_combustivel,
+        "manutencao": custo_manutencao,
+        "tripulacao": custo_tripulacao,
+        "seguro": custo_seguro,
+        "hangar": custo_hangar,
+        "ferry": custo_ferry,
+        "planejamento": custo_planejamento,
+        "depreciacao": custo_depreciacao,
+        "total": total,
+        
+        # Manter compatibilidade com código existente
+        "preco_comb": custo_combustivel,
+        "manut": custo_manutencao,
+        "piloto": custo_tripulacao,
+        "depr": custo_depreciacao
+    }
+
+def calcular_projecao_mensal(modelo, horas_mes, num_meses, params, 
+                           taxa_crescimento=0, inflacao_custos=0, 
+                           reajuste_preco=0, investimento_inicial=0):
+    """
+    Calcula projeção de custos e receitas mensais
+    
+    Args:
+        modelo: Modelo da aeronave
+        horas_mes: Horas mensais iniciais
+        num_meses: Número de meses para projetar
+        params: Parâmetros do sistema
+        taxa_crescimento: Taxa de crescimento anual (%)
+        inflacao_custos: Taxa de inflação de custos anual (%)
+        reajuste_preco: Taxa de reajuste de preços anual (%)
+        investimento_inicial: Investimento inicial
+    
+    Returns:
+        Dict com projeção detalhada
+    """
+    
+    projecao = {
+        'meses': [],
+        'receitas': [],
+        'custos': [],
+        'lucros': [],
+        'fluxo_caixa': [],
+        'horas_mensais': [],
+        'breakeven_mes': None
+    }
+    
+    # Valores iniciais
+    horas_atual = horas_mes
+    preco_hora_atual = params['preco_mercado_hora'][modelo]
+    saldo_acumulado = -investimento_inicial
+    
+    # Fatores de crescimento mensais
+    fator_crescimento_mensal = (1 + taxa_crescimento/100) ** (1/12)
+    fator_inflacao_mensal = (1 + inflacao_custos/100) ** (1/12)
+    fator_reajuste_mensal = (1 + reajuste_preco/100) ** (1/12)
+    
+    for mes in range(1, num_meses + 1):
+        # Aplicar crescimento
+        if mes > 1:
+            if mes % 12 == 1:  # A cada ano
+                horas_atual *= fator_crescimento_mensal ** 12
+                preco_hora_atual *= fator_reajuste_mensal ** 12
+        
+        # Calcular custos do mês
+        resultado_mes = calcula_custo_trecho(modelo, horas_atual, params)
+        custo_mensal = resultado_mes['total']
+        
+        # Aplicar inflação nos custos
+        if mes > 1 and mes % 12 == 1:  # A cada ano
+            custo_mensal *= fator_inflacao_mensal ** 12
+        
+        # Calcular receita (assumindo 50% das horas para charter com 75% ocupação)
+        horas_charter = horas_atual * 0.5 * 0.75
+        receita_bruta = horas_charter * preco_hora_atual
+        receita_proprietario = receita_bruta * 0.9  # 90% para proprietário
+        
+        # Lucro mensal
+        lucro_mensal = receita_proprietario - custo_mensal
+        saldo_acumulado += lucro_mensal
+        
+        # Verificar breakeven
+        if saldo_acumulado > 0 and projecao['breakeven_mes'] is None:
+            projecao['breakeven_mes'] = mes
+        
+        # Armazenar dados
+        projecao['meses'].append(mes)
+        projecao['receitas'].append(receita_proprietario)
+        projecao['custos'].append(custo_mensal)
+        projecao['lucros'].append(lucro_mensal)
+        projecao['fluxo_caixa'].append(saldo_acumulado)
+        projecao['horas_mensais'].append(horas_atual)
+    
+    return projecao
+
+def calcular_comparativo_gestao(modelo, horas_anuais, params, custos_fixos_externos):
+    """
+    Calcula comparativo entre gestão própria e gestão Amaro
+    
+    Args:
+        modelo: Modelo da aeronave
+        horas_anuais: Horas voadas por ano
+        params: Parâmetros do sistema
+        custos_fixos_externos: Dict com custos fixos da gestão própria
+            {
+                'hangar': valor,
+                'seguro': valor,
+                'tripulacao': valor,
+                'administracao': valor
+            }
+    
+    Returns:
+        Dict com comparativo detalhado
+    """
+    
+    # Custos variáveis (iguais para ambos)
+    resultado_anual = calcula_custo_trecho(modelo, horas_anuais, params)
+    custos_variaveis = {
+        'combustivel': resultado_anual['combustivel'],
+        'manutencao': resultado_anual['manutencao'],
+        'depreciacao': resultado_anual['depreciacao'],
+        'tripulacao_variavel': resultado_anual['tripulacao']
+    }
+    
+    # GESTÃO PRÓPRIA
+    custos_fixos_proprio = sum(custos_fixos_externos.values())
+    custos_variaveis_proprio = sum(custos_variaveis.values())
+    total_proprio = custos_fixos_proprio + custos_variaveis_proprio
+    
+    # GESTÃO AMARO (sem custos fixos)
+    total_amaro = custos_variaveis_proprio  # Amaro absorve custos fixos
+    
+    # Economia
+    economia_anual = total_proprio - total_amaro
+    economia_percentual = (economia_anual / total_proprio * 100) if total_proprio > 0 else 0
+    
+    return {
+        'gestao_propria': {
+            'custos_fixos': custos_fixos_proprio,
+            'custos_variaveis': custos_variaveis_proprio,
+            'total': total_proprio,
+            'breakdown_fixos': custos_fixos_externos,
+            'breakdown_variaveis': custos_variaveis
+        },
+        'gestao_amaro': {
+            'custos_fixos': 0,
+            'custos_variaveis': custos_variaveis_proprio,
+            'total': total_amaro,
+            'breakdown_variaveis': custos_variaveis
+        },
+        'economia': {
+            'valor_anual': economia_anual,
+            'percentual': economia_percentual,
+            'economia_5_anos': economia_anual * 5
+        }
+    }
+
+def calcular_custo_rota(origem, destino, modelo, params, rotas_disponiveis):
+    """
+    Calcula custo específico para uma rota
+    
+    Args:
+        origem: Código do aeroporto de origem
+        destino: Código do aeroporto de destino
+        modelo: Modelo da aeronave
+        params: Parâmetros do sistema
+        rotas_disponiveis: Lista de rotas disponíveis
+    
+    Returns:
+        Dict com análise da rota
+    """
+    
+    # Buscar duração da rota
+    rota_info = None
+    for rota in rotas_disponiveis:
+        if rota['origem'] == origem and rota['destino'] == destino:
+            rota_info = rota
+            break
+    
+    if not rota_info:
+        raise ValueError(f"Rota {origem} → {destino} não encontrada")
+    
+    duracao = rota_info['duracao_h']
+    
+    # Calcular custos
+    resultado_rota = calcula_custo_trecho(modelo, duracao, params)
+    
+    # Preço de mercado para esta rota
+    preco_mercado_hora = params['preco_mercado_hora'][modelo]
+    preco_mercado_total = preco_mercado_hora * duracao
+    
+    # Economia
+    economia = preco_mercado_total - resultado_rota['total']
+    economia_percentual = (economia / preco_mercado_total * 100) if preco_mercado_total > 0 else 0
+    
+    return {
+        'rota': f"{origem} → {destino}",
+        'duracao_horas': duracao,
+        'custo_amaro': resultado_rota['total'],
         'preco_mercado': preco_mercado_total,
         'economia': economia,
-        'percentual_economia': percentual_economia,
-        'detalhes': {
-            'modelo': modelo,
-            'duracao': duracao,
-            'consumo_lh': params['consumo_modelos'][modelo],
-            'preco_combustivel': params['preco_combustivel'],
-            'custo_piloto_hora': params['custo_piloto_hora_modelo'][modelo],
-            'custo_manutencao_hora': params['custo_manutencao'][modelo],
-            'depreciacao_hora': params['depreciacao_hora'][modelo],
-            'preco_mercado_hora': params['preco_mercado_hora'][modelo]
-        }
+        'economia_percentual': economia_percentual,
+        'breakdown_custos': {
+            'combustivel': resultado_rota['combustivel'],
+            'manutencao': resultado_rota['manutencao'],
+            'tripulacao': resultado_rota['tripulacao'],
+            'depreciacao': resultado_rota['depreciacao']
+        },
+        'viavel': economia > 0
     }
 
-def calcular_projecao_mensal(modelo, dias_mes, horas_dia, params):
+def calcular_lucro_mensal_charter(modelo, horas_charter, taxa_ocupacao, preco_hora, params):
     """
-    Calcula projeção de custos e lucros mensais
+    Calcula análise de lucro mensal com operação charter
+    
+    Args:
+        modelo: Modelo da aeronave
+        horas_charter: Horas disponíveis para charter por mês
+        taxa_ocupacao: Taxa de ocupação (0-100)
+        preco_hora: Preço por hora de charter
+        params: Parâmetros do sistema
+    
+    Returns:
+        Dict com análise completa de lucro
     """
-    horas_total = dias_mes * horas_dia
     
-    if horas_total <= 0:
-        return {
-            'horas_total': 0,
-            'custo_total': 0,
-            'receita_mercado': 0,
-            'lucro': 0,
-            'margem_percentual': 0
-        }
+    # Horas efetivas
+    horas_efetivas = horas_charter * (taxa_ocupacao / 100)
     
-    resultado_hora = calcula_custo_trecho(modelo, 1.0, params)
+    # Receitas
+    receita_bruta = preco_hora * horas_efetivas
+    receita_proprietario = receita_bruta * params.get('percentual_proprietario', 0.9)
+    taxa_amaro = receita_bruta - receita_proprietario
     
-    custo_total = resultado_hora['total'] * horas_total
-    receita_mercado = params['preco_mercado_hora'][modelo] * horas_total
-    lucro = receita_mercado - custo_total
-    margem_percentual = (lucro / receita_mercado * 100) if receita_mercado > 0 else 0
+    # Custos operacionais
+    resultado_custos = calcula_custo_trecho(modelo, horas_efetivas, params)
+    
+    # Lucro
+    lucro_liquido = receita_proprietario - resultado_custos['total']
+    roi_mensal = (lucro_liquido / resultado_custos['total'] * 100) if resultado_custos['total'] > 0 else 0
     
     return {
-        'horas_total': horas_total,
-        'custo_total': custo_total,
-        'receita_mercado': receita_mercado,
-        'lucro': lucro,
-        'margem_percentual': margem_percentual,
-        'breakdown': {
-            'combustivel_mensal': resultado_hora['preco_comb'] * horas_total,
-            'piloto_mensal': resultado_hora['piloto'] * horas_total,
-            'manutencao_mensal': resultado_hora['manut'] * horas_total,
-            'depreciacao_mensal': resultado_hora['depr'] * horas_total
-        }
+        'horas_disponiveis': horas_charter,
+        'horas_efetivas': horas_efetivas,
+        'taxa_ocupacao': taxa_ocupacao,
+        'receita_bruta': receita_bruta,
+        'receita_proprietario': receita_proprietario,
+        'taxa_amaro': taxa_amaro,
+        'custos_operacionais': resultado_custos['total'],
+        'lucro_liquido': lucro_liquido,
+        'roi_mensal': roi_mensal,
+        'breakdown_custos': {
+            'combustivel': resultado_custos['combustivel'],
+            'manutencao': resultado_custos['manutencao'],
+            'tripulacao': resultado_custos['tripulacao'],
+            'depreciacao': resultado_custos['depreciacao']
+        },
+        'lucrativo': lucro_liquido > 0
     }
-
-def calcular_horas_para_meta(meta_receita, modelo, params):
-    """
-    Calcula quantas horas são necessárias para atingir uma meta de receita
-    """
-    if meta_receita <= 0:
-        return 0
-    
-    preco_hora = params['preco_mercado_hora'][modelo]
-    if preco_hora <= 0:
-        return 0
-        
-    return float(meta_receita / preco_hora)

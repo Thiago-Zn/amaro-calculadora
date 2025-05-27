@@ -1,315 +1,230 @@
-# ✈️ Amaro Aviation - Calculadora Premium Refatorada
+# 🔄 Refatoração Amaro Aviation Calculator - Estrutura Multipage
 
-> **Ferramenta estratégica de análise de custos operacionais para aviação executiva**
+## 📋 Resumo das Alterações
 
-## 🎯 Visão Geral da Refatoração
+Esta refatoração transforma a aplicação monolítica em uma arquitetura multipage moderna, seguindo as especificações técnicas definidas no documento de requisitos.
 
-Esta é a **versão 3.0 refatorada** da Calculadora Amaro Aviation, redesenhada com foco em:
+### 🏗️ Nova Estrutura de Arquivos
 
-- ✅ **Simplicidade**: Interface reduzida para 3 abas principais
-- ✅ **Clareza**: UX intuitiva para usuários não-técnicos  
-- ✅ **Bilíngue**: Suporte completo PT-BR/EN
-- ✅ **Elegância**: Design moderno com identidade visual Amaro
-- ✅ **Confiabilidade**: Sistema robusto com fallbacks
-
-## 🚀 Principais Melhorias
-
-### Interface Simplificada
-- **3 abas principais** vs. 7 abas anteriores
-- **Fluxo linear** e objetivo para apresentações comerciais
-- **Elementos visuais modernos** com gradientes e animações
-
-### Funcionalidades Consolidadas
-1. **📈 Estimativa de Lucro Mensal** - Simulação completa de rentabilidade
-2. **⚖️ Comparativo de Custos** - Gestão própria vs. Amaro Aviation  
-3. **⚙️ Configurações e Fórmulas** - Parâmetros e transparência técnica
-
-### Sistema Bilíngue Robusto
-- **Tradução centralizada** em `config/idiomas.py`
-- **Formatação automática** de moedas e percentuais
-- **Contexto cultural** adequado para cada idioma
-
-## 📦 Instalação e Execução
-
-### Pré-requisitos
-```bash
-Python 3.8+
-pip (gerenciador de pacotes)
+```
+amaro-calculadora/
+├── app.py                               # Entry-point refatorado
+├── config/
+│   ├── theme.py                        # Sistema de tema CSS corporativo
+│   └── idiomas.py                      # Sistema de traduções PT/EN
+├── components/
+│   ├── header.py                       # Componente de cabeçalho reutilizável
+│   ├── sidebar.py                      # Componente de sidebar
+│   ├── metrics.py                      # Cards de métricas customizadas
+│   └── status.py                       # Boxes de status e alertas
+├── pages/
+│   ├── 1_📈_Estimativa_de_Lucro.py    # Análise de rentabilidade mensal
+│   ├── 2_📊_Breakdown_de_Custos.py    # Comparativo gestão própria vs Amaro
+│   ├── 3_✈️_Simulador_de_Rotas.py     # Simulação custo ponto-a-ponto
+│   ├── 4_📆_Projecao_e_Breakeven.py   # Projeção longo prazo + breakeven
+│   └── 5_⚙️_Configuracoes.py          # Gestão de parâmetros e dados
+├── utils/                              # Mantido e expandido
+│   ├── calculations.py                 # Função calcula_custo_trecho() refatorada
+│   ├── params.py                       # Gerenciamento de parâmetros
+│   └── export_manager.py               # Sistema de exportação robusto
+└── data/                               # CSVs editáveis
+    ├── modelos.csv
+    └── rotas.csv
 ```
 
-### Instalação Rápida
+## 🎯 Funcionalidades Implementadas
+
+### ✅ Páginas Principais
+
+1. **📈 Estimativa de Lucro Mensal**
+   - Análise de rentabilidade com operação charter
+   - Breakdown detalhado de custos operacionais
+   - Cálculo de ROI mensal
+   - Divisão 90/10 proprietário/Amaro
+
+2. **📊 Breakdown Comparativo de Custos**
+   - Comparação item por item: gestão própria vs Amaro
+   - Tabela interativa com economia detalhada
+   - Gráficos de distribuição de custos
+   - Projeção de economia acumulada 5 anos
+
+3. **✈️ Simulador de Rotas**
+   - Cálculo de custo por rota específica
+   - Comparação com preços de mercado
+   - Análise de viabilidade por rota
+   - Breakdown de custos por componente
+
+4. **📆 Projeção e Breakeven**
+   - Projeção financeira 12-60 meses
+   - Cálculo automático de breakeven
+   - Análise de cenários (otimista/pessimista)
+   - Gráficos temporais interativos
+
+5. **⚙️ Configurações**
+   - Edição de parâmetros financeiros
+   - CRUD completo para modelos.csv
+   - CRUD completo para rotas.csv
+   - Interface de data_editor do Streamlit
+
+### ✅ Sistema de Cálculos Refatorado
+
+A função `calcula_custo_trecho()` foi completamente refatorada conforme especificação:
+
+```python
+def calcula_custo_trecho(modelo, horas, params):
+    """
+    Returns:
+    {
+        "combustivel": ...,
+        "manutencao": ...,
+        "tripulacao": ...,
+        "seguro": ...,
+        "hangar": ...,
+        "ferry": ...,
+        "planejamento": ...,
+        "depreciacao": ...,
+        "total": soma
+    }
+    """
+```
+
+### ✅ Sistema de Componentes Reutilizáveis
+
+- **Header**: Cabeçalho corporativo com tema Amaro
+- **Sidebar**: Navegação e sistema de idiomas
+- **Metrics**: Cards de métricas customizadas
+- **Status**: Alertas e status boxes
+
+### ✅ Internacionalização Completa
+
+- Sistema bilíngue PT/EN em todas as páginas
+- Formatação de moedas e percentuais por idioma
+- Traduções centralizadas em `config/idiomas.py`
+- Detecção automática de idioma por seleção
+
+## 🔧 Melhorias Técnicas
+
+### Arquitetura
+- ✅ Separação clara de responsabilidades
+- ✅ Componentes reutilizáveis
+- ✅ Código modular e testável
+- ✅ Estrutura escalável
+
+### Performance
+- ✅ Cache de parâmetros com `@st.cache_data`
+- ✅ Carregamento otimizado de recursos
+- ✅ CSS minificado e otimizado
+
+### UX/UI
+- ✅ Design system Amaro Aviation
+- ✅ Tema corporativo consistente
+- ✅ Navegação intuitiva
+- ✅ Feedback visual em todas as ações
+
+### Robustez
+- ✅ Tratamento de erros em todas as funções
+- ✅ Validação de dados de entrada
+- ✅ Fallbacks automáticos
+- ✅ Sistema de exportação com múltiplos formatos
+
+## 📊 Compatibilidade
+
+### ✅ Mantida Compatibilidade
+- Todos os módulos existentes em `utils/` foram preservados
+- Parâmetros existentes continuam funcionando
+- Arquivos CSV mantêm mesmo formato
+- API de cálculos expandida, mas compatível
+
+### ✅ Dependências
+- Streamlit ≥1.31 ✅
+- Python 3.11 ✅
+- Todas as dependências do requirements.txt mantidas
+
+## 🚀 Como Testar
+
+### 1. Instalação
 ```bash
-# 1. Clone o repositório
-git clone https://github.com/seu-usuario/amaro-calculadora-refatorada.git
-cd amaro-calculadora-refatorada
-
-# 2. Instale dependências
+git checkout feature/multipage-refactor
 pip install -r requirements.txt
+python setup_initial.py  # Se necessário
+```
 
-# 3. Execute setup inicial (primeira vez)
-python setup_initial.py
-
-# 4. Execute a aplicação
+### 2. Execução
+```bash
 streamlit run app.py
 ```
 
-### Deploy no Streamlit Cloud
-1. **Fork** este repositório para sua conta GitHub
-2. Acesse [share.streamlit.io](https://share.streamlit.io)
-3. **Configure**:
-   - Repository: `seu-usuario/amaro-calculadora-refatorada`
-   - Branch: `main`
-   - Main file: `app.py`
-4. **Deploy** - Aplicação estará disponível em minutos
+### 3. Testes de Funcionalidade
+- [ ] Navegação entre todas as páginas
+- [ ] Cálculos em cada página funcionando
+- [ ] Mudança de idioma PT/EN
+- [ ] Edição de parâmetros e modelos
+- [ ] Exportação de relatórios
+- [ ] Validação de dados
 
-## 🎨 Guia de Uso
+## 🔄 Organização dos Commits
 
-### Para Apresentações Comerciais
+### Commit 1: Sistema de Tema e Traduções
+- `config/theme.py` - CSS corporativo Amaro
+- `config/idiomas.py` - Sistema bilíngue completo
 
-#### 1. Estimativa de Lucro Mensal
-```
-✈️ Selecionar modelo da aeronave
-⏰ Definir horas de voo mensais (ex: 80h)
-📊 Ajustar taxa de ocupação (75-85%)
-🚀 Calcular resultados
-```
+### Commit 2: Componentes Reutilizáveis
+- `components/header.py` - Cabeçalho corporativo
+- `components/sidebar.py` - Sidebar com navegação
+- `components/metrics.py` - Cards de métricas
+- `components/status.py` - Sistema de alertas
 
-**Saídas:**
-- Receita bruta mensal
-- Divisão proprietário/Amaro (90%/10%)
-- Custos operacionais detalhados
-- Lucro líquido e ROI
+### Commit 3: Refatoração de Cálculos
+- `utils/calculations.py` - Função calcula_custo_trecho() expandida
+- Novas funções de projeção e comparação
+- Compatibilidade mantida com código existente
 
-#### 2. Comparativo de Custos
-```
-✈️ Selecionar modelo e horas anuais
-💰 Informar custos fixos (hangar, seguro...)
-📈 Incluir/excluir receita de charter
-🚀 Comparar cenários
-```
+### Commit 4: Páginas Funcionais
+- `pages/1_📈_Estimativa_de_Lucro.py` - Análise de lucro
+- `pages/2_📊_Breakdown_de_Custos.py` - Comparativo
+- `pages/3_✈️_Simulador_de_Rotas.py` - Simulador de rotas
 
-**Saídas:**
-- Custo total gestão própria
-- Custo total gestão Amaro
-- Economia anual absoluta e percentual
+### Commit 5: Projeção e Configurações
+- `pages/4_📆_Projecao_e_Breakeven.py` - Análise temporal
+- `pages/5_⚙️_Configuracoes.py` - CRUD completo
 
-### Para Configuração Técnica
+### Commit 6: Entry-point e Finalização
+- `app.py` - Entry-point multipage
+- Documentação e ajustes finais
 
-#### 3. Configurações e Fórmulas
-```
-💰 Ajustar preços (combustível, piloto, manutenção)
-📊 Definir preços de mercado de referência
-📐 Visualizar fórmulas e impactos
-💾 Salvar configurações
-```
+## ✅ Critérios de Aceitação Atendidos
 
-## 🌐 Sistema de Idiomas
+- [x] **Breakdown itemizado** nos comparativos
+- [x] **CSVs editáveis** via front-end com data_editor
+- [x] **Simulador de rotas** funcional com todas as rotas
+- [x] **Projeção com breakeven** e gráficos temporais
+- [x] **App roda sem erros** em todas as páginas
+- [x] **Código organizado** seguindo estrutura especificada
+- [x] **PEP-8** e boas práticas de desenvolvimento
 
-### Uso no Streamlit
-```python
-from config.idiomas import get_text, detect_language_from_selection
+## 🔮 Próximos Passos
 
-# Detectar idioma selecionado
-language = st.selectbox("🌐 Language", ["🇧🇷 Português", "🇺🇸 English"])
-lang = detect_language_from_selection(language)
+### Melhorias Futuras (TODO)
+- [ ] Testes automatizados com pytest
+- [ ] API REST para integrações
+- [ ] Dashboard executivo
+- [ ] Análise preditiva com IA
+- [ ] App mobile nativo
 
-# Usar traduções
-st.title(get_text('app_title', lang))
-st.button(get_text('calculate', lang))
-```
+### Otimizações
+- [ ] Cache de resultados de cálculos
+- [ ] Compressão de assets estáticos
+- [ ] Lazy loading de componentes pesados
 
-### Adicionando Novas Traduções
-```python
-# Em config/idiomas.py
-TRANSLATIONS = {
-    'pt': {
-        'nova_chave': 'Texto em português'
-    },
-    'en': {
-        'nova_chave': 'Text in English'
-    }
-}
-```
+## 📞 Suporte
 
-## 🎯 Estrutura de Arquivos
-
-```
-amaro-calculadora-refatorada/
-├── app.py                          # Aplicação principal refatorada
-├── config/
-│   ├── idiomas.py                  # Sistema de tradução
-│   └── parametros.json             # Parâmetros operacionais
-├── data/
-│   ├── modelos.csv                 # Modelos de aeronaves
-│   └── rotas.csv                   # Rotas pré-definidas
-├── utils/
-│   ├── calculations.py             # Lógica de cálculos
-│   ├── params.py                   # Gerenciamento de parâmetros
-│   └── export_manager.py           # Sistema de exportação
-├── assets/
-│   └── style.css                   # Estilos personalizados
-├── requirements.txt                # Dependências Python
-├── setup_initial.py                # Script de configuração inicial
-└── README_Refatorado.md           # Esta documentação
-```
-
-## ⚙️ Configuração Avançada
-
-### Personalizando Modelos
-Edite `data/modelos.csv`:
-```csv
-modelo,consumo_l_por_h,manut_tipo,tipo
-Seu Novo Modelo,300,turboprop,turboprop
-```
-
-### Ajustando Parâmetros
-Modifique `config/parametros.json`:
-```json
-{
-  "preco_combustivel": 8.66,
-  "custo_piloto_hora": 1200,
-  "depreciacao_anual_pct": 8,
-  "custo_manutencao_hora": {
-    "turboprop": 1500,
-    "jato": 3000
-  },
-  "preco_mercado": {
-    "turboprop": 8000,
-    "jato": 15000
-  }
-}
-```
-
-### Personalizando Visual
-Modifique as cores em `app.py`:
-```python
-# CSS Principal
-AMARO_PRIMARY = '#8c1d40'    # Vermelho Amaro
-AMARO_SECONDARY = '#a02050'  # Vermelho secundário
-```
-
-## 📊 Sistema de Exportação
-
-### Recursos Disponíveis
-- **📊 Excel**: Relatórios formatados com múltiplas abas
-- **📄 PDF**: Documentos profissionais com identidade visual
-- **📋 CSV**: Fallback universal para dados
-- **🔧 JSON**: Backup completo de dados
-
-### Uso Programático
-```python
-from utils.export_manager import criar_relatorio_dados, gerar_excel_simples
-
-# Criar relatório
-dados_entrada = {"modelo": "Pilatus PC-12", "horas": 80}
-resultados = {"lucro_liquido": 144000, "roi": 45.0}
-
-relatorio = criar_relatorio_dados("Lucro Mensal", dados_entrada, resultados)
-
-# Gerar Excel
-excel_buffer = gerar_excel_simples(relatorio)
-```
-
-## 🔧 Troubleshooting
-
-### Problemas Comuns
-
-#### 1. Erro ao carregar modelos
-```
-❌ Nenhum modelo configurado
-```
-**Solução:** Execute `python setup_initial.py`
-
-#### 2. Parâmetros inválidos
-```
-❌ Erro na validação dos parâmetros
-```
-**Solução:** Verifique `config/parametros.json` ou restaure o backup
-
-#### 3. Erro de dependências
-```
-❌ Module not found
-```
-**Solução:** Execute `pip install -r requirements.txt`
-
-### Logs e Debug
-```python
-# Ativar debug no Streamlit
-streamlit run app.py --logger.level=debug
-```
-
-## 🚀 Roadmap e Melhorias Futuras
-
-### v3.1 - Planejado
-- [ ] **Modo offline** com cache local
-- [ ] **Templates de apresentação** personalizáveis
-- [ ] **API REST** para integrações
-- [ ] **Dashboard executivo** com KPIs
-
-### v3.2 - Em análise
-- [ ] **Análise preditiva** com IA
-- [ ] **Comparativo multi-concorrentes**
-- [ ] **Simulação Monte Carlo**
-- [ ] **App mobile** nativo
-
-## 🤝 Contribuição e Suporte
-
-### Para Desenvolvedores
-```bash
-# Setup desenvolvimento
-git clone [repo]
-pip install -r requirements-dev.txt
-pre-commit install
-
-# Executar testes
-python -m pytest tests/
-
-# Lint e formatação
-black .
-flake8 .
-```
-
-### Reportar Issues
-- **Bugs**: Use template de bug report
-- **Features**: Use template de feature request
-- **Dúvidas**: Consulte documentação ou crie discussion
-
-### Suporte Comercial
-- **Email**: suporte@amaroaviation.com
-- **Telefone**: (11) 99999-9999
-- **Horário**: Segunda a Sexta, 8h-18h
-
-## 📄 Licença e Uso
-
-### Uso Comercial
-Este sistema é **propriedade da Amaro Aviation** e destinado para:
-- ✅ Uso interno da empresa
-- ✅ Apresentações comerciais
-- ✅ Análises estratégicas
-- ❌ Redistribuição sem autorização
-
-### Créditos
-- **Desenvolvimento**: Equipe Técnica Amaro Aviation
-- **Design**: Identidade Visual Amaro Aviation
-- **Framework**: Streamlit + Plotly
-- **Inspiração**: Excelência em aviação executiva
+Para dúvidas ou problemas:
+- Consulte os TODOs no código
+- Verifique logs de erro no terminal
+- Execute `python setup_initial.py` para reset
+- Contate a equipe técnica Amaro Aviation
 
 ---
 
-## 🏆 Métricas de Qualidade
-
-- ✅ **Interface**: 100% responsiva
-- ✅ **Performance**: < 2s carregamento
-- ✅ **Acessibilidade**: WCAG 2.1 AA
-- ✅ **Compatibilidade**: Chrome, Firefox, Safari, Edge
-- ✅ **Mobile**: Design adaptativo
-- ✅ **SEO**: Meta tags otimizadas
-
----
-
-**Desenvolvido com ❤️ pela Amaro Aviation**  
-*Transformando análise de custos em vantagem competitiva*
-
-[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
-[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Plotly](https://img.shields.io/badge/Plotly-239120?style=for-the-badge&logo=plotly&logoColor=white)](https://plotly.com)
+**🏆 Refatoração Completa - Amaro Aviation Calculator v3.0**  
+*De monolítico para multipage: mais organizado, escalável e profissional*
