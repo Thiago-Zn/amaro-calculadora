@@ -1,119 +1,200 @@
-# components/header.py - VERSÃO ULTRA SIMPLES
+"""
+Header Components - VERSÃO CORRIGIDA
+Removidos problemas de HTML que causavam aparecer tags </div>
+"""
 
 import streamlit as st
 from config.idiomas import get_text
 
+
 def render_header(lang='pt'):
-    """Header sem HTML complexo"""
+    """
+    Header principal da aplicação - VERSÃO LIMPA
+    """
+    # Título principal usando markdown simples
     st.markdown(f"# ✈️ {get_text('app_title', lang)}")
+    
+    # Subtítulo
     st.markdown(f"**{get_text('app_subtitle', lang)}**")
+    
+    # Separador
     st.markdown("---")
+
 
 def render_page_header(title, subtitle=None, lang='pt'):
-    """Page header simplificado"""
-    title_text = get_text(title, lang) if isinstance(title, str) else title
+    """
+    Header de página específica - VERSÃO LIMPA SEM HTML
+    
+    Args:
+        title: Título da página (pode ser chave de tradução)
+        subtitle: Subtítulo opcional (pode ser chave de tradução)
+        lang: Idioma
+    """
+    # Processar título
+    if isinstance(title, str):
+        if title in ['page_profit', 'page_breakdown', 'page_simulator', 'page_projection', 'page_settings']:
+            title_text = get_text(title, lang)
+        else:
+            title_text = title
+    else:
+        title_text = str(title)
+    
+    # Exibir título da página
     st.markdown(f"## {title_text}")
     
+    # Exibir subtítulo se fornecido
     if subtitle:
-        subtitle_text = get_text(subtitle, lang) if isinstance(subtitle, str) else subtitle
+        if isinstance(subtitle, str):
+            # Verificar se é chave de tradução
+            subtitle_text = get_text(subtitle, lang) if subtitle in [
+                'page_profit', 'page_breakdown', 'page_simulator', 
+                'page_projection', 'page_settings'
+            ] else subtitle
+        else:
+            subtitle_text = str(subtitle)
+        
         st.markdown(f"*{subtitle_text}*")
     
+    # Separador
     st.markdown("---")
 
-# ========================================
 
-# components/sidebar.py - VERSÃO ULTRA SIMPLES
-
-import streamlit as st
-from config.idiomas import get_text, detect_language_from_selection
-
-def render_sidebar(lang='pt'):
-    """Sidebar sem HTML complexo"""
-    with st.sidebar:
-        st.markdown("### ✈️ Amaro Aviation")
-        st.markdown("Simulador de Custos")
-        st.markdown("---")
-        
-        # Seleção de idioma
-        idioma_selecionado = st.selectbox(
-            "Idioma / Language",
-            ["🇧🇷 Português", "🇺🇸 English"],
-            index=0 if lang == 'pt' else 1,
-            key="language_selector"
-        )
-        
-        lang_atual = detect_language_from_selection(idioma_selecionado)
-        
-        st.markdown("---")
-        st.success("✅ Sistema Operacional")
-        
-        return lang_atual
-
-# ========================================
-
-# components/metrics.py - VERSÃO ULTRA SIMPLES
-
-import streamlit as st
-from utils.params import format_currency, format_percentage
-
-def render_metric_card(label, value, delta=None, format_type="currency", lang='pt'):
-    """Métrica usando st.metric nativo"""
-    if format_type == "currency":
-        formatted_value = format_currency(value, lang)
-    elif format_type == "percentage":
-        formatted_value = format_percentage(value, lang)
-    else:
-        formatted_value = str(value)
+def render_section_header(title, icon="", lang='pt'):
+    """
+    Header de seção - VERSÃO SIMPLES
     
-    # Usar metric nativo do Streamlit
-    if delta is not None:
-        st.metric(label, formatted_value, f"{delta:+.1f}%")
-    else:
-        st.metric(label, formatted_value)
-
-def render_kpi_grid(kpis, columns=4, lang='pt'):
-    """Grid usando colunas simples"""
-    cols = st.columns(columns)
+    Args:
+        title: Título da seção
+        icon: Ícone opcional (emoji)
+        lang: Idioma
+    """
+    # Processar título
+    title_text = get_text(title, lang) if isinstance(title, str) else str(title)
     
-    for i, kpi in enumerate(kpis):
-        with cols[i % columns]:
-            render_metric_card(
-                label=kpi['label'],
-                value=kpi['value'],
-                delta=kpi.get('delta'),
-                format_type=kpi.get('format_type', 'currency'),
-                lang=lang
-            )
-
-# ========================================
-
-# components/status.py - VERSÃO ULTRA SIMPLES
-
-import streamlit as st
-
-def render_status_box(status_type, title, message):
-    """Status usando alertas nativos do Streamlit"""
-    full_message = f"**{title}**: {message}"
+    # Montar texto com ícone se fornecido
+    header_text = f"{icon} {title_text}" if icon else title_text
     
-    if status_type == 'success':
+    # Exibir usando markdown simples
+    st.markdown(f"### {header_text}")
+
+
+def render_info_box(title, content, type="info", lang='pt'):
+    """
+    Box de informações - VERSÃO USANDO STREAMLIT NATIVO
+    
+    Args:
+        title: Título do box
+        content: Conteúdo do box
+        type: Tipo (info, success, warning, error)
+        lang: Idioma
+    """
+    # Processar título e conteúdo
+    title_text = get_text(title, lang) if isinstance(title, str) else str(title)
+    content_text = get_text(content, lang) if isinstance(content, str) else str(content)
+    
+    # Texto completo
+    full_message = f"**{title_text}**\n\n{content_text}"
+    
+    # Usar elementos nativos do Streamlit
+    if type == "success":
         st.success(full_message)
-    elif status_type == 'warning':
+    elif type == "warning":
         st.warning(full_message)
-    elif status_type == 'error':
+    elif type == "error":
         st.error(full_message)
     else:
         st.info(full_message)
 
-def render_system_status(params, lang='pt'):
-    """Status do sistema simplificado"""
-    if not params:
-        st.error("❌ Sistema não configurado")
-        return False
+
+def render_metric_header(label, value, help_text="", lang='pt'):
+    """
+    Header de métrica - VERSÃO USANDO ST.METRIC
     
-    modelos = params.get('modelos_disponiveis', [])
-    if not modelos:
-        st.warning("⚠️ Nenhum modelo configurado")
-        return False
+    Args:
+        label: Label da métrica
+        value: Valor da métrica
+        help_text: Texto de ajuda opcional
+        lang: Idioma
+    """
+    # Processar textos
+    label_text = get_text(label, lang) if isinstance(label, str) else str(label)
+    help_text_final = get_text(help_text, lang) if help_text and isinstance(help_text, str) else help_text
     
-    st.success(f"✅ Sistema OK - {len(modelos)} modelos")
-    return True
+    # Usar st.metric nativo
+    if help_text_final:
+        st.metric(label_text, value, help=help_text_final)
+    else:
+        st.metric(label_text, value)
+
+
+def render_clean_title(text, level=1, lang='pt'):
+    """
+    Título limpo sem HTML - APENAS MARKDOWN
+    
+    Args:
+        text: Texto do título
+        level: Nível do título (1-6)
+        lang: Idioma
+    """
+    # Processar texto
+    title_text = get_text(text, lang) if isinstance(text, str) else str(text)
+    
+    # Definir marcação baseada no nível
+    markdown_prefix = "#" * max(1, min(6, level))
+    
+    # Exibir usando markdown puro
+    st.markdown(f"{markdown_prefix} {title_text}")
+
+
+def render_breadcrumb(items, lang='pt'):
+    """
+    Breadcrumb simples - APENAS TEXTO
+    
+    Args:
+        items: Lista de itens do breadcrumb
+        lang: Idioma
+    """
+    if not items:
+        return
+    
+    # Processar itens
+    processed_items = []
+    for item in items:
+        if isinstance(item, str):
+            processed_items.append(get_text(item, lang))
+        else:
+            processed_items.append(str(item))
+    
+    # Criar breadcrumb como texto simples
+    breadcrumb_text = " > ".join(processed_items)
+    
+    # Exibir usando markdown
+    st.markdown(f"*{breadcrumb_text}*")
+
+
+def render_status_indicator(status, message="", lang='pt'):
+    """
+    Indicador de status simples
+    
+    Args:
+        status: Status ('success', 'warning', 'error', 'info')
+        message: Mensagem opcional
+        lang: Idioma
+    """
+    # Ícones por status
+    status_icons = {
+        'success': '✅',
+        'warning': '⚠️',
+        'error': '❌',
+        'info': 'ℹ️'
+    }
+    
+    # Processar mensagem
+    message_text = get_text(message, lang) if message and isinstance(message, str) else str(message) if message else ""
+    
+    # Montar texto final
+    icon = status_icons.get(status, 'ℹ️')
+    full_text = f"{icon} {message_text}" if message_text else icon
+    
+    # Exibir usando markdown simples
+    st.markdown(full_text)

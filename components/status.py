@@ -1,9 +1,7 @@
 """
-Componente para renderização de boxes de status e alertas
+Componente para renderização de boxes de status - VERSÃO LIMPA
+Removido o quadro verde irritante do "Sistema Operacional"
 """
-
-import streamlit as st
-import textwrap
 
 import streamlit as st
 import textwrap
@@ -76,6 +74,7 @@ def render_status_box(status_type: str,
         border-radius: 8px;
         padding: 1rem 1.5rem;
         margin: 1rem 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     ">
         <div style="
             color: {style_config['color']};
@@ -98,19 +97,6 @@ def render_status_box(status_type: str,
 
 def render_calculation_status(is_profitable, profit_value, message, lang='pt'):
     """
-    Renderiza status específico para resultados de cálculos
-    
-    Args:
-        is_profitable: Boolean indicando se é lucrativo
-        profit_value: Valor do lucro/prejuízo
-        message: Mensagem explicativa
-        lang: Idioma
-    """
-    
-from utils.params import format_currency
-
-def render_calculation_status(is_profitable, profit_value, message, lang='pt'):
-    """
     Exibe um box de status baseado no resultado financeiro.
 
     Args:
@@ -119,6 +105,8 @@ def render_calculation_status(is_profitable, profit_value, message, lang='pt'):
         message (str): Texto explicativo que antecede o valor.
         lang (str): 'pt' ou 'en'.
     """
+    from utils.params import format_currency
+    
     # Monta texto puro, sem tags HTML
     valor_formatado = format_currency(abs(profit_value), lang)
     texto = f"{message} {valor_formatado}"
@@ -136,41 +124,18 @@ def render_calculation_status(is_profitable, profit_value, message, lang='pt'):
             texto
         )
 
-
 def render_system_status(params, lang='pt'):
     """
-    Mostra apenas UM box de status – sem <div>.
-    Retorna True se estiver tudo ok.
+    FUNÇÃO COMPLETAMENTE REMOVIDA - NÃO FAZ MAIS NADA!
+    
+    Esta função agora simplesmente retorna True sem exibir nada.
+    O irritante quadro verde foi COMPLETAMENTE removido.
     """
+    # Verificação silenciosa apenas para funcionalidade
     if not params or not params.get("modelos_disponiveis"):
-        st.warning("⚠️ Sistema não configurado")
-        return False
-
-    modelos = len(params["modelos_disponiveis"])
-    msg = f"✅ Sistema Operacional — {modelos} modelos configurados"
-    st.markdown(f"<div style='background:#E5F2ED;"
-            "border:1px solid #2FA26E;"
-            "border-left:6px solid #2FA26E;"
-            "border-radius:6px;padding:.6rem 1rem;'>"
-            f"✅ {msg}</div>", unsafe_allow_html=True)
-    return True
-
-    
-    modelos = params.get('modelos_disponiveis', [])
-    if not modelos:
-        render_status_box(
-            'warning',
-            'Nenhum Modelo Configurado' if lang == 'pt' else 'No Models Configured',
-            'Configure pelo menos um modelo de aeronave.' if lang == 'pt'
-            else 'Configure at least one aircraft model.'
-        )
         return False
     
-    render_status_box(
-        'success',
-        'Sistema Operacional' if lang == 'pt' else 'System Operational',
-        f"{len(modelos)} {'modelos configurados' if lang == 'pt' else 'models configured'}"
-    )
+    # Não exibe mais NADA - nem quadro verde nem mensagem
     return True
 
 def render_export_status(export_success, filename=None, lang='pt'):
@@ -219,6 +184,7 @@ def render_loading_status(message, lang='pt'):
         padding: 1rem 1.5rem;
         margin: 1rem 0;
         text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     ">
         <div style="
             color: #0EA5E9;
@@ -250,6 +216,7 @@ def render_progress_status(current_step, total_steps, step_name, lang='pt'):
         border-radius: 8px;
         padding: 1rem 1.5rem;
         margin: 1rem 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     ">
         <div style="
             display: flex;

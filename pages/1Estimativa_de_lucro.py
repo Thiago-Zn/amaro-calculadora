@@ -1,5 +1,5 @@
 """
-Página 1: Estimativa de Lucro Mensal
+Página 1: Estimativa de Lucro Mensal - VERSÃO CORRIGIDA
 Análise de rentabilidade com operação charter
 """
 
@@ -28,7 +28,7 @@ st.set_page_config(
     layout="wide"
 )
 
-from config.theme import load_theme
+# Carregamento do tema
 load_theme()
 
 # Sidebar e idioma
@@ -42,13 +42,21 @@ render_page_header(
     lang
 )
 
-# Carregar parâmetros
+# Carregar parâmetros - SEM quadro verde irritante
 try:
     params = load_params()
-    if not render_system_status(params, lang):
+    system_ok = render_system_status(params, lang)  # Agora não exibe nada
+    
+    if not system_ok:
+        st.error("❌ Sistema não configurado adequadamente")
+        st.info("💡 Configure o sistema na página de Configurações")
         st.stop()
     
     modelos = params.get('modelos_disponiveis', [])
+    
+    if not modelos:
+        st.error("❌ Nenhum modelo de aeronave configurado")
+        st.stop()
     
 except Exception as e:
     st.error(f"❌ {get_text('system_load_error', lang)}: {e}")
@@ -114,32 +122,34 @@ if st.button(f"🚀 {get_text('calculate', lang)}", type="primary", use_containe
         st.markdown("---")
         st.markdown(f"### 📊 {get_text('projection_analysis', lang)}")
         
-        # KPIs principais
-        kpis = [
-            {
-                'label': get_text('gross_revenue', lang),
-                'value': resultado['receita_bruta'],
-                'format_type': 'currency'
-            },
-            {
-                'label': get_text('owner_revenue', lang),
-                'value': resultado['receita_proprietario'],
-                'format_type': 'currency'
-            },
-            {
-                'label': get_text('net_profit', lang),
-                'value': resultado['lucro_liquido'],
-                'format_type': 'currency',
-                'delta': resultado['roi_mensal'] if resultado['lucro_liquido'] > 0 else None
-            },
-            {
-                'label': get_text('monthly_roi', lang),
-                'value': resultado['roi_mensal'],
-                'format_type': 'percentage'
-            }
-        ]
+        # KPIs principais usando métricas nativas do Streamlit
+        col1, col2, col3, col4 = st.columns(4)
         
-        render_kpi_grid(kpis, columns=4, lang=lang)
+        with col1:
+            st.metric(
+                get_text('gross_revenue', lang),
+                format_currency(resultado['receita_bruta'], lang)
+            )
+        
+        with col2:
+            st.metric(
+                get_text('owner_revenue', lang),
+                format_currency(resultado['receita_proprietario'], lang)
+            )
+        
+        with col3:
+            delta_value = f"+{resultado['roi_mensal']:.1f}%" if resultado['lucro_liquido'] > 0 else None
+            st.metric(
+                get_text('net_profit', lang),
+                format_currency(resultado['lucro_liquido'], lang),
+                delta=delta_value
+            )
+        
+        with col4:
+            st.metric(
+                get_text('monthly_roi', lang),
+                format_percentage(resultado['roi_mensal'], lang)
+            )
         
         # Gráficos de análise
         col1, col2 = st.columns(2)
@@ -155,14 +165,17 @@ if st.button(f"🚀 {get_text('calculate', lang)}", type="primary", use_containe
                 values=[resultado['receita_proprietario'], resultado['taxa_amaro']],
                 hole=0.5,
                 marker=dict(colors=['#10B981', '#8C1D40']),
-                textinfo='label+value',
-                texttemplate='<b>%{label}</b><br>' + format_currency(0, lang).replace('0,00', '%{value:,.0f}')
+                textinfo='label+percent',
+                textfont=dict(size=12)
             )])
             
             fig_receita.update_layout(
                 height=300,
-                showlegend=False,
-                margin=dict(l=0, r=0, t=0, b=0)
+                showlegend=True,
+                margin=dict(l=0, r=0, t=0, b=0),
+                paper_bgcolor='white',
+                plot_bgcolor='white',
+                font=dict(color='#1F2937')
             )
             
             st.plotly_chart(fig_receita, use_container_width=True)
@@ -189,7 +202,7 @@ if st.button(f"🚀 {get_text('calculate', lang)}", type="primary", use_containe
                 x=custos_values,
                 orientation='h',
                 text=[format_currency(v, lang) for v in custos_values],
-                textposition='inside',
+                textposition='auto',
                 marker_color=['#EF4444', '#F59E0B', '#3B82F6', '#10B981']
             )])
             
@@ -197,7 +210,10 @@ if st.button(f"🚀 {get_text('calculate', lang)}", type="primary", use_containe
                 height=300,
                 xaxis_title=get_text('value_currency', lang),
                 showlegend=False,
-                margin=dict(l=0, r=0, t=0, b=0)
+                margin=dict(l=0, r=0, t=0, b=0),
+                paper_bgcolor='white',
+                plot_bgcolor='white',
+                font=dict(color='#1F2937')
             )
             
             st.plotly_chart(fig_custos, use_container_width=True)
@@ -242,6 +258,7 @@ if st.button(f"🚀 {get_text('calculate', lang)}", type="primary", use_containe
         
     except Exception as e:
         st.error(f"❌ Erro no cálculo: {e}")
+        st.info("💡 Verifique se todos os parâmetros estão configurados corretamente")
 
 # Informações adicionais
 with st.expander("💡 Dicas e Informações" if lang == 'pt' else "💡 Tips and Information"):
@@ -278,10 +295,6 @@ with st.expander("💡 Dicas e Informações" if lang == 'pt' else "💡 Tips an
         - Consider more efficient routes
         """)
 
-# Footer da página
+# Footer da página - TEXTO SIMPLES
 st.markdown("---")
-st.markdown(f"""
-<div style="text-align: center; color: #6B7280; padding: 1rem;">
-    <p>📈 <strong>{get_text('page_profit', lang)}</strong> - Análise detalhada de rentabilidade</p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(f"**📈 {get_text('page_profit', lang)}** - Análise detalhada de rentabilidade")
