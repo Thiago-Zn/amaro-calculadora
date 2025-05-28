@@ -8,6 +8,7 @@ import streamlit as st
 # Importar sistema de tradução corrigido
 try:
     from config.idiomas import get_text, detect_language_from_selection, get_language_options, get_current_language_display
+    from utils.session_state import persistent_selectbox
 except ImportError:
     # Fallback se importação falhar
     def get_text(key, lang='pt'):
@@ -197,7 +198,7 @@ def render_sidebar(default_lang='pt'):
             current_index = 0
         
         # Selectbox de idioma
-        selected_display = st.selectbox(
+        selected_display = persistent_selectbox(
             get_text("language", current_lang),
             options=language_options,
             index=current_index,
