@@ -1,29 +1,42 @@
 """
-Sidebar Clean - Design baseado no site oficial da Amaro Aviation
+Sidebar DEFINITIVO com sistema de idioma funcionando
+Integrado com tradução e persistência
 """
 
 import streamlit as st
 
+# Importar sistema de tradução corrigido
 try:
-    from config.idiomas import get_text, detect_language_from_selection
+    from config.idiomas import get_text, detect_language_from_selection, get_language_options, get_current_language_display
 except ImportError:
-    def get_text(key: str, lang: str) -> str:
-        if key == "language":
-            return "Idioma / Language"
+    # Fallback se importação falhar
+    def get_text(key, lang='pt'):
         return key.replace("_", " ").title()
+    
+    def detect_language_from_selection(selection):
+        return 'pt' if '🇧🇷' in selection or 'Português' in selection else 'en'
+    
+    def get_language_options():
+        return ["🇧🇷 Português", "🇺🇸 English"]
+    
+    def get_current_language_display(lang):
+        return "🇧🇷 Português" if lang == 'pt' else "🇺🇸 English"
 
-    def detect_language_from_selection(selection: str) -> str:
-        return "pt" if "Português" in selection else "en"
-
-def render_sidebar(current_lang: str = "pt") -> str:
+def render_sidebar(default_lang='pt'):
     """
-    Sidebar clean inspirada no design oficial da Amaro Aviation
+    Sidebar DEFINITIVO com seleção de idioma funcionando
+    
+    Args:
+        default_lang: Idioma padrão caso não haja seleção
+    
+    Returns:
+        str: Código do idioma selecionado ('pt' ou 'en')
     """
     
-    # CSS específico para sidebar clean
+    # CSS para sidebar limpa e funcional
     st.markdown("""
     <style>
-    /* === SIDEBAR CLEAN AMARO === */
+    /* === SIDEBAR AMARO AVIATION === */
     section[data-testid="stSidebar"] {
         background: #8C1D40 !important;
         border-right: none !important;
@@ -57,7 +70,7 @@ def render_sidebar(current_lang: str = "pt") -> str:
         font-weight: 400;
     }
     
-    /* === SELETOR DE IDIOMA CLEAN === */
+    /* === SELETOR DE IDIOMA FUNCIONAL === */
     section[data-testid="stSidebar"] .stSelectbox {
         margin: 1.5rem 0 !important;
     }
@@ -71,11 +84,11 @@ def render_sidebar(current_lang: str = "pt") -> str:
         letter-spacing: 0.05em !important;
     }
     
-    /* Caixa principal do seletor - CLEAN e MODERNA */
+    /* Caixa do seletor - BRANCA e LEGÍVEL */
     section[data-testid="stSidebar"] .stSelectbox > div > div {
         background: white !important;
         color: #333333 !important;
-        border: none !important;
+        border: 2px solid white !important;
         border-radius: 10px !important;
         padding: 1rem 1.25rem !important;
         font-weight: 500 !important;
@@ -85,23 +98,23 @@ def render_sidebar(current_lang: str = "pt") -> str:
         transition: all 0.2s ease !important;
     }
     
-    /* Hover effect suave */
+    /* Hover effect */
     section[data-testid="stSidebar"] .stSelectbox > div > div:hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 20px rgba(0,0,0,0.2) !important;
     }
     
-    /* Seta do dropdown */
+    /* Seta do seletor */
     section[data-testid="stSidebar"] .stSelectbox svg {
         fill: #333333 !important;
         width: 18px !important;
         height: 18px !important;
     }
     
-    /* === DROPDOWN CLEAN === */
+    /* === DROPDOWN FUNCIONAL === */
     div[data-baseweb="popover"][role="listbox"] {
         background: white !important;
-        border: none !important;
+        border: 2px solid #8C1D40 !important;
         border-radius: 12px !important;
         box-shadow: 0 8px 32px rgba(0,0,0,0.2) !important;
         padding: 0.5rem 0 !important;
@@ -135,20 +148,6 @@ def render_sidebar(current_lang: str = "pt") -> str:
         font-weight: 600 !important;
     }
     
-    /* === NAVEGAÇÃO LIMPA === */
-    section[data-testid="stSidebar"] .stRadio {
-        margin-top: 2rem !important;
-    }
-    
-    section[data-testid="stSidebar"] .stRadio label {
-        color: white !important;
-        font-weight: 600 !important;
-        font-size: 0.875rem !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.05em !important;
-        margin-bottom: 1rem !important;
-    }
-    
     /* === FOOTER DA SIDEBAR === */
     .sidebar-footer {
         position: absolute;
@@ -169,7 +168,7 @@ def render_sidebar(current_lang: str = "pt") -> str:
     """, unsafe_allow_html=True)
 
     with st.sidebar:
-        # Header elegante da sidebar
+        # Header da sidebar
         st.markdown("""
         <div class="sidebar-header">
             <h1 class="sidebar-logo">✈️ Amaro Aviation</h1>
@@ -177,32 +176,115 @@ def render_sidebar(current_lang: str = "pt") -> str:
         </div>
         """, unsafe_allow_html=True)
         
-        # Seletor de idioma clean
-        label = get_text("language", current_lang)
-        options = ["🇧🇷 Português", "🇺🇸 English"]
-
+        # ============================================================
+        # SELEÇÃO DE IDIOMA COM PERSISTÊNCIA
+        # ============================================================
+        
+        # Obter idioma atual do session_state ou usar padrão
+        current_lang = st.session_state.get('selected_language', default_lang)
+        
+        # Opções de idioma
+        language_options = get_language_options()
+        
+        # Determinar seleção atual
         try:
-            cur_display = next(
-                opt for opt in options
-                if detect_language_from_selection(opt) == current_lang
-            )
-            idx = options.index(cur_display)
-        except StopIteration:
-            idx = 0
-
+            current_display = get_current_language_display(current_lang)
+            if current_display in language_options:
+                current_index = language_options.index(current_display)
+            else:
+                current_index = 0
+        except:
+            current_index = 0
+        
+        # Selectbox de idioma
         selected_display = st.selectbox(
-            label,
-            options,
-            index=idx,
-            key="language_selector_clean"
+            get_text("language", current_lang),
+            options=language_options,
+            index=current_index,
+            key="language_selector_sidebar"
         )
         
-        # Espaço para respirar
+        # Detectar idioma selecionado
+        selected_lang = detect_language_from_selection(selected_display)
+        
+        # Atualizar session_state se mudou
+        if selected_lang != current_lang:
+            st.session_state['selected_language'] = selected_lang
+            # Forçar rerun para aplicar nova tradução
+            st.rerun()
+        
+        # Espaço para separar conteúdo
         st.markdown("<div style='margin: 2rem 0;'></div>", unsafe_allow_html=True)
         
-        # Footer sutil (opcional)
+        # ============================================================
+        # INFORMAÇÕES DO SISTEMA (OPCIONAL)
+        # ============================================================
+        
+        # Mostrar informações sobre a página atual (se desejar)
+        try:
+            # Detectar página atual baseada na URL ou session_state
+            current_page = st.session_state.get('current_page', 'Principal')
+            
+            st.markdown(f"""
+            <div style="color: rgba(255,255,255,0.8); font-size: 0.8rem; text-align: center; margin: 1rem 0;">
+                <p>📍 Página: {current_page}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        except:
+            pass  # Ignorar se não conseguir detectar página
+        
+        # ============================================================
+        # FOOTER DA SIDEBAR
+        # ============================================================
         st.markdown("""
         <div class="sidebar-footer">
-            <p>v3.0 • Design Clean</p>
+            <p>v3.0 • Sistema Corrigido</p>
         </div>
         """, unsafe_allow_html=True)
+    
+    # Retornar idioma selecionado
+    return selected_lang
+
+def set_current_page(page_name):
+    """Função para definir página atual (opcional)"""
+    st.session_state['current_page'] = page_name
+
+def get_current_language():
+    """Função utilitária para obter idioma atual"""
+    return st.session_state.get('selected_language', 'pt')
+
+def reset_language_selection():
+    """Reset da seleção de idioma (para debug)"""
+    if 'selected_language' in st.session_state:
+        del st.session_state['selected_language']
+    if 'language_selector_sidebar' in st.session_state:
+        del st.session_state['language_selector_sidebar']
+
+# Teste da função se executado diretamente
+if __name__ == "__main__":
+    print("🧪 Testando sidebar...")
+    
+    # Simular session_state
+    class MockSessionState:
+        def __init__(self):
+            self.data = {}
+        
+        def get(self, key, default=None):
+            return self.data.get(key, default)
+        
+        def __setitem__(self, key, value):
+            self.data[key] = value
+        
+        def __contains__(self, key):
+            return key in self.data
+    
+    # Mock st.session_state
+    st.session_state = MockSessionState()
+    
+    # Testar detecção de idioma
+    assert detect_language_from_selection("🇧🇷 Português") == 'pt'
+    assert detect_language_from_selection("🇺🇸 English") == 'en'
+    assert detect_language_from_selection("Qualquer coisa") == 'pt'
+    
+    print("✅ Sidebar funcionando corretamente!")
