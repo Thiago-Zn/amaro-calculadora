@@ -200,8 +200,7 @@ def render_sidebar(default_lang='pt'):
         # Selectbox de idioma
         selected_display = persistent_selectbox(
             get_text("language", current_lang),
-            options=language_options,
-            index=current_index,
+            language_options,
             key="language_selector_sidebar"
         )
         
