@@ -6,7 +6,8 @@ Com selectbox persistente e gráficos funcionais
 import streamlit as st
 import sys
 from pathlib import Path
-
+from utils.session_state import persistent_selectbox, persistent_number_input, persistent_slider
+from utils.charts_fixed import render_chart_receitas, render_chart_custos
 sys.path.append(str(Path(__file__).parent.parent))
 
 from config.theme import load_theme
@@ -64,21 +65,11 @@ st.markdown("### 💰 Estimativa de Lucro")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    modelo_selecionado = persistent_selectbox(
-        "Modelo da Aeronave",
-        options=modelos,
-        key="modelo_lucro_persist"
-    )
+    modelo_selecionado = persistent_selectbox("Modelo da Aeronave", options=modelos, key="modelo_persist")
+
 
 with col2:
-    horas_charter = persistent_number_input(
-        "Horas de Charter/mês",
-        key="horas_charter_persist",
-        default_value=80,
-        min_value=10,
-        max_value=200,
-        step=10
-    )
+    horas_charter = persistent_number_input("Horas/mês", key="horas_persist", default_value=80, min_value=10, max_value=200)
 
 with col3:
     taxa_ocupacao = persistent_slider(
@@ -149,11 +140,7 @@ if st.button("🚀 Calcular", type="primary", use_container_width=True):
             st.markdown("#### 📊 Composição de Receitas")
             
             # Renderizar gráfico de receitas
-            fig_receita = render_chart_receitas(
-                resultado['receita_proprietario'], 
-                resultado['taxa_amaro'], 
-                lang
-            )
+            fig_receita = render_chart_receitas(resultado['receita_proprietario'], resultado['taxa_amaro'], lang)
             st.plotly_chart(fig_receita, use_container_width=True)
         
         with col2:
