@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 # Imports dos sistemas corrigidos
-from config.theme import load_theme
+from config.theme_fix import load_theme
 from config.idiomas import get_text, detect_language_from_selection, get_language_options, get_current_language_display
 from components.sidebar import render_sidebar
 from components.status import render_system_status, render_calculation_status
@@ -22,7 +22,8 @@ from utils.params import load_params, format_currency, format_percentage
 from utils.calculations import calcular_lucro_mensal_charter
 from utils.export_manager import botao_download_inteligente, criar_relatorio_dados
 from utils.session_state import persistent_selectbox, persistent_number_input, persistent_slider
-from utils.charts_fixed import render_chart_receitas, render_chart_custos
+from utils.graficos_garantidos import criar_grafico_pizza as render_chart_receitas, criar_grafico_barras as render_chart_custos
+
 
 # ========================================================================
 # CONFIGURAÇÃO DA PÁGINA

@@ -2,7 +2,7 @@
 Página 2: Breakdown Comparativo de Custos
 Comparação item a item: gestão própria vs Amaro Aviation
 """
-
+from utils.session_state import persistent_selectbox, persistent_number_input
 import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
@@ -12,7 +12,7 @@ from pathlib import Path
 # Adicionar o diretório raiz ao path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from config.theme import load_theme
+from config.theme_fix import load_theme
 from config.idiomas import get_text, detect_language_from_selection
 from components.header import render_page_header
 from components.sidebar import render_sidebar
@@ -21,6 +21,7 @@ from components.status import render_system_status
 from utils.params import load_params, format_currency
 from utils.calculations import calcular_comparativo_gestao
 from utils.export_manager import botao_download_inteligente, criar_relatorio_dados
+from utils.graficos_garantidos import criar_grafico_pizza
 
 # Configuração da página
 st.set_page_config(
@@ -29,7 +30,6 @@ st.set_page_config(
     layout="wide"
 )
 
-from config.theme import load_theme
 load_theme()
 
 
@@ -63,11 +63,12 @@ st.markdown(f"### ⚖️ {get_text('page_breakdown', lang)}")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    modelo_comp = st.selectbox(
-        get_text('aircraft_model', lang),
-        modelos,
-        key="modelo_breakdown"
-    )
+   modelo_comp = persistent_selectbox(
+    get_text('aircraft_model', lang),
+    modelos,
+    key="modelo_breakdown"
+)
+
 
 with col2:
     horas_anuais = st.number_input(
@@ -299,21 +300,13 @@ if st.button(f"📊 {get_text('calculate', lang)}", type="primary", use_containe
         with col1:
             st.markdown(f"#### 📊 {get_text('cost_distribution', lang)}")
             
-            fig_proprio = go.Figure(data=[go.Pie(
-                labels=[get_text('fixed_costs_label', lang), get_text('variable_costs_label', lang)],
-                values=[resultado['gestao_propria']['custos_fixos'], resultado['gestao_propria']['custos_variaveis']],
-                hole=0.5,
-                marker=dict(colors=['#EF4444', '#F59E0B']),
-                textinfo='label+percent'
-            )])
-            
-            fig_proprio.update_layout(
-                height=300,
-                showlegend=True,
-                margin=dict(l=0, r=0, t=20, b=0)
+            # Usa o utilitário de pizza já testado e com bom contraste
+            fig_proprio = criar_grafico_pizza(
+                resultado['gestao_propria']['custos_fixos'],
+                resultado['gestao_propria']['custos_variaveis'],
+                get_text('cost_distribution', lang)
             )
-            
-            st.plotly_chart(fig_proprio, use_container_width=True)
+            st.plotly_chart(fig_proprio, use_container_width=True, key="chart_cost_distribution")
         
         with col2:
             st.markdown(f"#### 📊 {get_text('accumulated_savings', lang)}")

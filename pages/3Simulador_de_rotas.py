@@ -14,11 +14,16 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 # Imports APENAS do que funciona
-from config.theme import load_theme
+from config.theme_fix import load_theme
 from utils.params import load_params, format_currency
 from utils.calculations import calcular_custo_rota
-from utils.graficos_simples import grafico_barras_custos, grafico_comparativo_simples
+from utils.graficos_garantidos import criar_grafico_barras, criar_grafico_comparativo
 from utils.selectbox_simples import selectbox_que_funciona
+from utils.session_state import persistent_selectbox
+from config.idiomas import get_text, detect_language_from_selection
+from components.sidebar import render_sidebar
+
+
 
 # ========================================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -31,6 +36,7 @@ st.set_page_config(
 
 # Carregar tema
 load_theme()
+lang = render_sidebar() or 'pt'
 
 # ========================================================================
 # HEADER SIMPLES
@@ -90,12 +96,12 @@ st.markdown("### ✈️ Seleção de Rota")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    origem_selecionada = selectbox_que_funciona(
-        "Aeroporto de Origem",
-        origens_disponiveis,
-        "origem_rota",
-        origens_disponiveis[0] if origens_disponiveis else None
-    )
+    origem_selecionada = persistent_selectbox(
+    "Aeroporto de Origem",
+    origens_disponiveis,
+    key="origem_rota"
+)
+
 
 with col2:
     # Filtrar destinos baseado na origem
@@ -223,25 +229,38 @@ if st.button("✈️ SIMULAR ROTA", type="primary", use_container_width=True):
         with col1:
             st.markdown("##### 💸 Composição de Custos")
             
-            # GRÁFICO 1: Custos da rota
+        # ============================================================
+        # GRÁFICO 1: Composição de Custos
+        # ============================================================
+        with col1:
+            st.markdown(f"##### 💸 {get_text('cost_distribution', lang)}")
             breakdown = resultado_rota.get('breakdown_custos', {})
-            fig_custos = grafico_barras_custos(
-                breakdown.get('combustivel', 0),
-                breakdown.get('tripulacao', 0),
-                breakdown.get('manutencao', 0),
-                breakdown.get('depreciacao', 0)
+            # Montar dicionário de custos com labels localizados
+            custos_dict = {
+                get_text('fuel', lang): breakdown.get('combustivel', 0),
+                get_text('crew', lang): breakdown.get('tripulacao', 0),
+                get_text('maintenance', lang): breakdown.get('manutencao', 0),
+                get_text('depreciation', lang): breakdown.get('depreciacao', 0)
+            }
+            # Gerar gráfico de barras com contraste garantido
+            fig_custos = criar_grafico_barras(
+                custos_dict,
+                get_text('cost_distribution', lang)
             )
-            st.plotly_chart(fig_custos, use_container_width=True, key="grafico_custos_rota")
-        
+            st.plotly_chart(fig_custos, use_container_width=True, key="chart_custos_rota")
+
+        # ============================================================
+        # GRÁFICO 2: Comparativo Amaro vs Mercado
+        # ============================================================
         with col2:
-            st.markdown("##### 📊 Comparativo Visual")
-            
-            # GRÁFICO 2: Comparativo Amaro vs Mercado
-            fig_comparativo = grafico_comparativo_simples(
+            st.markdown(f"##### 📊 {get_text('comparative_visual', lang)}")
+            fig_comparativo = criar_grafico_comparativo(
                 resultado_rota['custo_amaro'],
-                resultado_rota['preco_mercado']
+                resultado_rota['preco_mercado'],
+                get_text('comparative_visual', lang)
             )
-            st.plotly_chart(fig_comparativo, use_container_width=True, key="grafico_comparativo_rota")
+            st.plotly_chart(fig_comparativo, use_container_width=True, key="chart_comparativo_rota")
+
         
         # ============================================================
         # STATUS DA ROTA

@@ -12,7 +12,8 @@ from pathlib import Path
 # Adicionar o diretório raiz ao path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from config.theme import load_theme
+from config.theme_fix import load_theme
+load_theme()
 from config.idiomas import get_text, detect_language_from_selection
 from components.header import render_page_header
 from components.sidebar import render_sidebar
@@ -21,6 +22,12 @@ from components.status import render_system_status
 from utils.params import load_params, format_currency
 from utils.calculations import calcular_projecao_mensal
 from utils.export_manager import botao_download_inteligente, criar_relatorio_dados
+from utils.session_state import (
+    persistent_selectbox,
+    persistent_number_input,
+    persistent_slider
+)
+
 
 # Configuração da página
 st.set_page_config(
@@ -64,30 +71,32 @@ st.markdown(f"### 📈 {get_text('page_projection', lang)}")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    modelo_proj = st.selectbox(
-        get_text('aircraft_model', lang),
-        modelos,
-        key="modelo_proj"
-    )
+    modelo_proj = persistent_selectbox(
+    get_text('aircraft_model', lang),
+    modelos,
+    key="modelo_proj"
+)
+
 
 with col2:
-    horas_mes_proj = st.number_input(
-        get_text('monthly_hours', lang).replace('Charter/', 'Voo/'),
-        min_value=20,
-        max_value=150,
-        value=60,
-        step=10,
-        key="horas_mes_proj"
-    )
+    horas_mes_proj = persistent_number_input(
+    get_text('monthly_hours', lang).replace('Charter/', 'Voo/'),
+    key="horas_mes_proj",
+    default_value=60,
+    min_value=20,
+    max_value=150,
+    step=10
+)
+
 
 with col3:
-    horizonte_meses = st.slider(
+    horizonte_meses = persistent_slider(
         get_text('projection_horizon', lang),
+        key="horizonte_proj",
         min_value=12,
         max_value=60,
-        value=36,
-        step=12,
-        key="horizonte_proj"
+        default_value=36,
+        step=12
     )
 
 with col4:
