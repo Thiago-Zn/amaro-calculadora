@@ -74,6 +74,15 @@ def persistent_number_input(label, key, default_value=0, help=None, **kwargs):
     # Obter valor atual do session_state
     current_value = get_persistent_value(key, default_value)
     
+    # Garantir que todos os valores numéricos sejam do mesmo tipo
+    # Converter todos para float para consistência
+    if 'min_value' in kwargs and kwargs['min_value'] is not None:
+        kwargs['min_value'] = float(kwargs['min_value'])
+    if 'max_value' in kwargs and kwargs['max_value'] is not None:
+        kwargs['max_value'] = float(kwargs['max_value'])
+    if 'step' in kwargs and kwargs['step'] is not None:
+        kwargs['step'] = float(kwargs['step'])
+    
     # Criar number input
     value = st.number_input(
         label,
@@ -102,12 +111,17 @@ def persistent_slider(label, key, min_value=0, max_value=100, default_value=50, 
     elif current_value > max_value:
         current_value = max_value
     
+    # Garantir que todos os valores sejam int para sliders
+    min_value = int(min_value)
+    max_value = int(max_value)
+    current_value = int(current_value)
+    
     # Criar slider
     value = st.slider(
         label,
         min_value=min_value,
         max_value=max_value,
-        value=int(current_value),
+        value=current_value,
         key=f"{key}_widget",
         help=help,
         **kwargs

@@ -95,10 +95,10 @@ with col2:
     horas_charter = persistent_number_input(
         get_text('monthly_hours', lang),
         key="horas_persist",
-        default_value=80,
-        min_value=10,
-        max_value=200,
-        step=5,
+        default_value=80.0,
+        min_value=10.0,
+        max_value=200.0,
+        step=5.0,
         help="Horas disponíveis para charter por mês"
     )
 
