@@ -1,49 +1,77 @@
-"""
-Página 4: Projeção de Longo Prazo e Análise de Breakeven
-Análise temporal de 12-60 meses com ponto de equilíbrio
-"""
-
 import streamlit as st
-import plotly.graph_objects as go
-import pandas as pd
+
+# —————————————  
+# 1) Configuração da página  
+# —————————————  
+st.set_page_config(
+    page_title="Projeção e Breakeven | Amaro Aviation",
+    page_icon="📈",
+    layout="wide",
+)
+
+# —————————————  
+# 2) Imports internos e tema  
+# —————————————  
 import sys
 from pathlib import Path
-
-# Adicionar o diretório raiz ao path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from config.theme_fix import load_theme
 load_theme()
-from config.idiomas import get_text, detect_language_from_selection
-from components.header import render_page_header
+
+# —————————————  
+# 3) Traga também pandas e plotly  
+# —————————————  
+import pandas as pd
+import plotly.graph_objects as go
+
+# —————————————  
+# 4) Internacionalização, sidebar, etc  
+# —————————————
+from config.idiomas import get_text
 from components.sidebar import render_sidebar
-from components.metrics import render_highlight_metric, render_kpi_grid
+# … e o resto dos seus imports …
+
+
+# ————————————————————————————————————————————————
+# 5. Cabeçalho e status do sistema
+# ————————————————————————————————————————————————
+from components.header import render_page_header
 from components.status import render_system_status
-from utils.params import load_params, format_currency
-from utils.calculations import calcular_projecao_mensal
-from utils.export_manager import botao_download_inteligente, criar_relatorio_dados
+
+# ————————————————————————————————————————————————
+# 6. Métricas e KPIs customizados
+# ————————————————————————————————————————————————
+from components.metrics import render_highlight_metric, render_kpi_grid
+
+# ————————————————————————————————————————————————
+# 7. Helpers de persistência de inputs
+# ————————————————————————————————————————————————
 from utils.session_state import (
     persistent_selectbox,
     persistent_number_input,
     persistent_slider
 )
 
+# ————————————————————————————————————————————————
+# 8. Parâmetros, formatação e cálculos
+# ————————————————————————————————————————————————
+from utils.params import load_params, format_currency
+from utils.calculations import calcular_projecao_mensal
 
-# Configuração da página
-st.set_page_config(
-    page_title="Projeção e Breakeven | Amaro Aviation",
-    page_icon="📈",
-    layout="wide"
-)
+# ————————————————————————————————————————————————
+# 9. Exportação de relatórios
+# ————————————————————————————————————————————————
+from utils.export_manager import botao_download_inteligente, criar_relatorio_dados
 
-from config.theme import load_theme
-load_theme()
+# ========================================================================
+# Início da lógica da página
+# ========================================================================
 
+# Captura do idioma via sidebar
+lang = render_sidebar() or 'pt'
 
-# Sidebar e idioma
-lang = render_sidebar()
-
-# Header da página
+# Título e descrição no topo
 render_page_header(
     'page_projection',
     'Análise temporal e determinação do ponto de equilíbrio financeiro'
@@ -52,20 +80,19 @@ render_page_header(
     lang
 )
 
-# Carregar parâmetros
+# Carregamento e verificação dos parâmetros de configuração
 try:
     params = load_params()
     if not render_system_status(params, lang):
         st.stop()
-    
     modelos = params.get('modelos_disponiveis', [])
-    
 except Exception as e:
     st.error(f"❌ {get_text('system_load_error', lang)}: {e}")
     st.stop()
 
-# Interface principal
+# Seção principal
 st.markdown(f"### 📈 {get_text('page_projection', lang)}")
+
 
 # Parâmetros principais
 col1, col2, col3, col4 = st.columns(4)
