@@ -322,12 +322,6 @@ div[data-testid="stDataFrame"] {
     box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
 }
 
-/* === ESCONDER ELEMENTOS STREAMLIT === */
-#MainMenu, header, footer, .stDeployButton {
-    visibility: hidden !important;
-    display: none !important;
-}
-
 /* === RESPONSIVIDADE === */
 @media (max-width: 768px) {
     .block-container {
