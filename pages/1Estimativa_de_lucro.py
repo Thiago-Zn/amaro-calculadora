@@ -1,25 +1,23 @@
 """
-Página 1: Estimativa de Lucro Mensal - VERSÃO CORRIGIDA
-Análise de rentabilidade com operação charter
+Página 1: Estimativa de Lucro - VERSÃO FINAL CORRIGIDA
+Com selectbox persistente e gráficos funcionais
 """
 
 import streamlit as st
-import plotly.graph_objects as go
 import sys
 from pathlib import Path
 
-# Adicionar o diretório raiz ao path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from config.theme import load_theme
-from config.idiomas import get_text, detect_language_from_selection
-from components.header import render_page_header
+from config.idiomas import get_text
 from components.sidebar import render_sidebar
-from components.metrics import render_metric_card, render_kpi_grid
-from components.status import render_calculation_status, render_system_status
+from components.status import render_system_status, render_calculation_status
 from utils.params import load_params, format_currency, format_percentage
 from utils.calculations import calcular_lucro_mensal_charter
 from utils.export_manager import botao_download_inteligente, criar_relatorio_dados
+from utils.session_state import persistent_selectbox, persistent_number_input, persistent_slider
+from utils.charts_fixed import render_chart_receitas, render_chart_custos
 
 # Configuração da página
 st.set_page_config(
@@ -35,17 +33,14 @@ load_theme()
 lang = render_sidebar()
 
 # Header da página
-render_page_header(
-    'page_profit',
-    'Análise de rentabilidade mensal com operação charter' if lang == 'pt' 
-    else 'Monthly profitability analysis with charter operation',
-    lang
-)
+st.markdown("# 📈 Estimativa de Lucro")
+st.markdown("*Análise de rentabilidade mensal com operação charter*")
+st.markdown("---")
 
-# Carregar parâmetros - SEM quadro verde irritante
+# Carregar parâmetros
 try:
     params = load_params()
-    system_ok = render_system_status(params, lang)  # Agora não exibe nada
+    system_ok = render_system_status(params, lang)
     
     if not system_ok:
         st.error("❌ Sistema não configurado adequadamente")
@@ -59,56 +54,52 @@ try:
         st.stop()
     
 except Exception as e:
-    st.error(f"❌ {get_text('system_load_error', lang)}: {e}")
+    st.error(f"❌ Erro ao carregar sistema: {e}")
     st.stop()
 
 # Interface principal
-st.markdown(f"### 💰 {get_text('page_profit', lang)}")
+st.markdown("### 💰 Estimativa de Lucro")
 
-# Formulário de entrada
+# Formulário de entrada com persistência
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    modelo_selecionado = st.selectbox(
-        get_text('aircraft_model', lang),
-        modelos,
-        key="modelo_lucro"
+    modelo_selecionado = persistent_selectbox(
+        "Modelo da Aeronave",
+        options=modelos,
+        key="modelo_lucro_persist"
     )
 
 with col2:
-    horas_charter = st.number_input(
-        get_text('monthly_hours', lang),
+    horas_charter = persistent_number_input(
+        "Horas de Charter/mês",
+        key="horas_charter_persist",
+        default_value=80,
         min_value=10,
         max_value=200,
-        value=80,
-        step=10,
-        help=get_text('monthly_hours', lang) if lang == 'pt' 
-             else "Monthly hours available for charter"
+        step=10
     )
 
 with col3:
-    taxa_ocupacao = st.slider(
-        get_text('occupancy_rate', lang),
+    taxa_ocupacao = persistent_slider(
+        "Taxa de Ocupação (%)",
+        key="taxa_ocupacao_persist",
         min_value=50,
         max_value=95,
-        value=75,
-        help=get_text('occupancy_rate', lang) if lang == 'pt'
-             else "Percentage of occupied available hours"
+        default_value=75
     )
 
 with col4:
-    preco_hora_charter = st.number_input(
-        get_text('charter_price', lang),
-        value=float(params['preco_mercado_hora'].get(modelo_selecionado, 8000)),
-        step=500.0,
-        help=get_text('charter_price', lang) if lang == 'pt'
-             else "Price charged per charter hour"
+    default_price = float(params['preco_mercado_hora'].get(modelo_selecionado, 8000))
+    preco_hora_charter = persistent_number_input(
+        "Preço Hora Charter (R$)",
+        key="preco_charter_persist",
+        default_value=default_price,
+        step=500.0
     )
 
 # Botão de cálculo
-if st.button(f"🚀 {get_text('calculate', lang)}", type="primary", use_container_width=True):
-    
-    # Realizar cálculos
+if st.button("🚀 Calcular", type="primary", use_container_width=True):
     try:
         resultado = calcular_lucro_mensal_charter(
             modelo=modelo_selecionado,
@@ -118,111 +109,73 @@ if st.button(f"🚀 {get_text('calculate', lang)}", type="primary", use_containe
             params=params
         )
         
-        # Exibir resultados
+        # Separador
         st.markdown("---")
-        st.markdown(f"### 📊 {get_text('projection_analysis', lang)}")
+        st.markdown("### 📊 Análise de Projeção")
         
-        # KPIs principais usando métricas nativas do Streamlit
+        # KPIs usando métricas nativas
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
             st.metric(
-                get_text('gross_revenue', lang),
+                "Receita Bruta Mensal",
                 format_currency(resultado['receita_bruta'], lang)
             )
         
         with col2:
             st.metric(
-                get_text('owner_revenue', lang),
+                "Receita do Proprietário (90%)",
                 format_currency(resultado['receita_proprietario'], lang)
             )
         
         with col3:
-            delta_value = f"+{resultado['roi_mensal']:.1f}%" if resultado['lucro_liquido'] > 0 else None
+            delta_value = f"+{resultado['roi_mensal']:.1f}%" if resultado['lucro_liquido'] > 0 else f"{resultado['roi_mensal']:.1f}%"
             st.metric(
-                get_text('net_profit', lang),
+                "Lucro Líquido",
                 format_currency(resultado['lucro_liquido'], lang),
                 delta=delta_value
             )
         
         with col4:
             st.metric(
-                get_text('monthly_roi', lang),
+                "ROI Mensal",
                 format_percentage(resultado['roi_mensal'], lang)
             )
         
-        # Gráficos de análise
+        # Gráficos funcionais
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown(f"#### 📊 {get_text('revenue_composition', lang)}")
+            st.markdown("#### 📊 Composição de Receitas")
             
-            fig_receita = go.Figure(data=[go.Pie(
-                labels=[
-                    get_text('owner_revenue', lang).replace(' (90%)', ''),
-                    'Taxa Amaro (10%)' if lang == 'pt' else 'Amaro Fee (10%)'
-                ],
-                values=[resultado['receita_proprietario'], resultado['taxa_amaro']],
-                hole=0.5,
-                marker=dict(colors=['#10B981', '#8C1D40']),
-                textinfo='label+percent',
-                textfont=dict(size=12)
-            )])
-            
-            fig_receita.update_layout(
-                height=300,
-                showlegend=True,
-                margin=dict(l=0, r=0, t=0, b=0),
-                paper_bgcolor='white',
-                plot_bgcolor='white',
-                font=dict(color='#1F2937')
+            # Renderizar gráfico de receitas
+            fig_receita = render_chart_receitas(
+                resultado['receita_proprietario'], 
+                resultado['taxa_amaro'], 
+                lang
             )
-            
             st.plotly_chart(fig_receita, use_container_width=True)
         
         with col2:
-            st.markdown(f"#### 💸 {get_text('cost_breakdown', lang)}")
+            st.markdown("#### 💸 Breakdown de Custos Operacionais")
             
-            custos_labels = [
-                get_text('fuel', lang),
-                get_text('crew', lang),
-                get_text('maintenance', lang),
-                get_text('depreciation', lang)
-            ]
+            # Preparar dados dos custos
+            custos_dict = {
+                'combustivel': resultado['breakdown_custos']['combustivel'],
+                'tripulacao': resultado['breakdown_custos']['tripulacao'],
+                'manutencao': resultado['breakdown_custos']['manutencao'],
+                'depreciacao': resultado['breakdown_custos']['depreciacao']
+            }
             
-            custos_values = [
-                resultado['breakdown_custos']['combustivel'],
-                resultado['breakdown_custos']['tripulacao'],
-                resultado['breakdown_custos']['manutencao'],
-                resultado['breakdown_custos']['depreciacao']
-            ]
-            
-            fig_custos = go.Figure(data=[go.Bar(
-                y=custos_labels,
-                x=custos_values,
-                orientation='h',
-                text=[format_currency(v, lang) for v in custos_values],
-                textposition='auto',
-                marker_color=['#EF4444', '#F59E0B', '#3B82F6', '#10B981']
-            )])
-            
-            fig_custos.update_layout(
-                height=300,
-                xaxis_title=get_text('value_currency', lang),
-                showlegend=False,
-                margin=dict(l=0, r=0, t=0, b=0),
-                paper_bgcolor='white',
-                plot_bgcolor='white',
-                font=dict(color='#1F2937')
-            )
-            
+            # Renderizar gráfico de custos
+            fig_custos = render_chart_custos(custos_dict, lang)
             st.plotly_chart(fig_custos, use_container_width=True)
         
         # Status da operação
         render_calculation_status(
             is_profitable=resultado['lucrativo'],
             profit_value=resultado['lucro_liquido'],
-            message="O proprietário terá um lucro líquido de" if lang == 'pt' and resultado['lucrativo']
+            message="O proprietário terá um lucro líquido de" if resultado['lucrativo'] and lang == 'pt'
                     else "The owner will have a net profit of" if resultado['lucrativo']
                     else "A operação apresenta déficit de" if lang == 'pt'
                     else "The operation shows a deficit of",
@@ -251,7 +204,7 @@ if st.button(f"🚀 {get_text('calculate', lang)}", type="primary", use_containe
         with col2:
             botao_download_inteligente(
                 relatorio_dados,
-                f"📊 {get_text('export', lang)}",
+                "📊 Exportar",
                 'excel',
                 'estimativa_lucro_mensal'
             )
@@ -261,40 +214,23 @@ if st.button(f"🚀 {get_text('calculate', lang)}", type="primary", use_containe
         st.info("💡 Verifique se todos os parâmetros estão configurados corretamente")
 
 # Informações adicionais
-with st.expander("💡 Dicas e Informações" if lang == 'pt' else "💡 Tips and Information"):
-    if lang == 'pt':
-        st.markdown("""
-        **Como interpretar os resultados:**
-        
-        - **Receita Bruta**: Total faturado com as horas de charter
-        - **Receita do Proprietário**: 90% da receita bruta (padrão Amaro)
-        - **Taxa Amaro**: 10% da receita bruta para gestão
-        - **ROI Mensal**: Retorno sobre o investimento operacional
-        
-        **Dicas para otimização:**
-        
-        - Mantenha taxa de ocupação acima de 70%
-        - Ajuste preços conforme demanda sazonal
-        - Monitore custos de combustível regularmente
-        - Considere rotas mais eficientes
-        """)
-    else:
-        st.markdown("""
-        **How to interpret results:**
-        
-        - **Gross Revenue**: Total billed charter hours
-        - **Owner Revenue**: 90% of gross revenue (Amaro standard)
-        - **Amaro Fee**: 10% of gross revenue for management
-        - **Monthly ROI**: Return on operational investment
-        
-        **Optimization tips:**
-        
-        - Keep occupancy rate above 70%
-        - Adjust prices according to seasonal demand
-        - Monitor fuel costs regularly
-        - Consider more efficient routes
-        """)
+with st.expander("💡 Dicas e Informações"):
+    st.markdown("""
+    **Como interpretar os resultados:**
+    
+    - **Receita Bruta**: Total faturado com as horas de charter
+    - **Receita do Proprietário**: 90% da receita bruta (padrão Amaro)
+    - **Taxa Amaro**: 10% da receita bruta para gestão
+    - **ROI Mensal**: Retorno sobre o investimento operacional
+    
+    **Dicas para otimização:**
+    
+    - Mantenha taxa de ocupação acima de 70%
+    - Ajuste preços conforme demanda sazonal
+    - Monitore custos de combustível regularmente
+    - Considere rotas mais eficientes
+    """)
 
-# Footer da página - TEXTO SIMPLES
+# Footer simples
 st.markdown("---")
-st.markdown(f"**📈 {get_text('page_profit', lang)}** - Análise detalhada de rentabilidade")
+st.markdown("**📈 Estimativa de Lucro** - Análise detalhada de rentabilidade")
